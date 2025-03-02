@@ -23,7 +23,13 @@ jobs:
         npm install sfdx-cli --global
 
     - name: Authorize Salesforce Org
-      run: sfdx auth:jwt:grant --clientid ${{ secrets.SF_CLIENT_ID }} --jwtkeyfile assets/server.key --username ${{ secrets.SF_USERNAME }} --instanceurl https://login.salesforce.com
+      env:
+        SF_CLIENT_ID: ${{ secrets.SF_CLIENT_ID }}
+        SF_CLIENT_SECRET: ${{ secrets.SF_CLIENT_SECRET }}
+        SF_USERNAME: ${{ secrets.SF_USERNAME }}
+        SF_PASSWORD: ${{ secrets.SF_PASSWORD }}
+      run: |
+        sfdx auth:web:login --setdefaultusername -r https://login.salesforce.com -a myorg
 
     - name: Deploy to Salesforce
-      run: sfdx force:source:deploy -x manifest/package.xml -u myorg
+      run: sfdx force:source:deploy -x manifest/package.xml -u
