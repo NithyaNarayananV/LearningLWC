@@ -32,4 +32,4 @@ jobs:
         sfdx auth:web:login --setdefaultusername -r https://login.salesforce.com -a myorg
 
     - name: Deploy to Salesforce
-      run: sfdx force:source:deploy -x manifest/package.xml -u
+      run: sfdx force:source:deploy -x manifest/package.xml -u myorg
