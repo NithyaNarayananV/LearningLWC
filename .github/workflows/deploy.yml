@@ -21,6 +21,7 @@ jobs:
         ./sfdx/install
 
     - name: Authorize Salesforce Org
+      run: sfdx auth:jwt:grant --clientid ${{ secrets.SF_CLIENT_ID }} --jwtkeyfile assets/server.key --username ${{ secrets.SF_USERNAME }} --instanceurl https://login.salesforce.com
 
     - name: Deploy to Salesforce
       run: sfdx force:source:deploy -x manifest/package.xml -u myorg
