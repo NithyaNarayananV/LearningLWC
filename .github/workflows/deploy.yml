@@ -5,6 +5,10 @@ on:
     branches:
       - main
       - feature-branch
+  pull_request:
+    branches:
+      - main
+      - feature-branch
 
 jobs:
   deploy:
