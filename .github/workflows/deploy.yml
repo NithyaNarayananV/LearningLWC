@@ -4,22 +4,24 @@ on:
   push:
     branches:
       - main
+      - feature-branch
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+    - name: Checkout repository
+      uses: actions/checkout@v2
 
-      - name: Install Salesforce CLI
-        run: npm install sfdx-cli --global
+    - name: Install Salesforce CLI
+      run: |
+        wget https://developer.salesforce.com/media/salesforce-cli/sfdx-linux-amd64.tar.xz
+        tar xJf sfdx-linux-amd64.tar.xz
+        ./sfdx/install
 
-      - name: Authenticate with Salesforce
-        run: |
-          echo "${{ secrets.SALESFORCE_AUTH_URL }}" > ./authFile.json
-          sfdx auth:sfdxurl:store -f authFile.json
+    - name: Authorize Salesforce Org
+      run: sfdx auth:jwt:grant --clientid ${{ secrets.SF_CLIENT_ID }} --jwtkeyfile assets/server.key --username ${{ secrets.SF_USERNAME }} --instanceurl https://login.salesforce.com
 
-      - name: Deploy to Salesforce
-        run: sfdx force:source:deploy -p force-app
+    - name: Deploy to Salesforce
+      run: sfdx force:source:deploy -x manifest/package.xml -u myorg
