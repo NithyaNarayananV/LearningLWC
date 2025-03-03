@@ -29,7 +29,7 @@ jobs:
         SF_USERNAME: ${{ secrets.SF_USERNAME }}
         SF_PASSWORD: ${{ secrets.SF_PASSWORD }}
       run: |
-        sfdx force:auth:web:login --setdefaultusername -r https://login.salesforce.com -a myorg
+        sfdx force:auth:web:login --setdefaultusername -r https://nnlearninglwc-dev-ed.trailblaze.my.salesforce.com -a myorg
    
     - name: Verify Authorization
       run: sfdx force:org:display -u myorg
