@@ -1,30 +1,45 @@
-name: Salesforce CI/CD Pipeline (OAuth Authentication)
+name: Salesforce CI/CD Pipeline
 
 on:
   push:
     branches:
       - main
-      - feature-branch
-
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
+      # 1. Checkout your repository code so the workflow has access to your Salesforce project files.
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-    - name: Install Salesforce CLI
-      uses: amtrack/sfdx-cli-action@v1
-      with:
-        version: latest
+      # 2. Setup Node.js because we’ll install Salesforce CLI using npm.
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'  # Adjust the Node version if needed.
 
-    - name: Authenticate with Salesforce
-      run: echo ${{ secrets.SFDX_AUTH_URL }} > sfdx-auth-url.txt && sfdx auth:sfdxurl:store --urlfile sfdx-auth-url.txt --setdefaultusername
+      # 3. Install the Salesforce CLI globally.
+      - name: Install Salesforce CLI
+        run: npm install sfdx-cli --global
 
-    - name: Validate deployment
-      run: sfdx force:source:deploy -p force-app --checkonly
+      # 4. Verify that the Salesforce CLI has been installed properly.
+      - name: Check Salesforce CLI version
+        run: sfdx --version
 
-    - name: Deploy to Salesforce
-      run: sfdx force:source:deploy -p 
+      # 5. Authenticate using an SFDX Auth URL.
+      #    Make sure you've added the SFDX_AUTH_URL secret to your repository settings.
+      - name: Authenticate with Salesforce
+        run: |
+          echo "${{ secrets.SFDX_AUTH_URL }}" > sfdx-auth-url.txt
+          sfdx auth:sfdxurl:store -f sfdx-auth-url.txt --setdefaultusername
+
+      # 6. Validate your deployment by running a check-only deployment.
+      #    This dry-run ensures that metadata compiles and tests run without actually deploying changes.
+      - name: Validate Deployment (Dry Run)
+        run: sfdx force:source:deploy -p force-app --checkonly --testlevel RunLocalTests
+
+      # 7. Perform the actual deployment after validation.
+      - name: Deploy to Salesforce
+        run: sfdx force:source:deploy -p force-app --testlevel RunLocalTests
