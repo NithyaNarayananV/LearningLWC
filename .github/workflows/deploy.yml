@@ -1,14 +1,11 @@
-name: Deploy to Salesforce
+name: Salesforce CI/CD Pipeline (OAuth Authentication)
 
 on:
   push:
     branches:
       - main
       - feature-branch
-  pull_request:
-    branches:
-      - main
-      - feature-branch
+
 
 jobs:
   deploy:
@@ -19,20 +16,15 @@ jobs:
       uses: actions/checkout@v2
 
     - name: Install Salesforce CLI
-      run: |
-        npm install sfdx-cli --global
+      uses: amtrack/sfdx-cli-action@v1
+      with:
+        version: latest
 
-    - name: Authorize Salesforce Org
-      env:
-        SF_CLIENT_ID: ${{ secrets.SF_CLIENT_ID }}
-        SF_CLIENT_SECRET: ${{ secrets.SF_CLIENT_SECRET }}
-        SF_USERNAME: ${{ secrets.SF_USERNAME }}
-        SF_PASSWORD: ${{ secrets.SF_PASSWORD }}
-      run: |
-        sfdx force:auth:web:login --setdefaultusername -r https://nnlearninglwc-dev-ed.trailblaze.my.salesforce.com -a myorg
-   
-    - name: Verify Authorization
-      run: sfdx force:org:display -u myorg
-      
+    - name: Authenticate with Salesforce
+      run: echo ${{ secrets.SFDX_AUTH_URL }} > sfdx-auth-url.txt && sfdx auth:sfdxurl:store --urlfile sfdx-auth-url.txt --setdefaultusername
+
+    - name: Validate deployment
+      run: sfdx force:source:deploy -p force-app --checkonly
+
     - name: Deploy to Salesforce
-      run: sfdx force:source:deploy -x manifest/package.xml -u myorg
+      run: sfdx force:source:deploy -p 
