@@ -2,7 +2,7 @@
 name: Deploy to Salesforce
 
 on:
-  pull_reques:
+  pull_request:
     branches:
       - main
     paths:
