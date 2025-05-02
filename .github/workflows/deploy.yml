@@ -9,9 +9,7 @@ on:
       - 'force-app/**'
 
 jobs:
-  merge_job:
-    # this job will only run if the PR has been merged
-    if: github.event.pull_request.merged == true
+  deploy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -49,11 +47,3 @@ jobs:
       - name: Deploy to Salesforce
         run: sfdx force:source:deploy -p force-app --testlevel RunLocalTests
           
-
-  close_job:
-    # this job will only run if the PR has been closed without being merged
-    if: github.event.pull_request.merged == false
-    runs-on: ubuntu-latest
-    steps:
-      - run: |
-          echo PR #${{ github.event.number }} has been closed without being merge
