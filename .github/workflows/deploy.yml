@@ -1,45 +1,30 @@
-name: Salesforce CI/CD Pipeline
+
+name: Deploy to Salesforce
 
 on:
-  push:
+  pull_request:
     branches:
-      - main
+      - master
+    paths:
+      - 'force-app/**'
 
 jobs:
-  deploy:
+  merge_job:
+    # this job will only run if the PR has been merged
+    if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
-
     steps:
-      # 1. Checkout your repository code so the workflow has access to your Salesforce project files.
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      # 2. Setup Node.js because we’ll install Salesforce CLI using npm.
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
+      - uses: actions/checkout@v3
         with:
-          node-version: '16'  # Adjust the Node version if needed.
+          SFDX_AUTH_URL`: ${{ secrets.SALESFORCE_AUTH_URL }}
+          DRY_RUN: false
+          TEST_LEVEL: RunLocalTests
+          
 
-      # 3. Install the Salesforce CLI globally.
-      - name: Install Salesforce CLI
-        run: npm install sfdx-cli --global
-
-      # 4. Verify that the Salesforce CLI has been installed properly.
-      - name: Check Salesforce CLI version
-        run: sfdx --version
-
-      # 5. Authenticate using an SFDX Auth URL.
-      #    Make sure you've added the SFDX_AUTH_URL secret to your repository settings.
-      - name: Authenticate with Salesforce
-        run: |
-          echo "${{ secrets.SFDX_AUTH_URL }}" > sfdx-auth-url.txt
-          sfdx auth:sfdxurl:store -f sfdx-auth-url.txt --setdefaultusername
-
-      # 6. Validate your deployment by running a check-only deployment.
-      #    This dry-run ensures that metadata compiles and tests run without actually deploying changes.
-      - name: Validate Deployment (Dry Run)
-        run: sfdx force:source:deploy -p force-app --checkonly --testlevel RunLocalTests
-
-      # 7. Perform the actual deployment after validation.
-      - name: Deploy to Salesforce
-        run: sfdx force:source:deploy -p force-app --testlevel RunLocalTests
+  close_job:
+    # this job will only run if the PR has been closed without being merged
+    if: github.event.pull_request.merged == false
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          echo PR #${{ github.event.number }} has been closed without being merge
