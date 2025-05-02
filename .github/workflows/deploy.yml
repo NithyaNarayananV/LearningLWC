@@ -1,49 +1,38 @@
-
-name: Deploy to Salesforce
+name: Deploy to Salesforce on PR
 
 on:
   pull_request:
     branches:
+      - main
       - master
-    paths:
-      - 'force-app/**'
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v3
-        with:
-          SFDX_AUTH_URL`: ${{ secrets.SALESFORCE_AUTH_URL }}
-          DRY_RUN: false
-          TEST_LEVEL: RunLocalTests
-      # 2. Setup Node.js because we’ll install Salesforce CLI using npm.
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '16'  # Adjust the Node version if needed.
+          node-version: '18'
 
-      # 3. Install the Salesforce CLI globally.
       - name: Install Salesforce CLI
-        run: npm install sfdx-cli --global
+        run: |
+          npm install -g sfdx-cli
+          sfdx --version
 
-      # 4. Verify that the Salesforce CLI has been installed properly.
-      - name: Check Salesforce CLI version
-        run: sfdx --version
-
-      # 5. Authenticate using an SFDX Auth URL.
-      #    Make sure you've added the SFDX_AUTH_URL secret to your repository settings.
-      - name: Authenticate with Salesforce
+      - name: Authenticate with Salesforce (Fix)
         run: |
           echo "${{ secrets.SFDX_AUTH_URL }}" > sfdx-auth-url.txt
-          sfdx auth:sfdxurl:store -f sfdx-auth-url.txt --setdefaultusername
+          sfdx auth:sfdxurl:store -f sfdx-auth-url.txt --set-default
 
-      # 6. Validate your deployment by running a check-only deployment.
-      #    This dry-run ensures that metadata compiles and tests run without actually deploying changes.
       - name: Validate Deployment (Dry Run)
-        run: sfdx force:source:deploy -p force-app --checkonly --testlevel RunLocalTests
+        run: |
+          sfdx force:source:deploy -p force-app --checkonly
 
-      # 7. Perform the actual deployment after validation.
       - name: Deploy to Salesforce
-        run: sfdx force:source:deploy -p force-app --testlevel RunLocalTests
-          
+        run: |
+          sfdx force:source:deploy -p force-app --verbose
