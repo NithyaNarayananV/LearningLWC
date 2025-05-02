@@ -1,25 +1,29 @@
+
 name: Deploy to Salesforce
 
 on:
-  push:
+  pull_reques:
     branches:
       - main
+    paths:
+      - 'force-app/**'
 
 jobs:
-  deploy:
+  merge_job:
+    # this job will only run if the PR has been merged
+    if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v3
+        with:
+          SFDX_AUTH_URL`: ${{ secrets.SALESFORCE_AUTH_URL }}
+          DRY_RUN: false
+          TEST_LEVEL: RunLocalTests
 
-      - name: Install Salesforce CLI
-        run: npm install sfdx-cli --global
-
-      - name: Authenticate with Salesforce
-        run: |
-          echo "${{ secrets.SALESFORCE_AUTH_URL }}" > ./authFile.json
-          sfdx auth:sfdxurl:store -f authFile.json
-
-      - name: Deploy to Salesforce
-        run: sfdx force:source:deploy -p force-app
+  close_job:
+    # this job will only run if the PR has been closed without being merged
+    if: github.event.pull_request.merged == false
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          echo PR #${{ github.event.number }} has been closed without being merge
