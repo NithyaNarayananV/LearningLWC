@@ -20,12 +20,16 @@ jobs:
 
       - name: Install Salesforce CLI
         run: npm install sfdx-cli --global
-
         
       # 4. Verify that the Salesforce CLI has been installed properly.
       - name: Check Salesforce CLI version
         run: sfdx --version
-
+      
+        # How to Get the SFDX_AUTH_URL?
+        # Goto VS Code and Authorize the org using the command:
+        # sfdx force:auth:web:login -a deployOrg
+        # After successful login. In VS Code, In Terminal, run the command for the auth URL:
+        # sfdx force:org:display --targetusername LWCLearningOrg --verbose
       - name: Authenticate to Salesforce using Auth URL
         env:
           SFDX_AUTH_URL: ${{ secrets.SFDX_AUTH_URL }}
