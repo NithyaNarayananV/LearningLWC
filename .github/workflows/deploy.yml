@@ -1,9 +1,9 @@
-name: Deploy to Salesforce on PR
+name: Deploy to Salesforce (Username-Password Auth)
 
 on:
   pull_request:
     branches:
-      - main
+      - main  # Deploy on push to main branch
       - master
 
 jobs:
@@ -14,25 +14,29 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '18'
-
       - name: Install Salesforce CLI
         run: |
-          npm install -g sfdx-cli
-          sfdx --version
+          wget https://developer.salesforce.com/media/salesforce-cli/sfdx-linux-amd64.tar.xz
+          mkdir sfdx-cli
+          tar -xJf sfdx-linux-amd64.tar.xz -C sfdx-cli --strip-components 1
+          ./sfdx-cli/install
 
-      - name: Authenticate with Salesforce (Fix)
+      - name: Authenticate with Salesforce (Username & Password)
+        env:
+          SF_USERNAME: ${{ secrets.SF_USERNAME }}
+          SF_PASSWORD: ${{ secrets.SF_PASSWORD }}
+          SF_TOKEN: ${{ secrets.SF_TOKEN }}  # Add your security token here
         run: |
-          echo "${{ secrets.SFDX_AUTH_URL }}" > sfdx-auth-url.txt
-          sfdx auth:sfdxurl:store -f sfdx-auth-url.txt --set-default
+          sfdx auth:web:login --setalias MyOrg --instanceurl https://login.salesforce.com --setdefaultusername
+          echo "Login manually is not supported in CI. Using password auth..."
+          sfdx auth:sfdxurl:store -f sfdx_auth_url.txt -a MyOrg || echo "Use sfdx force:auth:login command locally to generate sfdx_auth_url.txt"
 
-      - name: Validate Deployment (Dry Run)
+      - name: Deploy metadata to Salesforce
+        env:
+          SF_USERNAME: ${{ secrets.SF_USERNAME }}
+          SF_PASSWORD: ${{ secrets.SF_PASSWORD }}
+          SF_TOKEN: ${{ secrets.SF_TOKEN }}
         run: |
-          sfdx force:source:deploy -p force-app --checkonly
-
-      - name: Deploy to Salesforce
-        run: |
-          sfdx force:source:deploy -p force-app --verbose
+          echo $SF_PASSWORD$SF_TOKEN > password.txt
+          sfdx auth:login --username $SF_USERNAME --password $(cat password.txt)
+          sfdx force:source:deploy -p force-app -u $SF_USERNAME --wait 10 --testlevel NoTestRun
