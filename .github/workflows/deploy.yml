@@ -22,22 +22,21 @@ jobs:
       - name: Check Salesforce CLI version
         run: sfdx --version
 
-      - name: Authenticate with Salesforce (Username & Password)
-        env:
-          SF_USERNAME: ${{ secrets.SF_USERNAME }}
-          SF_PASSWORD: ${{ secrets.SF_PASSWORD }}
-          SF_TOKEN: ${{ secrets.SF_TOKEN }}  # Add your security token here
-        run: |
-          sfdx auth:web:login --setalias MyOrg --instanceurl https://login.salesforce.com --setdefaultusername
-          echo "Login manually is not supported in CI. Using password auth..."
-          sfdx auth:sfdxurl:store -f sfdx_auth_url.txt -a MyOrg || echo "Use sfdx force:auth:login command locally to generate sfdx_auth_url.txt"
-
-      - name: Deploy metadata to Salesforce
+      - name: Authenticate to Salesforce (Username + Password + Token)
         env:
           SF_USERNAME: ${{ secrets.SF_USERNAME }}
           SF_PASSWORD: ${{ secrets.SF_PASSWORD }}
           SF_TOKEN: ${{ secrets.SF_TOKEN }}
+          SF_CLIENT_ID: ${{ secrets.SF_CLIENT_ID }}
         run: |
-          echo $SF_PASSWORD$SF_TOKEN > password.txt
-          sfdx auth:login --username $SF_USERNAME --password $(cat password.txt)
-          sfdx force:source:deploy -p force-app -u $SF_USERNAME --wait 10 --testlevel NoTestRun
+          sfdx force:auth:password:grant \
+            --clientid "$SF_CLIENT_ID" \
+            --username "$SF_USERNAME" \
+            --password "${SF_PASSWORD}${SF_TOKEN}" \
+            --instanceurl https://login.salesforce.com \
+            --setdefaultusername
+
+      - name: Deploy Metadata to Salesforce
+        run: |
+          sfdx force:source:deploy -p force-app -u ${{ secrets.SF_USERNAME }} --wait 10 --testlevel NoTestRun
+
