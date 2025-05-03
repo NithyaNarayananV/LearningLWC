@@ -27,7 +27,7 @@ jobs:
           SFDX_AUTH_URL: ${{ secrets.SFDX_AUTH_URL }}
         run: |
           echo "$SFDX_AUTH_URL" > auth-url.txt
-          sfdx auth:sfdxurl:store -f auth-url.txt -s -a deployOrg
+          sfdx force:auth:sfdxurl:store -f auth-url.txt -s -a deployOrg
 
       - name: Deploy metadata
         run: |
