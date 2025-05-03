@@ -5,10 +5,15 @@ on:
     branches:
       - main
       - master
+    paths:
+      - 'force-app/**'
+
   pull_request:
     branches:
       - main  # Deploy on push to main branch
       - master
+    paths:
+      - 'force-app/**'
 
 jobs:
   deploy:
