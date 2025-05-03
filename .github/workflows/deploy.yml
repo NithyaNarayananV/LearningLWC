@@ -22,21 +22,13 @@ jobs:
       - name: Check Salesforce CLI version
         run: sfdx --version
 
-      - name: Authenticate to Salesforce (Username + Password + Token)
+      - name: Authenticate to Salesforce using Auth URL
         env:
-          SF_USERNAME: ${{ secrets.SF_USERNAME }}
-          SF_PASSWORD: ${{ secrets.SF_PASSWORD }}
-          SF_TOKEN: ${{ secrets.SF_TOKEN }}
-          SF_CLIENT_ID: ${{ secrets.SF_CLIENT_ID }}
+          SFDX_AUTH_URL: ${{ secrets.SFDX_AUTH_URL }}
         run: |
-          sfdx force:auth:password:grant \
-            --clientid "$SF_CLIENT_ID" \
-            --username "$SF_USERNAME" \
-            --password "${SF_PASSWORD}${SF_TOKEN}" \
-            --instanceurl https://login.salesforce.com \
-            --setdefaultusername
+          echo "$SFDX_AUTH_URL" > auth-url.txt
+          sfdx auth:sfdxurl:store -f auth-url.txt -s -a deployOrg
 
-      - name: Deploy Metadata to Salesforce
+      - name: Deploy metadata
         run: |
-          sfdx force:source:deploy -p force-app -u ${{ secrets.SF_USERNAME }} --wait 10 --testlevel NoTestRun
-
+          sfdx force:source:deploy -p force-app -u deployOrg --wait 10 --testlevel NoTestRun
