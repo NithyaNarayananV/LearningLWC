@@ -1,6 +1,10 @@
 name: Deploy to Salesforce (Username-Password Auth)
 
 on:
+  push:
+    branches:
+      - main
+      - master
   pull_request:
     branches:
       - main  # Deploy on push to main branch
