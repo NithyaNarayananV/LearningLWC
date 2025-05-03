@@ -1,9 +1,6 @@
 /*Get Utensils and Ingredients
-
     Get Teacup
-
     Get Spoon
-    
     Get Tea Kettle
     Get Teapot
     Get Tea
