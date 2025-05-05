@@ -10,7 +10,7 @@ on:
 
   pull_request:
     branches:
-      - main  # Deploy on push to main branch
+      - main
       - master
     paths:
       - 'force-app/**'
@@ -45,3 +45,8 @@ jobs:
       - name: Deploy metadata
         run: |
           sfdx force:source:deploy -p force-app -u deployOrg --wait 10 --testlevel NoTestRun
+
+
+
+      # for more Details Refer : 
+      # https://www.1sync.co/build-salesforce-deployment-pipeline-with-github-actions
