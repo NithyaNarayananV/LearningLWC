@@ -1,0 +1,18 @@
+<apex:page lightningStylesheets="ture">
+    <apex:slds/>
+    <div class="slds-scope">
+        <div class = 'slds-p-around_small'>
+            <label>Enter publish Message</label>
+            <input type="text" id="messageField" class="slds-input" />
+            <div>
+                <button class="slds-button slds-button_neutral" onclick="publishMessage()">Publish</button>
+                <button class="slds-button slds-button_neutral" onclick="publishMessage()">Publish</button>
+            </div>
+        </div>
+            
+        </div>
+    <script>
+    
+    </script>
+
+</apex:page>
