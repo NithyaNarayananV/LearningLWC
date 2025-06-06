@@ -22,5 +22,6 @@ export default class LmsComponentX extends LightningElement {
     unsubscribeMessage(){
         unsubscribe(this.subscription)
         this.subscription = null
-    }
+    } 
+    
 }
