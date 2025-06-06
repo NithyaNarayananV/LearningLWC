@@ -2,8 +2,7 @@ name: Validate to Salesforce (Username-Password Auth)
 on:
   pull_request:
     branches:
-      - main
-      - master
+      - Salesforce-Main
     paths:
       - 'force-app/**'
 jobs:
