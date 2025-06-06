@@ -1,5 +1,6 @@
 global class Blz_HealthCheck implements Schedulable {
     global void execute(SchedulableContext sc) {
+        
         Messaging.reserveSingleEmailCapacity(1);
         Messaging.SingleEmailMessage mymail = new Messaging.SingleEmailMessage();
         String[] toaddresses = new String[]{'cvrnishanth@gmail.com'};
