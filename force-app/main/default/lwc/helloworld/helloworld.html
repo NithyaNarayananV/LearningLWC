@@ -1,8 +1,8 @@
 <template>
     <lightning-card title="HelloWorld" icon-name="custom:custom14">
       <div class="slds-m-around_medium">
-        <p>Vannakam🙏🏼, {greeting} Thamarai Selvaaa!!</p>
-          <p> Sample - Testing - New 21-06-2025 04:49PM</p>
+        <p>Vannakam🙏🏼, {greeting} Thalaiva!!</p>
+          <p> Sample - Testing - New 15-09-2025 11:17AM</p>
         <lightning-input label="Name" value={greeting} onchange={changeHandler}></lightning-input>
         <figcaption>AI Certificate From Static Resource</figcaption>
         <img src={imageUrl} alt="My Image" title="AI Certificate From Static Resource"/>
@@ -13,7 +13,20 @@
         <figcaption>Youtube Video</figcaption>
         <iframe  src="https://www.youtube.com/embed/o9mivPpQlSA" title="Jinguchaa - Lyrical | Thug Life | Kamal Haasan | Mani Ratnam | STR | AR Rahman | RKFI | MT | RG" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
       </div>
+      <div>
 
+        <lightning-input 
+          label="Enter YouTube URL" 
+          value={youtubeUrl} 
+          onchange={handleInputChange}>
+        </lightning-input>
 
+        <lightning-button 
+          label="Convert to Embed Link" 
+          onclick={handleConvertClick}>
+        </lightning-button>
+          <p>Embed URL: {embedUrl}</p>
+          <iframe  src={embedUrl} title="V" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+        </div>
     </lightning-card>
   </template>

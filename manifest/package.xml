@@ -5,8 +5,8 @@
         <name>ApexClass</name>
     </types>
     <types>
-        <members>*</members>
-        <name>Flow</name>
+        <members>QuestionForm</members>
+        <name>LightningComponentBundle</name>
     </types>
 
     <version>52.0</version>
