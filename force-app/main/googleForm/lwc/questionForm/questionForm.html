@@ -1,0 +1,45 @@
+<template>
+    <lightning-card> 
+        <table class="slds-table slds-table_cell-buffer slds-table_bordered">
+            <tbody>
+                <template for:each={forms} for:item="form">
+                    <tr key={form.Label}>
+                        <td>
+                          <lightning-input
+                            label={form.MasterLabel}
+                            placeholder={form.Label}
+                            value={form.value}
+                            data-index={form.index}
+                            onchange={onChangeValueHandler}>
+                          </lightning-input>
+                        </td>
+                        <td> 
+                          <template if:true={form.Has_Attachment__c}>
+                            <lightning-file-upload
+                              label={form.Document}
+                              name="fileUploader"
+                              accept=".pdf,.doc,.docx,.png,.jpg"
+                              record-id={recordId}
+                              onuploadfinished={handleUploadFinished}>
+                            </lightning-file-upload> 
+                          </template>
+                        </td>
+                    </tr>
+                </template>
+            </tbody>
+        </table>
+        <lightning-button 
+          label="Submit"
+          onclick={onSubmitHandler}>
+        </lightning-button>
+
+        <template for:each={forms} for:item="form">
+          <p key={form.Label}>MasterLabel : {form.MasterLabel}</p>
+          <p key={form.Label}>Has_Attachment__c : {form.Has_Attachment__c}</p>
+          <p key={form.Label}>Label : {form.Label}</p>
+          <p key={form.Label}>Document : {form.Document}</p>
+          <p key={form.Label}>Value : {form.value}</p>
+        </template>
+
+    </lightning-card>
+</template>
