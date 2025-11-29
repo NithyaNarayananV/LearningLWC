@@ -1,45 +1,96 @@
 <template>
     <lightning-card> 
-        <table class="slds-table slds-table_cell-buffer slds-table_bordered">
-            <tbody>
-                <template for:each={forms} for:item="form">
-                    <tr key={form.Label}>
-                        <td>
-                          <lightning-input
-                            label={form.MasterLabel}
-                            placeholder={form.Label}
-                            value={form.value}
-                            data-index={form.index}
-                            onchange={onChangeValueHandler}>
-                          </lightning-input>
-                        </td>
-                        <td> 
-                          <template if:true={form.Has_Attachment__c}>
-                            <lightning-file-upload
-                              label={form.Document}
-                              name="fileUploader"
-                              accept=".pdf,.doc,.docx,.png,.jpg"
-                              record-id={recordId}
-                              onuploadfinished={handleUploadFinished}>
-                            </lightning-file-upload> 
-                          </template>
-                        </td>
-                    </tr>
-                </template>
-            </tbody>
-        </table>
-        <lightning-button 
-          label="Submit"
-          onclick={onSubmitHandler}>
-        </lightning-button>
-
-        <template for:each={forms} for:item="form">
-          <p key={form.Label}>MasterLabel : {form.MasterLabel}</p>
-          <p key={form.Label}>Has_Attachment__c : {form.Has_Attachment__c}</p>
-          <p key={form.Label}>Label : {form.Label}</p>
-          <p key={form.Label}>Document : {form.Document}</p>
-          <p key={form.Label}>Value : {form.value}</p>
+      <div style="padding: 20px;">
+        
+        <template if:false={contactId}>
+          <div style="display: flex; gap: 10px; align-items: center;">
+            <!-- Basic ingo of the user-->
+            <lightning-input
+              label="Contact Name"
+              placeholder="Enter Your Name"
+              value={contactName}
+              onchange={onChangeNameHandler}>
+            </lightning-input>
+         
+            <div style="text-align: right; padding:20px">
+              <lightning-button 
+                  label="Create Contact"
+                  onclick={onCreateContactClick}>
+              </lightning-button>
+            </div>               
+          </div>
         </template>
+        <template if:true={contactId}>
+          <div>
+            Hello {contactName}!
+          </div>
+          <table class="slds-table slds-table_cell-buffer slds-table_bordered">
+              <tbody>
+                  <template for:each={forms} for:item="form" for:index="index">
+                      <tr key={form.index}>
+                          <td>
+                            <lightning-input
+                              label={form.MasterLabel}
+                              placeholder={form.Label}
+                              value={form.value}
+                              data-index={index}
+                              pattern={form.pattern}
+                              onchange={onChangeValueHandler}>
+                            </lightning-input>
+                          </td>
+                          <td> 
+                            <template if:true={form.Has_Attachment__c}>
+                              <lightning-file-upload
+                                label={form.Document}
+                                name={form.fileName}
+                                data-index={index}
+                                accept=".pdf,.doc,.docx,.png,.jpg"
+                                record-id={form.contactRecordId}
+                                disabled={form.disableUpload}
+                                onuploadfinished={handleUploadFinished}>
+                              </lightning-file-upload>
+                              <template if:true={form.docsUploaded}>
+                              <p style="color: green; font-weight: bold;">File uploaded successfully!</p>                              </template>
+                            </template>
+                          </td>
+                          <!--
+                            <td> Testing Column : Need to be Deleted 
+                              <p key={form.index}>MasterLabel : {form.MasterLabel}</p>
+                              <p key={form.index}>Has_Attachment__c : {form.Has_Attachment__c}</p>
+                              <p key={form.index}>Label : {form.Label}</p>
+                              <p key={form.index}>Document : {form.Document}</p>
+                              <p key={form.index}>Upload : {form.disableUpload}</p>
+                              <p key={form.index}>pattern : {form.pattern}</p>
+                              <p key={form.index}><strong> Value : {form.value}</strong></p>
+                          </td>
+                          -->
+                          <td>                            
+                            <template if:true={form.Has_Attachment__c}>
+                            
+                              <p key={form.documentId}>
+                                  <!--a href={form.downloadUrl} target="_blank">{form.downloadUrl}</a-->
+                                  
+                                  <!--iframe src={form.downloadUrlPDF} width="600" height="400" style="border:none;"></iframe-->
 
+                                  <img src={form.downloadUrl} alt="Preview" style="max-width:600px; max-height:400px;">
+
+                              </p>
+                            </template>
+                          </td>
+                      </tr>
+                  </template>
+              </tbody>
+          </table>
+          <div style="text-align: right; padding:20px">
+            <lightning-button 
+              label="Submit"
+              onclick={onSubmitHandler}>
+            </lightning-button>
+            <template if:true={isSubmitted}>
+              <p style="color: green; font-weight: bold;">Submitted successfully!</p>
+            </template>
+          </div>
+        </template>
+      </div>
     </lightning-card>
 </template>
