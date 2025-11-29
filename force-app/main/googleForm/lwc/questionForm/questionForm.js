@@ -41,18 +41,18 @@ export default class QuestionForm extends LightningElement {
         }
     }
     display(i){
-            console.log('DeveloperName =', this.forms[i].DeveloperName);
-            console.log('MasterLabel =', this.forms[i].MasterLabel);
-            console.log('Label =', this.forms[i].Label);
-            console.log('QualifiedApiName =', this.forms[i].QualifiedApiName);
-            console.log('Has_Attachment__c =', this.forms[i].Has_Attachment__c);
-            console.log('Input_Type__c =', this.forms[i].Input_Type__c);
-            console.log('pattern =',this.forms[i].pattern);
-            console.log('InputValue ==',this.forms[i].InputValue);
-            console.log('contactRecordId =',this.forms[i].contactRecordId);
-            console.log('oldFileName =', this.forms[i].oldFileName);
-            console.log('newFileName =',this.forms[i].newFileName);
-            console.log('documentID =',this.forms[i].documentID);
+        console.log('DeveloperName =', this.forms[i].DeveloperName);
+        console.log('MasterLabel =', this.forms[i].MasterLabel);
+        console.log('Label =', this.forms[i].Label);
+        console.log('QualifiedApiName =', this.forms[i].QualifiedApiName);
+        console.log('Has_Attachment__c =', this.forms[i].Has_Attachment__c);
+        console.log('Input_Type__c =', this.forms[i].Input_Type__c);
+        console.log('pattern =',this.forms[i].pattern);
+        console.log('InputValue ==',this.forms[i].InputValue);
+        console.log('contactRecordId =',this.forms[i].contactRecordId);
+        console.log('oldFileName =', this.forms[i].oldFileName);
+        console.log('newFileName =',this.forms[i].newFileName);
+        console.log('documentId =',this.forms[i].documentId);
     }
     initializeFormRows() {
         for (let i = 0; i < this.forms.length; i++) {
@@ -91,6 +91,7 @@ export default class QuestionForm extends LightningElement {
     }
     contactName='';
     contactId='';
+
     onChangeNameHandler(event){
         this.contactName = event.target.value;
         console.log("Contact's Name : ",this.contactName);
@@ -113,7 +114,7 @@ export default class QuestionForm extends LightningElement {
         });
 
         //this.display();
-        submitHandler({ listMapCMTn: this.forms })
+        submitHandler({ listMapCMTn: this.forms , deleteDocsID : this.deleteDocsID})
             .then(() => {
                 console.log(' successfully');
             })
@@ -152,13 +153,16 @@ export default class QuestionForm extends LightningElement {
         const recordId = fileUploadComponent.recordId; // form.contactRecordId
 
         //if the reuploding on a particular item, to prevent duplication, we store the old id and delete it later.
-        console.log('this.forms[index].documentID ',this.forms[index].documentID);
+        console.log('this.forms[index].documentId ',this.forms[index].documentId);
 
-        const lenDoc = this.forms[index].documentID.length;
+        const lenDoc = this.forms[index].documentId.length;
         console.log('length of docID : ',lenDoc);
         if(lenDoc>0){
-            console.log('delete docs id added : ',deleteDocsID);
-            deleteDocsID.push(this.forms[index].documentID);
+            if (!this.deleteDocsID) {
+                this.deleteDocsID = [];
+            }
+            console.log('delete docs id added : ',this.deleteDocsID);
+            this.deleteDocsID.push(this.forms[index].documentId);
         }
 
         console.log('Uploaded Files:', uploadedFiles);
@@ -173,15 +177,13 @@ export default class QuestionForm extends LightningElement {
                 ...updatedForms[index], // keep existing fields
                 disableUpload:true,
                 docsUploaded:true,
+                isUploadActive:false,
                 documentId: file.documentId,
                 downloadUrl: `/sfc/servlet.shepherd/document/download/${file.documentId}`,
                 downloadUrlPDF: `/sfc/servlet.shepherd/document/download/${file.documentId}?operation=VIEW`,
-
                 defaultName: file.name
             };
-
             console.log('updatedForms[index].documentId', updatedForms[index].documentId, 'updatedForms[index].defaultName ', updatedForms[index].defaultName );
-
             this.forms = updatedForms;
             console.log('this.forms[index].documentId', this.forms[index].documentId, 'this.forms[index].defaultName ', this.forms[index].defaultName );
 
@@ -200,6 +202,35 @@ export default class QuestionForm extends LightningElement {
                 });
                 */
         });
+    }
+    onReUploadDoc(event){
+        console.log(" onReUploadDoc event.target : ",event.target.dataset.index);
+        const index = event.target.dataset.index;
+
+        if (!this.deleteDocsID) {
+            this.deleteDocsID = [];
+        }
+        const updatedForms = [...this.forms];
+
+        this.deleteDocsID.push(''+updatedForms[index].documentId);
+        console.log(" onReUploadDoc deleteDocsID.push(this.forms[index].documentId) : ",this.documentId);
+        console.log(" onReUploadDoc this.forms[index].documentId : ",updatedForms[index].documentId);
+        for (let i = 0; i < this.deleteDocsID.length; i++) {
+            console.log('Delete Doc i : ',this.deleteDocsID[i]);
+        }
+
+
+            updatedForms[index] = {
+                ...updatedForms[index], // keep existing fields
+                disableUpload:false,
+                docsUploaded:false,
+                isUploadActive:true,
+                downloadUrl: ``,
+                downloadUrlPDF: ``,
+                defaultName: ''
+            };
+            console.log(' onReUploadDoc updatedForms[index].documentId', updatedForms[index].documentId, 'updatedForms[index].defaultName ', updatedForms[index].defaultName );
+            this.forms = updatedForms;
     }
 }
 /*

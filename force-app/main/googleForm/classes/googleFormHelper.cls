@@ -20,13 +20,15 @@ public with sharing class googleFormHelper {
             row.put('contactRecordId', '');
             row.put('oldFileName', '');
             row.put('newFileName', '');
-            row.put('documentID', '');
+            row.put('documentId', '');
+            row.put('isUploadActive', true);
+
             listMapCMT.add(row);
         }
         return listMapCMT;
     }
     @AuraEnabled(cacheable=true)
-    public static void onSubmitHandler(List<Map<String, Object>> listMapCMTn){
+    public static void onSubmitHandler(List<Map<String, Object>> listMapCMTn, List<Id> deleteDocsID){
         //this method suppose to save the fields data to the contact's description field. and rename the document uploaded.
         System.debug('inside final apex onSubmitHandler START');
         
@@ -38,7 +40,7 @@ public with sharing class googleFormHelper {
             String newFileName;
             for (String key : cmt.keySet()) {
                 System.debug(key + ' => ' + cmt.get(key));
-                if(key=='documentID')
+                if(key=='documentId')
                     docId = (string)cmt.get(key);
                 if(key=='newFileName')
                     newFileName = (string)cmt.get(key);
@@ -57,7 +59,7 @@ public with sharing class googleFormHelper {
             System.debug('contactRecordId ='+cmt.get('contactRecordId'));
             System.debug('oldFileName ='+ cmt.get('oldFileName'));
             System.debug('newFileName ='+cmt.get('newFileName'));
-            System.debug('documentID ='+cmt.get('documentID'));
+            System.debug('documentId ='+cmt.get('documentId'));
             */
             listofDocID.add(docId);
             if(docId!=null)
@@ -70,22 +72,22 @@ public with sharing class googleFormHelper {
         System.debug('inside final apex onSubmitHandler END');
         //updateDocs(listofDocID, mapDocIDname);
         //update this on 27th NOC
-        System.enqueueJob(new updateAttachementQueueable(listofDocID, mapDocIDname));
+        System.enqueueJob(new updateAttachementQueueable(listofDocID, mapDocIDname, deleteDocsID));
         //System.enqueueJob(new updateAttachementQueueable(ids, attMap));
     }
     @AuraEnabled(cacheable=true)
     public static void renameFile(Id documentId, String newName)  {
-        ContentVersion cv = [SELECT Id, Title FROM ContentVersion WHERE ContentDocumentId = :documentId ORDER BY CreatedDate DESC LIMIT 1];
+        ContentVersion cv = [SELECT Id, Title FROM ContentVersion WHERE ContentdocumentId = :documentId ORDER BY CreatedDate DESC LIMIT 1];
         cv.Title = newName;
         update cv;
     }
     /*
     @future
     public static void updateDocs(List<String> listofDocID, Map<String,String> mapDocIDname){
-        List<ContentVersion> docsList = [SELECT Id, ContentDocumentId,  Title FROM ContentVersion WHERE ContentDocumentId = :listofDocID  ];
+        List<ContentVersion> docsList = [SELECT Id, ContentdocumentId,  Title FROM ContentVersion WHERE ContentdocumentId = :listofDocID  ];
         system.debug('DocsList : '+docsList);
         for(ContentVersion doc: docsLIst){
-            String docId = doc.ContentDocumentId;
+            String docId = doc.ContentdocumentId;
             system.debug('Docs   : '+doc);
             system.debug('mapDocIDname  : '+mapDocIDname);
             system.debug('(String)mapDocIDname.get(docId)  : '+(String)mapDocIDname.get(docId));
