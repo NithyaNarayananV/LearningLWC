@@ -29,4 +29,60 @@
           <iframe  src={embedUrl} title="V" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
         </div>
     </lightning-card>
+  
+
+    <lightning-card>
+  <!-- <div
+    class="slds-text-align_center slds-m-top_x-large slds-m-bottom_small"
+    style="font-size: 1.5rem"
+  >
+    <strong>Client Services Technical Assistance Intake Form</strong>
+  </div> -->
+ 
+  <lightning-record-edit-form
+    record-id={recordId}
+    object-api-name="Account"
+    onload={handleFormLoad}
+    onsuccess={handleSuccess}
+    onsubmit={handleSubmit}
+    onerror={handleError}
+  >
+    <span class="css-injection" lwc:dom="manual"></span>
+ 
+    <div class="slds-m-top_medium">
+      <!--  <template> -->
+      <div data-id="Submitter Details">
+        <!--Help Text-->
+        <div class="slds-grid slds-grid_align-end slds-m-bottom_small">
+          <label
+            class="colorContrast slds-no-flex slds-form-element__label slds-col slds-size_2-of-12"
+          >
+            <abbr class="slds-required" title="required">*</abbr>
+            = Required field
+          </label>
+        </div>
+ 
+        <!--Submitter Name-->
+        <div class="slds-grid">
+          <div
+            class="slds-form-element__control slds-grow slds-col slds-size_7-of-12"
+          >
+            <lightning-input-field
+              variant="label-inline"
+              field-name="Name"
+              disabled={editMode}
+              data-id="CSCM_Submitter_Name__c"
+              class="inline-fix"
+              required
+            ></lightning-input-field>
+          </div>
+        </div>
+      </div>
+    </div>
+  </lightning-record-edit-form>
+
+
+ 
+</lightning-card>
+  
   </template>

@@ -14,10 +14,9 @@ export default class QuestionForm extends LightningElement {
     @track forms =[];
     inactivityTimeout;
     timeoutDuration = 30000; 
-    isSubmitted=false;
     deleteDocsID=[];
     _forms;
-
+    isSubmitted=false;
     set forms(value) {
         this._forms = value; 
     }
@@ -114,13 +113,15 @@ export default class QuestionForm extends LightningElement {
         });
 
         //this.display();
-        submitHandler({ listMapCMTn: this.forms , deleteDocsID : this.deleteDocsID})
+        submitHandler({ listMapCMTn: this.forms , deleteDocsID : this.deleteDocsID, contactRecordId : this.contactId})
             .then(() => {
                 console.log(' successfully');
             })
             .catch(error => {
                 console.error(' file:', error);
             });
+            this.forms =[];
+            this.contactId='';
     }
     onCreateContactClick(){
         const fields = {};
@@ -164,14 +165,12 @@ export default class QuestionForm extends LightningElement {
             console.log('delete docs id added : ',this.deleteDocsID);
             this.deleteDocsID.push(this.forms[index].documentId);
         }
-
         console.log('Uploaded Files:', uploadedFiles);
         console.log('Label:', label);
         console.log('Custom Name:', fileName);
         console.log('Linked Record Id:', recordId);
         uploadedFiles.forEach(file => {
             console.log('Uploaded file:', file.name, 'Document Id:', file.documentId);
- 
             const updatedForms = [...this.forms];
             updatedForms[index] = {
                 ...updatedForms[index], // keep existing fields
@@ -180,13 +179,12 @@ export default class QuestionForm extends LightningElement {
                 isUploadActive:false,
                 documentId: file.documentId,
                 downloadUrl: `/sfc/servlet.shepherd/document/download/${file.documentId}`,
-                downloadUrlPDF: `/sfc/servlet.shepherd/document/download/${file.documentId}?operation=VIEW`,
+                downloadUrlPDF: `/sfc/servlet.shepherd/document/preview/${file.documentId}`,
                 defaultName: file.name
             };
             console.log('updatedForms[index].documentId', updatedForms[index].documentId, 'updatedForms[index].defaultName ', updatedForms[index].defaultName );
             this.forms = updatedForms;
             console.log('this.forms[index].documentId', this.forms[index].documentId, 'this.forms[index].defaultName ', this.forms[index].defaultName );
-
             this.forms.forEach((form, index) => {
                 console.log(`Form ${index}:`, form);
             });
@@ -218,20 +216,22 @@ export default class QuestionForm extends LightningElement {
         for (let i = 0; i < this.deleteDocsID.length; i++) {
             console.log('Delete Doc i : ',this.deleteDocsID[i]);
         }
-
-
-            updatedForms[index] = {
-                ...updatedForms[index], // keep existing fields
-                disableUpload:false,
-                docsUploaded:false,
-                isUploadActive:true,
-                downloadUrl: ``,
-                downloadUrlPDF: ``,
-                defaultName: ''
-            };
-            console.log(' onReUploadDoc updatedForms[index].documentId', updatedForms[index].documentId, 'updatedForms[index].defaultName ', updatedForms[index].defaultName );
-            this.forms = updatedForms;
+        updatedForms[index] = {
+            ...updatedForms[index], // keep existing fields
+            disableUpload:false,
+            docsUploaded:false,
+            isUploadActive:true,
+            downloadUrl: ``,
+            downloadUrlPDF: ``,
+            defaultName: ''
+        };
+        console.log(' onReUploadDoc updatedForms[index].documentId', updatedForms[index].documentId, 'updatedForms[index].defaultName ', updatedForms[index].defaultName );
+        this.forms = updatedForms;
     }
+
+
+
+    test;
 }
 /*
 DeveloperName : "Driving_License"
