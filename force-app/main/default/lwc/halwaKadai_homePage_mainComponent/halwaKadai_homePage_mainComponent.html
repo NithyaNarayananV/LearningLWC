@@ -14,10 +14,11 @@
 
     <section class="hero">
         <div class="hero-slider">
-            <div class="slide active" style="background-image: {Image5};"></div>
-            <div class="slide" style="background-image: {Image6};"></div>
-            <div class="slide" style="background-image: {Image7};"></div>
-
+            <template for:each={slidesComputed} for:item="slide" for:index="index">
+                <div key={slide.id} class={slide.cls}>
+                    <img src={slide.url} alt={slide.alt}/>
+                </div>
+            </template>
         </div>
 
         <div class="container">
@@ -53,4 +54,28 @@
             </div>
         </div>
     </section-->
+     <!-- =========================================
+         SPECIALTIES SECTION
+         ========================================= -->
+    <section class="featured">
+        <div class="container">
+
+            <h2>Our Specialties</h2>
+
+            <div class="featured-grid">
+
+                <template for:each={products} for:item="product" for:index="index">
+                    <div class="featured-item" key={product.id}>
+                        <div class="featured-image"  >
+                            <img src={product.url} alt={product.alt} loading="lazy">
+                        </div>
+                        <h3>{product.name}</h3>
+                        <p>{product.description}</p>
+                    </div>
+                </template>
+
+            </div>
+        </div>
+    </section>
+
 </template>

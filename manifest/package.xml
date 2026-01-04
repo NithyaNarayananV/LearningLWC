@@ -7,6 +7,9 @@
     <types>
         <members>*</members>
         <name>LightningComponentBundle</name>
+    </types>  <types>
+        <members>Halwakadai_HelperClass</members>
+        <name>ApexClass</name>
     </types>
 
     <version>64.0</version>
