@@ -18,12 +18,11 @@ public class Halwakadai_HelperClass {
 
 	@AuraEnabled(cacheable=true)
 	public static List<Product2>  getProductsDetails() {
-		List<Product2> halwaList = [SELECT Id, Name, ProductCode, Description, IsActive, IsArchived, StockKeepingUnit, Image_URL__c FROM Product2 WHERE RecordType.DeveloperName  = 'HalwaShop'];
+		List<Product2> halwaList = [SELECT  Name, ProductCode, Description, StockKeepingUnit, Image_URL__c, HomePage_Visible__c, Tag__c, Price__c FROM Product2 WHERE RecordType.DeveloperName  = 'HalwaShop'];
 		for(Product2 halwa : halwaList){
 			system.debug(halwa);
 		}
 		return halwaList;
-
 	}
 
 }

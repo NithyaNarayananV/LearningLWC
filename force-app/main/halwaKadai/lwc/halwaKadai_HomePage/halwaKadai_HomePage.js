@@ -1,27 +1,11 @@
-// file: halwaKadai_homePage_mainComponent.js
 import { LightningElement, wire, track } from 'lwc';
-
-// Replace with your static resources or external URLs
-import IMG1 from '@salesforce/resourceUrl/HalwaKadaiImage1';
-import IMG2 from '@salesforce/resourceUrl/HalwaKadaiImage2';
 import getProducts from '@salesforce/apex/Halwakadai_HelperClass.getProductsDetails';
+export default class HalwaKadaiHomePage extends LightningElement {
 
-//import PRODUCTS from @salesforce.getProductsDetails
-
-export default class HalwaKadai_homePage_mainComponent extends LightningElement {
-  // Base slide data
-  //Image4 = 'https://media.licdn.com/dms/image/v2/D5622AQGzvIsavdO49g/feedshare-shrink_1280/B56ZstqXhKJsAs-/0/1765997648869?e=1769040000&v=beta&t=sv9swAEc1yV0w2eLr9oIDxihvgq1xPVmCwnOd06KfO8';
-  //Image5 = 'https://raw.githubusercontent.com/Madhesh2109/halwa-heritage/refs/heads/main/images/carrot-halwa.jpg';
   Image5 = 'https://raw.githubusercontent.com/Madhesh2109/halwa-heritage/refs/heads/main/images/halwa-kadai-1.png';
   Image6 = 'https://raw.githubusercontent.com/Madhesh2109/halwa-heritage/refs/heads/main/images/halwa1.jpeg';
   Image7 = 'https://raw.githubusercontent.com/Madhesh2109/halwa-heritage/refs/heads/main/images/halwa2.jpeg';
   Image8 = 'https://raw.githubusercontent.com/Madhesh2109/halwa-heritage/refs/heads/main/images/halwa3.jpeg';
- 
-  ImageProduct1 = 'https://raw.githubusercontent.com/Madhesh2109/halwa-heritage/refs/heads/main/images/badam-halwa.png';
-  ImageProduct2 = 'https://raw.githubusercontent.com/Madhesh2109/halwa-heritage/refs/heads/main/images/carrot-halwa.jpg';
-  ImageProduct3 = 'https://raw.githubusercontent.com/Madhesh2109/halwa-heritage/refs/heads/main/images/cashew-halwa.png';
-  //ImageProduct1 = 'https://raw.githubusercontent.com/Madhesh2109/halwa-heritage/refs/heads/main/images/halwa3.jpeg';
-  
   
   slides = [
     //{ id: 's1', url: IMG1, alt: 'Halwa Kadai - Slide 1' },
@@ -35,8 +19,6 @@ export default class HalwaKadai_homePage_mainComponent extends LightningElement 
 
   ];
 
-  //@wire(getProducts)
-  //products;
     @track halwaProducts = [];
 
     @wire(getProducts)
@@ -66,7 +48,6 @@ export default class HalwaKadai_homePage_mainComponent extends LightningElement 
     //{ id: 's8', url: this.Image8, alt: 'Halwa Kadai - Slide 8' }
 
   ];
-
 
   headline   = 'Authentic South Indian Halwa';
   subheading = 'Slow‑cooked in pure ghee with timeless Tamil heritage.';

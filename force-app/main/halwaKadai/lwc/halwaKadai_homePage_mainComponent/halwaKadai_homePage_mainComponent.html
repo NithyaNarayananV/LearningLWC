@@ -1,0 +1,18 @@
+<template>
+    <nav class="main-menu">
+        <ul>
+            <li><a onclick={onHomeClick}>Home</a></li>
+            <li><a onclick={onAboutClick}>About</a></li>
+            <li><a onclick={onProductsClick}>Products</a></li>
+            <li><a onclick={onContactClick}>Contact</a></li>
+        </ul>
+    </nav>
+    <template if:true={isActive_Home}>
+        <c-halwa-kadai-home-page></c-halwa-kadai-home-page>
+    </template>
+    <template if:true={isActive_Product}>
+        <c-halwa-kadai-products></c-halwa-kadai-products>
+    </template>
+
+
+</template>
