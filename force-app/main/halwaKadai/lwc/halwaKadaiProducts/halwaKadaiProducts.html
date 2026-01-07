@@ -37,7 +37,7 @@
 
             <div class="product-grid">
 
-                <template for:each={products} for:item="product" for:index="index">
+                <template for:each={halwaProducts} for:item="product" for:index="index">
                         <div class="product-card" key={product.id}>
                             <span class="product-badge"></span>
                             <div class="product-image" >
@@ -46,11 +46,44 @@
                             <h3>{product.name}</h3>
                             <p>{product.description}</p>
                             <span class="price">Rs.{product.price}/Kg</span>
-                            <button class="add-to-cart-btn">Add to Cart</button>
+                               <!-- Your quantity control -->
+                            <div class="actions-row">
+                                <template  lwc:if={product.selected}>
+                                    <div class="quantity-control">
+                                        <button
+                                            class="quantity-btn decrease"
+                                            data-id={product.id}
+                                            onclick={handleDecreaseQuantity}
+                                            aria-label="Decrease quantity"
+                                        >-</button>
+                                        
+                                        <div class="input-kg-container">
+                                            <input
+                                                type="number"
+                                                class="quantity-input with-kg"
+                                                min="0"
+                                                value={product.quantity}
+                                                readonly
+                                            />
+                                            <span class="kg-label">Kg</span>
+                                        </div>
+
+                                        <button
+                                            class="quantity-btn increase"
+                                            data-id={product.id}
+                                            onclick={handleIncreaseQuantity}
+                                            aria-label="Increase quantity"
+                                        >+</button>
+                                    </div>
+                                </template> 
+                                <template lwc:else>
+                                    <button class="add-to-cart-btn" data-id={product.id} onclick={handleIncreaseQuantity}>Add to Cart</button>
+                                </template>
+                            </div>
+
                         </div>
                 </template>
             </div>
-
         </div>
     </section>
 
@@ -61,7 +94,6 @@
             <div class="combo-grid" id="comboGrid"></div>
         </div>
     </section>
-
     <!-- ✅ Recently Viewed -->
     <section class="recently-viewed">
         <div class="container">
@@ -69,7 +101,4 @@
             <div class="recent-grid" id="recentGrid"></div>
         </div>
     </section>
-
-
-
 </template>

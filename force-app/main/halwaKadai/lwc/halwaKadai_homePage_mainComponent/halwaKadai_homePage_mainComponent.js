@@ -8,6 +8,8 @@ export default class HalwaKadai_homePage_mainComponent extends LightningElement 
    isActive_Product=false;
    isActive_Contact=false;
 
+   productCount=0;
+
   onHomeClick(){
     this.isActive_Home=true;
     this.isActive_About=false;
@@ -31,5 +33,14 @@ export default class HalwaKadai_homePage_mainComponent extends LightningElement 
     this.isActive_About=false;
     this.isActive_Product=false;
     this.isActive_Contact=true;
-   }
+   } 
+
+  handleProductCount(event) {
+    console.log('handleProductCount(event) {');
+    const { productCount } = event.detail;
+    // Do whatever you need: update state, call Apex, refresh UI...
+    this.productCount = productCount;
+    console.log('Child says:',productCount);
+  }
+
 }

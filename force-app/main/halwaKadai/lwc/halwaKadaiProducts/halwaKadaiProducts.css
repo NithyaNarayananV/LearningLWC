@@ -3,6 +3,7 @@
     max-width: 1200px;
     margin: 0 auto;
 }
+
 /* Page Hero */
 .page-hero {
     background: linear-gradient(135deg, #FFEBD6, #FFF9F2);
@@ -88,7 +89,7 @@
     transform: translateY(-5px);
 }
 
-/* ✅ Product Badge */
+/* ✅ Product Badge (single definition) */
 .product-badge {
     position: absolute;
     top: 14px;
@@ -107,12 +108,16 @@
     background: linear-gradient(135deg, #E67E22, #D35400);
     animation: floatBadge 2s ease-in-out infinite;
 }
+.product-badge:hover {
+    transform: scale(1.05);
+    filter: brightness(1.15);
+}
 /* Small floating animation */
 @keyframes floatBadge {
     0%, 100% { transform: translateY(0); }
     50% { transform: translateY(-2px); }
 }
-/* ✅ Themed badge colors (based on text) */
+/* Themed badge colors (based on text) */
 .product-badge[data-type="Premium"] {
     background: linear-gradient(135deg, #FFD700, #FFC107);
     color: #5D4037;
@@ -134,7 +139,6 @@
 .product-image {
     height: 220px;
 }
-
 .product-image img {
     width: 100%;
     height: 100%;
@@ -149,21 +153,7 @@
 
 .price {
     color: #E67E22;
-    margin-bottom: 20px;
-}
-
-/* Add to cart */
-.add-to-cart-btn {
-    position: absolute;
-    bottom: 12px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: #E67E22;
-    color: white;
-    padding: 8px 14px;
-    border-radius: 8px;
-    border: none;
-    cursor: pointer;
+    margin-bottom: 16px; /* space before actions row */
 }
 
 /* ✅ Combo Packs */
@@ -171,13 +161,11 @@
     padding: 70px 0;
     background: #FFF9F2;
 }
-
 .combo-grid {
     display: grid;
     gap: 30px;
     grid-template-columns: repeat(auto-fit,minmax(260px,1fr));
 }
-
 .combo-card {
     background: white;
     border-radius: 14px;
@@ -185,7 +173,6 @@
     text-align: center;
     box-shadow: 0 8px 20px rgba(0,0,0,0.06);
 }
-
 .combo-card img {
     height: 180px;
     width: 100%;
@@ -197,13 +184,11 @@
 .recently-viewed {
     padding: 50px 0;
 }
-
 .recent-grid {
     display: grid;
     gap: 20px;
     grid-template-columns: repeat(auto-fit,minmax(200px,1fr));
 }
-
 .recent-card {
     background: white;
     border-radius: 12px;
@@ -211,30 +196,11 @@
     text-align: center;
     box-shadow: 0 4px 12px rgba(0,0,0,0.08);
 }
-
 .recent-card img {
     width: 100%;
     height: 130px;
     object-fit: cover;
     border-radius: 10px;
-}
-
-.product-badge {
-  display: inline-block;
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  padding: 4px 8px;
-  border-radius: 8px;
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: #fff;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
-  transition: transform 0.3s ease, background 0.3s ease;
-}
-.product-badge:hover {
-    transform: scale(1.05);
-    filter: brightness(1.15);
 }
 
 /* ===========================
@@ -254,4 +220,127 @@
     z-index: 9999;
     opacity: 0;
     animation: fadeInOut 2s ease forwards;
+}
+
+/* A single row that will hold either the button OR the quantity control */
+.actions-row {
+    display: flex;
+    align-items: center;
+    justify-content: center; /* center horizontally */
+    gap: 12px;               /* space between items */
+    margin-top: 8px;         /* buffer after price */
+    position: relative;      /* ensure row sits above overlays */
+    z-index: 2;
+    pointer-events: auto;
+}
+
+
+/* Make sure the wrapper stays the positioning context */
+.input-kg-container {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.with-kg {
+    padding-right: 40px;     /* space for suffix */
+}
+
+/* Ensure the suffix renders above the input */
+.kg-label {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #555;
+  font-size: 12px;
+  pointer-events: none;
+  z-index: 3;              /* ⬆️ raise above input */
+}
+
+/* Add to cart */
+.add-to-cart-btn {
+    background: #E67E22;
+    color: #fff;
+    padding: 8px 16px;       /* parity with controls */
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+
+    height: 32px;            /* match quantity button height */
+    line-height: 32px;       /* center text vertically */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+
+    position: relative;
+    z-index: 2;
+    pointer-events: auto;
+}
+.add-to-cart-btn:hover {
+    background: #C45C1A;
+}
+
+/* Quantity control styled to align nicely with the button */
+.quantity-control {
+    display: inline-flex;    /* sits as a single item in the actions-row */
+    align-items: center;
+    gap: 8px;
+    justify-content: center;
+
+    position: relative;
+    z-index: 2;
+    pointer-events: auto;
+}
+
+/* Quantity buttons: keep sizes consistent */
+.quantity-btn {
+    background: #E67E22;
+    color: #fff;
+    border: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    font-size: 16px;
+    cursor: pointer;
+    transition: 0.2s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    position: relative;
+    z-index: 2;
+    pointer-events: auto;
+}
+.quantity-btn:hover {
+    background: #C45C1A;
+}
+
+/* Quantity input */
+.quantity-input {
+    width: 65px;              /* increases width only */
+    padding: 6px 8px;         /* inner space */
+    text-align: center;
+    border: 1px solid rgba(230, 126, 34, 0.4);
+    border-radius: 6px;
+    vertical-align: middle;
+    box-sizing: border-box;
+    position: relative;
+    z-index: 2;
+    pointer-events: auto;
+}
+
+
+/* Remove item icon */
+.remove-item {
+    background: none;
+    border: none;
+    color: #e74c3c;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+.remove-item:hover {
+    transform: scale(1.2);
 }
