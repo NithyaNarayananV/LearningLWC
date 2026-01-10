@@ -51,15 +51,15 @@
                     <div class="featured-grid">
 
                         <template for:each={products} for:item="product" for:index="index">
-                                <template if:true={product.homeVisible}>
-                            <div class="featured-item" key={product.id}>
-                                <div class="featured-image"  >
-                                    <img src={product.url} alt={product.alt} loading="lazy">
+                            <template if:true={product.homeVisible}>
+                                <div class="featured-item" key={product.id}>
+                                    <div class="featured-image"  >
+                                        <img src={product.url} alt={product.alt} loading="lazy">
+                                    </div>
+                                    <h3>{product.name}</h3>
+                                    <p>{product.description}</p>
                                 </div>
-                                <h3>{product.name}</h3>
-                                <p>{product.description}</p>
-                            </div>
-                                </template>
+                            </template>
                         </template>
 
                     </div>

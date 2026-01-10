@@ -3,9 +3,10 @@ import getProducts from '@salesforce/apex/Halwakadai_HelperClass.getProductsDeta
 
 import { publish, MessageContext } from 'lightning/messageService';
 import PRODUCTS_LMS from '@salesforce/messageChannel/halwaKadaiLMS__c';
+import { getState, setState , subscribe as stateSubscribe} from 'c/halwaKadaiUtils';
 
 export default class HalwaKadaiProducts extends LightningElement {
-  
+
     halwaProducts;
     products;
     productCount=0;
@@ -50,7 +51,13 @@ export default class HalwaKadaiProducts extends LightningElement {
             }
 
     }
-        
+    connectedCallback() {
+        // initialize from shared state (array)
+        this.halwaProducts = getState();
+        stateSubscribe((newState) => {
+            this.halwaProducts = newState;
+    });
+}
     handleIncreaseQuantity(event) {
         const id = event.currentTarget.dataset.id;
         this.halwaProducts = this.halwaProducts.map(p => {
@@ -106,6 +113,9 @@ export default class HalwaKadaiProducts extends LightningElement {
         const message = { products: this.halwaProducts }; // Option A (array directly)
         publish(this.messageContext, PRODUCTS_LMS, message);
         console.log('[PUB] ✅ Published:', JSON.parse(JSON.stringify(message)));
+        setState({ value:  this.halwaProducts });
+        console.log('VALUE SET FOR STATE ');
+
     }
 
 
