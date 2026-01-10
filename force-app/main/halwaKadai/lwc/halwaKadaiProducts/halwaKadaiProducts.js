@@ -1,13 +1,18 @@
 import { LightningElement, wire, track } from 'lwc';
 import getProducts from '@salesforce/apex/Halwakadai_HelperClass.getProductsDetails';
+
+import { publish, MessageContext } from 'lightning/messageService';
+import PRODUCTS_LMS from '@salesforce/messageChannel/halwaKadaiLMS__c';
+
 export default class HalwaKadaiProducts extends LightningElement {
   
-    @track halwaProducts = [];
+    halwaProducts;
     products;
     productCount=0;
     @wire(getProducts)
-    wiredProducts({ error, data }) {
-        if (data) {
+    wiredProducts({ error, data}) {
+        if (data){
+            console.log('wiredProducts');
             this.products = data.map((prod, index) => ({
                 id: prod.Id,
                 url: prod.Image_URL__c, // custom field from Product2
@@ -54,11 +59,12 @@ export default class HalwaKadaiProducts extends LightningElement {
                 const newQty = Number(p.quantity || 0) +0.5;
                 if(p.quantity==0)
                     this.productCount = this.productCount+1
-                this.notifyParent() ;
+                
                 return { ...p, quantity: newQty, _dirty: true, selected:true };
             }
             return p;
         });
+        this.notifyParent() ;
     }
     handleDecreaseQuantity(event) {
         const id = event.currentTarget.dataset.id;
@@ -70,11 +76,12 @@ export default class HalwaKadaiProducts extends LightningElement {
                 const newSelected = newQty > 0;
                 if(!newSelected)
                     this.productCount = this.productCount-1
-                this.notifyParent();
+                
                 return { ...p, quantity: newQty, _dirty: true, selected: newSelected };
             }
             return p;
         });
+        this.notifyParent();
     }
 
     notifyParent() {
@@ -88,5 +95,18 @@ export default class HalwaKadaiProducts extends LightningElement {
             composed: true    // allow crossing Shadow DOM boundary to ancestors
         })
         );
+        this.publishProducts();
     }
+
+    @wire(MessageContext) messageContext;
+
+
+    publishProducts() {
+        console.log('publishProducts()');
+        const message = { products: this.halwaProducts }; // Option A (array directly)
+        publish(this.messageContext, PRODUCTS_LMS, message);
+        console.log('[PUB] ✅ Published:', JSON.parse(JSON.stringify(message)));
+    }
+
+
 }

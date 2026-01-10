@@ -1,0 +1,91 @@
+<template>
+ <main>
+        <section class="page-hero">
+            <div class="container">
+                <h1>Shopping Cart</h1>
+                <p>Review your halwa selections</p>
+            </div>
+        </section>
+        <section class="cart-section">
+            <div class="container">
+                
+                <div class="cart-wrapper">
+
+                    <!-- LEFT SIDE: CART ITEMS -->
+                    <div class="cart-left">
+                        <h2>Your Shopping Cart</h2>
+                        <div id="cart-items-container" class="cart-items"></div>
+                    </div>
+                    <template for:each={halwaProducts} for:item="product" for:index="index">
+                        <div class="cart-item-details" key={product.id}>
+                            <span class="product-badge"></span>
+                            <div class="product-image" >
+                                <img src={product.url} alt={product.alt} loading="lazy">
+                            </div>
+                            <h3>{product.name}</h3>
+                            <span class="price">Rs.{product.price}/Kg</span>
+                            <p>{product.quantity}</p>
+                               <!-- Your quantity control -->
+                            <div class="actions-row">
+                                <template  lwc:if={product.selected}>
+                                    <div class="quantity-control">
+                                        <button
+                                            class="quantity-btn decrease"
+                                            data-id={product.id}
+                                            onclick={handleDecreaseQuantity}
+                                            aria-label="Decrease quantity"
+                                        >-</button>
+                                        
+                                        <div class="input-kg-container">
+                                            <input
+                                                type="number"
+                                                class="quantity-input with-kg"
+                                                min="0"
+                                                value={product.quantity}
+                                                readonly
+                                            />
+                                            <span class="kg-label">Kg</span>
+                                        </div>
+
+                                        <button
+                                            class="quantity-btn increase"
+                                            data-id={product.id}
+                                            onclick={handleIncreaseQuantity}
+                                            aria-label="Increase quantity"
+                                        >+</button>
+                                    </div>
+                                </template> 
+                                <template lwc:else>
+                                    <button class="add-to-cart-btn" data-id={product.id} onclick={handleIncreaseQuantity}>Add to Cart</button>
+                                </template>
+                            </div>
+
+                        </div>
+                </template>
+
+                    <!-- RIGHT SIDE: SUMMARY BOX -->
+                    <div class="cart-right">
+                        <div class="summary-box">
+                            <p class="summary-text">Subtotal (<span class="item-count">0</span> items):</p>
+                            <h3 class="summary-total" id="cart-total">₹0</h3>
+                            <button id="checkout-btn" class="summary-btn">
+                                Proceed to Checkout
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div id="empty-cart-message" style="display: none; text-align: center; padding: 60px 0;">
+                    <h3>Your cart is empty</h3>
+                    <p>Add some delicious halwa to your cart!</p>
+                    <a href="products.html" class="btn">Browse Products</a>
+                </div>
+                
+                <div id="login-required-message" style="display: none; text-align: center; padding: 60px 0;">
+                    <h3>Please Login</h3>
+                    <p>You need to be logged in to view your cart.</p>
+                    <a href="auth.html" class="btn">Login</a>
+                </div>
+            </div>
+        </section>
+    </main>
+</template>

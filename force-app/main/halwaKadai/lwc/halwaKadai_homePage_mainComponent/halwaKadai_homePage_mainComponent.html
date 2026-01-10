@@ -15,10 +15,10 @@
                     <a href="auth.html" class="btn-login">Login</a>
 
                     <!-- My Orders Link (Visible only after login) -->
-                    <a href="my-orders.html" id="my-orders-link" class="btn-orders" style="display:none;">📦 My Orders</a>
+                    <a  onclick={onCartClick} id="my-orders-link" class="btn-orders" style="display:none;">📦 My Orders</a>
 
                     <!-- Cart -->
-                    <a id="cart-icon" class="cart-icon" href="cart.html">
+                    <a id="cart-icon" class="cart-icon" onclick={onCartClick}>
                         🛒 <span class="cart-count">{productCount}</span>
                     </a>
 
@@ -77,7 +77,6 @@
                 </div>
             </div>
         </header>
-
     <nav class="main-menu">
         <ul>
             <li><a onclick={onHomeClick}>Home</a></li>
@@ -86,17 +85,18 @@
             <li><a onclick={onContactClick}>Contact</a></li>
         </ul>
     </nav>
-    <template if:true={isActive_Home}>
+     <div class={homeClass}>
         <c-halwa-kadai-home-page></c-halwa-kadai-home-page>
-    </template>
-    <template if:true={isActive_Product}>
+     </div>
+    <div class={productClass}>
         <c-halwa-kadai-products onproductcount={handleProductCount}></c-halwa-kadai-products>
-    </template>
-<footer>
-    <div class="container">
-        <p>&copy; 2023 Halwa Delights. All rights reserved.</p>
     </div>
-</footer>
-<button class="back-to-top" id="backToTop">↑</button>
-
+    <div class={cartClass}>
+        <c-halwa-kadai-cart-page></c-halwa-kadai-cart-page>
+    </div>
+    <footer>
+        <div class="container">
+            <p>&copy; 2023 Halwa Delights. All rights reserved.</p>
+        </div>
+    </footer>
 </template>
