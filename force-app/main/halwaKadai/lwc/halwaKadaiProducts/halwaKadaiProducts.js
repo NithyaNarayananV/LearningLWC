@@ -24,8 +24,7 @@ export default class HalwaKadaiProducts extends LightningElement {
                 description: prod.Description,
                 homeVisible: prod.HomePage_Visible__c,
                 tag: prod.Tag__c, 
-                price: prod.Price__c
-            }));
+                price: prod.Price__c            }));
             
             // Create the editable working copy with extra fields
             this.halwaProducts = this.products.map(p => ({
@@ -37,6 +36,7 @@ export default class HalwaKadaiProducts extends LightningElement {
                 // helper fields for UI state
                 _dirty: false,
                 selected: false,
+                orderPrice: 0
             }));
 
         } else if (error) {
@@ -78,7 +78,7 @@ export default class HalwaKadaiProducts extends LightningElement {
                     totalCount: this.summary.totalCount + 1,
                     totalPrice: this.summary.totalPrice + p.price
                 };
-                return { ...p, quantity: newQty, _dirty: true, selected:true };
+                return { ...p, quantity: newQty, _dirty: true, selected:true , orderPrice: p.price * newQty };
             }
             return p;
         });
@@ -97,7 +97,7 @@ export default class HalwaKadaiProducts extends LightningElement {
                     totalCount: this.summary.totalCount - 1,
                     totalPrice: this.summary.totalPrice - p.price
                 };
-                return { ...p, quantity: newQty, _dirty: true, selected: newSelected };
+                return { ...p, quantity: newQty, _dirty: true, selected: newSelected, orderPrice: p.price * newQty };
             }
             return p;
         });

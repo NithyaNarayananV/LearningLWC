@@ -79,6 +79,7 @@ export default class HalwaKadai_homePage_mainComponent extends LightningElement 
     this.cartClass='slds-hide';
     this.productClass='slds-hide'; 
     this.checkoutClass='slds-hide';
+    this.handleScrollTop();
    }
 
   handleProductCount(event) {
@@ -91,6 +92,15 @@ export default class HalwaKadai_homePage_mainComponent extends LightningElement 
   handleCheckOut(event) {
     console.log('handleCheckOut(event) {');
     this.onCheckoutClick();
+    this.handleScrollTop();
+  }
+
+  handleScrollTop() { // Scroll the entire window to the top 
+    window.scrollTo({ 
+        top: 0, 
+        behavior: 'smooth' 
+        // adds smooth animation
+    }); 
   }
 
 

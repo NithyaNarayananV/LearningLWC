@@ -97,7 +97,7 @@ export default class HalwaKadaiCartPage extends LightningElement {
                     totalCount: this.summary.totalCount + 1,
                     totalPrice: this.summary.totalPrice + p.price
                 };
-                return { ...p, quantity: newQty, _dirty: true, selected: true };
+                return { ...p, quantity: newQty, _dirty: true, selected: true, orderPrice: p.price * newQty };
             }
             return p;
         });
@@ -118,7 +118,7 @@ export default class HalwaKadaiCartPage extends LightningElement {
                     totalCount: this.summary.totalCount - 1,
                     totalPrice: this.summary.totalPrice - p.price
                 };          
-                return { ...p, quantity: newQty, _dirty: true, selected: newSelected };
+                return { ...p, quantity: newQty, _dirty: true, selected: newSelected, orderPrice: p.price * newQty };
             }
             return p;
         });
@@ -160,5 +160,6 @@ export default class HalwaKadaiCartPage extends LightningElement {
         });
         this.dispatchEvent(checkoutEvent);
     }
+
 
 }

@@ -57,6 +57,7 @@
                                                 <h3>{product.name}</h3>
                                                 <p>₹{product.price}/kg</p>
                                                 <p>Qty: {product.quantity} Kg</p>
+                                                <p>Order Price: ₹{product.orderPrice}</p>
 
                                             </div>
                                         </div>
@@ -66,11 +67,11 @@
                             <strong>$ </strong>
                             <p>₹44 x 5</p>
                             </div>
-                            <p class="item-total">₹{summary.totalPrice}</p>
+                            <p class="item-total">{summary.totalCount}</p>
                         </div>
 
                         <div class="summary-line">
-                            <span>Subtotal</span><span id="order-subtotal">₹0</span>
+                            <span>Subtotal</span><span id="order-subtotal">₹{summary.totalPrice}</span>
                         </div>
 
                         <div class="summary-line">
@@ -78,7 +79,7 @@
                         </div>
                         
                         <div class="summary-line total">
-                            <span>Total</span><span id="order-total">₹0</span>
+                            <span>Total</span><span id="order-total">₹{summary.totalPrice}</span>
                         </div>
 
                         <button id="place-order-btn" class="place-order-btn">
