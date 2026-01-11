@@ -3,11 +3,13 @@ import getProducts from '@salesforce/apex/Halwakadai_HelperClass.getProductsDeta
 
 import { publish, MessageContext } from 'lightning/messageService';
 import PRODUCTS_LMS from '@salesforce/messageChannel/halwaKadaiLMS__c';
-import { getState, setState , subscribe as stateSubscribe} from 'c/halwaKadaiUtils';
+import { getState, setState , getSummary, subscribe as stateSubscribe} from 'c/halwaKadaiUtils';
 
 export default class HalwaKadaiProducts extends LightningElement {
 
     halwaProducts;
+    summary = { totalCount: 0, totalPrice: 0 };
+
     products;
     productCount=0;
     @wire(getProducts)
@@ -51,22 +53,31 @@ export default class HalwaKadaiProducts extends LightningElement {
             }
 
     }
-    connectedCallback() {
-        // initialize from shared state (array)
+        connectedCallback() {
+        // 1. Initial Load
         this.halwaProducts = getState();
-        stateSubscribe((newState) => {
-            this.halwaProducts = newState;
-    });
-}
+        this.summary = getSummary();
+
+        // 2. Subscribe to future changes
+        this.unsub = stateSubscribe((data) => {
+            // This ensures both variables stay in sync with the utility
+            this.halwaProducts = data.products;
+            this.summary = data.summary;
+            console.log('Sync Complete: Count is ' + this.summary.totalCount);
+        });
+    }
+
     handleIncreaseQuantity(event) {
         const id = event.currentTarget.dataset.id;
         this.halwaProducts = this.halwaProducts.map(p => {
             console.log('handleIncreaseQuantity');
             if (p.id === id) {
-                const newQty = Number(p.quantity || 0) +0.5;
-                if(p.quantity==0)
-                    this.productCount = this.productCount+1
-                
+                const newQty = Number(p.quantity || 0) + 1;
+                this.summary = {
+                    ...this.summary,
+                    totalCount: this.summary.totalCount + 1,
+                    totalPrice: this.summary.totalPrice + p.price
+                };
                 return { ...p, quantity: newQty, _dirty: true, selected:true };
             }
             return p;
@@ -78,12 +89,14 @@ export default class HalwaKadaiProducts extends LightningElement {
         this.halwaProducts = this.halwaProducts.map(p => {
             console.log('handleDecreaseQuantity');
             if (p.id === id) {
-                const current = Number(p.quantity || 0.5);
-                const newQty = Math.max(0, current -0.5); // never below 0
+                const current = Number(p.quantity || 1);
+                const newQty = Math.max(0, current - 1); // never below 0
                 const newSelected = newQty > 0;
-                if(!newSelected)
-                    this.productCount = this.productCount-1
-                
+                this.summary = {
+                    ...this.summary,
+                    totalCount: this.summary.totalCount - 1,
+                    totalPrice: this.summary.totalPrice - p.price
+                };
                 return { ...p, quantity: newQty, _dirty: true, selected: newSelected };
             }
             return p;
@@ -95,28 +108,24 @@ export default class HalwaKadaiProducts extends LightningElement {
         // Send any payload you want in `detail`
         console.log(' notifyParent() {');
         this.dispatchEvent(
-        new CustomEvent('productcount', {
-            
-            detail: {  productCount: this.productCount },
-            bubbles: true,    // allow bubbling through DOM
-            composed: true    // allow crossing Shadow DOM boundary to ancestors
-        })
+            new CustomEvent('productcount', {            
+                detail : { productCount : this.productCount },
+                bubbles : true, // allow bubbling through DOM
+                composed : true // allow crossing Shadow DOM boundary to ancestors
+            })
         );
         this.publishProducts();
     }
 
     @wire(MessageContext) messageContext;
 
-
     publishProducts() {
         console.log('publishProducts()');
         const message = { products: this.halwaProducts }; // Option A (array directly)
         publish(this.messageContext, PRODUCTS_LMS, message);
         console.log('[PUB] ✅ Published:', JSON.parse(JSON.stringify(message)));
-        setState({ value:  this.halwaProducts });
+        setState(this.halwaProducts);
+        setState(this.summary);
         console.log('VALUE SET FOR STATE ');
-
     }
-
-
 }

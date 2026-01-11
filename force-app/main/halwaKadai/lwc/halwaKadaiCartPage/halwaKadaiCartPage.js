@@ -1,23 +1,30 @@
 import { LightningElement, wire } from 'lwc';
 import { subscribe, unsubscribe, publish, MessageContext } from 'lightning/messageService';
 import PRODUCTS_LMS from '@salesforce/messageChannel/halwaKadaiLMS__c';
-import { getState, setState , subscribe as stateSubscribe} from 'c/halwaKadaiUtils';
+import { getState, setState , getSummary, subscribe as stateSubscribe} from 'c/halwaKadaiUtils';
 
 export default class HalwaKadaiCartPage extends LightningElement {
     @wire(MessageContext) messageContext;
     subscription;
+    
     halwaProducts = [];
+    summary = { totalCount: 0, totalPrice: 0 };
+    unsub;
 
+    connectedCallback() {
+        // 1. Initial Load
+        this.halwaProducts = getState();
+        this.summary = getSummary();
 
-////////////////
+        // 2. Subscribe to future changes
+        this.unsub = stateSubscribe((data) => {
+            // This ensures both variables stay in sync with the utility
+            this.halwaProducts = data.products;
+            this.summary = data.summary;
+            console.log('CART Sync Complete: Count is ' + this.summary.totalCount);
+        });
+    }
 
-connectedCallback() {
-    // initialize from shared state (array)
-    this.halwaProducts = getState();
-    stateSubscribe((newState) => {
-        this.halwaProducts = newState;
-    });
-}
 ///////////////////
 
     receivedMessage = 'No message received';
@@ -84,13 +91,18 @@ connectedCallback() {
         this.halwaProducts = this.halwaProducts.map(p => {
             console.log('handleIncreaseQuantity');
             if (p.id === id) {
-                const newQty = Number(p.quantity || 0) + 0.5;
+                const newQty = Number(p.quantity || 0) + 1;
+                this.summary = {
+                    ...this.summary,
+                    totalCount: this.summary.totalCount + 1,
+                    totalPrice: this.summary.totalPrice + p.price
+                };
                 return { ...p, quantity: newQty, _dirty: true, selected: true };
             }
             return p;
         });
         // persist to shared state and propagate
-        setState(this.halwaProducts);
+        //setState(this.halwaProducts);
         this.notifyParent();
     }
     handleDecreaseQuantity(event) {
@@ -98,14 +110,19 @@ connectedCallback() {
         this.halwaProducts = this.halwaProducts.map(p => {
             console.log('handleDecreaseQuantity');
             if (p.id === id) {
-                const current = Number(p.quantity || 0.5);
-                const newQty = Math.max(0, current - 0.5);
+                const current = Number(p.quantity || 1);
+                const newQty = Math.max(0, current - 1);
                 const newSelected = newQty > 0;
+                this.summary = {
+                    ...this.summary,
+                    totalCount: this.summary.totalCount - 1,
+                    totalPrice: this.summary.totalPrice - p.price
+                };          
                 return { ...p, quantity: newQty, _dirty: true, selected: newSelected };
             }
             return p;
         });
-        setState(this.halwaProducts);
+        //setState(this.halwaProducts);
         this.notifyParent();
     }
 
@@ -125,7 +142,6 @@ connectedCallback() {
 
     @wire(MessageContext) messageContext;
 
-
     publishProducts() {
         console.log('publishProducts()');
         const message = { products: this.halwaProducts }; // Option A (array directly)
@@ -136,6 +152,13 @@ connectedCallback() {
         console.log('VALUE SET FOR STATE ');
 
     }
-
+    handleCheckoutClick() {
+        console.log('handleCheckoutClick()');
+        const checkoutEvent = new CustomEvent('checkout', {
+            bubbles: true,
+            composed: true
+        });
+        this.dispatchEvent(checkoutEvent);
+    }
 
 }

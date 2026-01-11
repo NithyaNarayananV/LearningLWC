@@ -12,14 +12,14 @@
 
                 <!-- Right Side Buttons -->
                 <div class="header-right">
-                    <a href="auth.html" class="btn-login">Login</a>
+                    <!--a href="auth.html" class="btn-login">Login</a-->
 
                     <!-- My Orders Link (Visible only after login) -->
                     <a  onclick={onCartClick} id="my-orders-link" class="btn-orders" style="display:none;">📦 My Orders</a>
 
                     <!-- Cart -->
                     <a id="cart-icon" class="cart-icon" onclick={onCartClick}>
-                        🛒 <span class="cart-count">{productCount}</span>
+                        🛒 <span class="cart-count">{summary.totalCount}</span>
                     </a>
 
                     <!-- Profile section -->
@@ -92,11 +92,14 @@
         <c-halwa-kadai-products onproductcount={handleProductCount}></c-halwa-kadai-products>
     </div>
     <div class={cartClass}>
-        <c-halwa-kadai-cart-page></c-halwa-kadai-cart-page>
+        <c-halwa-kadai-cart-page  oncheckout={handleCheckOut}></c-halwa-kadai-cart-page>
+    </div>    
+    <div class={checkoutClass}>
+        <c-halwa-kadai-check-out-page></c-halwa-kadai-check-out-page>
     </div>
     <footer>
         <div class="container">
-            <p>&copy; 2023 Halwa Delights. All rights reserved.</p>
+            <p>&copy; 2026 Halwa Delights. All rights reserved.</p>
         </div>
     </footer>
 </template>

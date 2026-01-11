@@ -7,7 +7,7 @@
             </div>
         </section>
         <section class="cart-section">
-            <div class="container">                
+            <div class="container">
                 <div class="cart-wrapper">
                     <!-- LEFT SIDE: CART ITEMS -->
                     <div class="cart-left">
@@ -23,7 +23,6 @@
                                             <div class="cart-item-details">
                                                 <h3>{product.name}</h3>
                                                 <p>₹{product.price}/kg</p>
-
                                                 <div class="quantity-control">
                                                     <div class="actions-row">
                                                         <template  lwc:if={product.selected}>
@@ -59,22 +58,22 @@
                                                         </template>
                                                     </div> 
                                                 </div>
-                                            </div>                                
+                                            </div>
                                         </div>
                                     </div>  
-                                </template>                          
+                                </template>
                             </template>
                         </div>
                     </div>
-                </div>
                     <!-- RIGHT SIDE: SUMMARY BOX -->
-                <div class="cart-right">
-                    <div class="summary-box">
-                        <p class="summary-text">Subtotal (<span class="item-count">0</span> items):</p>
-                        <h3 class="summary-total" id="cart-total">₹0</h3>
-                        <button id="checkout-btn" class="summary-btn">
-                            Proceed to Checkout
-                        </button>
+                    <div class="cart-right">
+                        <div class="summary-box">
+                            <p class="summary-text">Subtotal (<span class="item-count">{summary.totalCount}</span> items):</p>
+                            <h3 class="summary-total" id="cart-total">₹{summary.totalPrice}</h3>
+                            <button id="checkout-btn" onclick={handleCheckoutClick} class="summary-btn">
+                                Proceed to Checkout
+                            </button>
+                        </div>
                     </div>
                 </div>
                 <div id="empty-cart-message" style="display: none; text-align: center; padding: 60px 0;">
