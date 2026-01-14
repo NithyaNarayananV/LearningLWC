@@ -14,16 +14,16 @@
                         <h2>Shipping Information</h2>
                         <form id="shipping-form" class="checkout-form">
                             <label for="fullname">Full Name</label>
-                            <input type="text" id="fullname" placeholder="Enter your name" required />
+                            <input type="text" id="fullname" placeholder="Enter your name" required value={name}  onblur={setName} />
 
                             <label for="address">Address</label>
-                            <textarea id="address" placeholder="House number, street, city" required></textarea>
+                            <textarea id="address" placeholder="House number, street, city" required value={address} onblur={setAddress}></textarea>
 
                             <label for="phone">Mobile Number</label>
-                            <input type="tel" id="phone" placeholder="+91 XXXXX XXXXX" required />
+                            <input type="tel" id="phone" placeholder="+91 XXXXX XXXXX"  pattern="(\+91)?[6-9][0-9]{9}" required value={phone} onblur={setPhone}/>
 
                             <label for="email">Email</label>
-                            <input type="email" id="email" placeholder="you@example.com" required />
+                            <input type="email" id="email" placeholder="you@example.com"    pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$" required  value={email} onblur={setEmail}/>
                         </form>
                     </div>
 
@@ -31,11 +31,11 @@
                         <h2>Payment Method</h2>
                         <div class="payment-options">
                             <label class="payment-option">
-                                <input type="radio" name="payment" value="gpay" checked />
+                                <input type="radio" name="payment" value="gpay"  disabled />
                                 <span class="icon">📱</span> Google Pay (UPI)
                             </label>
                             <label class="payment-option">
-                                <input type="radio" name="payment" value="cod" />
+                                <input type="radio" name="payment" value="cod" checked />
                                 <span class="icon">💰</span> Cash on Delivery
                             </label>
                         </div>
@@ -58,7 +58,6 @@
                                                 <p>₹{product.price}/kg</p>
                                                 <p>Qty: {product.quantity} Kg</p>
                                                 <p>Order Price: ₹{product.orderPrice}</p>
-
                                             </div>
                                         </div>
                                     </div>  
@@ -82,7 +81,7 @@
                             <span>Total</span><span id="order-total">₹{summary.totalPrice}</span>
                         </div>
 
-                        <button id="place-order-btn" class="place-order-btn">
+                        <button id="place-order-btn" class="place-order-btn" disabled={isPlaceOrderDisabled} onclick={onPlaceOrderHandler}>
                             Place Order
                         </button>
                     </div>
