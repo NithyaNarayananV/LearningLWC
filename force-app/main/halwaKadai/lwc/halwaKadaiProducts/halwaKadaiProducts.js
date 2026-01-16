@@ -17,14 +17,16 @@ export default class HalwaKadaiProducts extends LightningElement {
         if (data){
             console.log('wiredProducts');
             this.products = data.map((prod, index) => ({
-                id: prod.Id,
+                id: prod.ProductCode,
                 url: prod.Image_URL__c, // custom field from Product2
                 alt: `Halwa Kadai - Slide ${index + 1}`,
                 name: prod.Name,
                 description: prod.Description,
                 homeVisible: prod.HomePage_Visible__c,
                 tag: prod.Tag__c, 
-                price: prod.Price__c            }));
+                pricebookId: prod.PricebookEntries?.length ? prod.PricebookEntries[0].Id : null,
+                price: prod.PricebookEntries?.length ? prod.PricebookEntries[0].UnitPrice : null
+            }));
             
             // Create the editable working copy with extra fields
             this.halwaProducts = this.products.map(p => ({
