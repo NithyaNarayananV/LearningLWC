@@ -25,4 +25,57 @@ public class Halwakadai_HelperClass {
 		return halwaList;
 	}
 
+    @AuraEnabled
+	public static Id createOrder(List<Map<String,Object>> products) {
+		Order newOrder = new Order(
+			AccountId = '001GA00005KAsGgYAL',
+			ContractId = '800GA000000b86cYAA',
+			EffectiveDate = Date.today(),
+			Status = 'Draft',
+			Pricebook2Id = '01sGA00000Zwd4SYAR'
+		);
+		insert newOrder;
+
+		List<OrderItem> orderItems = new List<OrderItem>();
+
+	for (Map<String,Object> prod : products) {
+		if(((Decimal) prod.get('quantity')).intValue()>0){
+			Id pricebookId   = (Id) prod.get('pricebookId');
+			system.debug(pricebookId);
+			Decimal unitPrice = (Decimal) prod.get('price');
+
+			// Safe conversion for quantity
+			Integer quantity = 0;
+			Object qtyObj = prod.get('quantity');
+			if (qtyObj != null) {
+				if (qtyObj instanceof Decimal) {
+					quantity = ((Decimal) qtyObj).intValue();
+				} else if (qtyObj instanceof Double) {
+					quantity = ((Double) qtyObj).intValue();
+				} else if (qtyObj instanceof Integer) {
+					quantity = (Integer) qtyObj;
+				}
+			}
+
+			if (pricebookId != null && quantity > 0) {
+				orderItems.add(new OrderItem(
+					OrderId = newOrder.Id,
+					PricebookEntryId = pricebookId,
+					Quantity = quantity,
+					UnitPrice = unitPrice
+				));
+			}
+		}
+	}
+
+
+		if (!orderItems.isEmpty()) {
+			insert orderItems;
+		}
+
+		return newOrder.Id;
+	}
+
+
+
 }

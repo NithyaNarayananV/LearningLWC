@@ -1,5 +1,6 @@
 import { LightningElement } from 'lwc';
 import { getState, setState , getSummary, subscribe as stateSubscribe} from 'c/halwaKadaiUtils';
+import createOrder from '@salesforce/apex/Halwakadai_HelperClass.createOrder';
 
 export default class HalwaKadaiCheckOutPage extends LightningElement {
     halwaProducts;
@@ -92,6 +93,13 @@ export default class HalwaKadaiCheckOutPage extends LightningElement {
     onPlaceOrderHandler(){
         console.log('onPlaceOrderHandler');
 
+        createOrder({ products: this.halwaProducts }).then(result => 
+        { 
+            console.log('Order created successfully: ', result); 
+            // You can show a toast here 
+        }) .catch(error => { 
+            console.error('Error creating order: ', error); 
+        });
 
     }
 
