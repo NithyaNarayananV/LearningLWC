@@ -15,7 +15,7 @@
  * ――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
  */
 
-public with sharing class Halwakadai_HelperClass {
+public without sharing class Halwakadai_HelperClass {
 
     // Address wrapper to hold address details
     public class AddressWrapper {
