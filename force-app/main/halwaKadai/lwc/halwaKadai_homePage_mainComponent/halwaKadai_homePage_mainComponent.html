@@ -97,8 +97,10 @@
     <div class={checkoutClass}>
         <c-halwa-kadai-check-out-page onorderconfirmation={handleOrderConfirmationClick}></c-halwa-kadai-check-out-page>
     </div>
-    <div class={orderConfimationClass}>
+    <div>
+    <template lwc:if={orderConfirmationClass}>
         <c-halwa-kadai-order-confirmation></c-halwa-kadai-order-confirmation>
+    </template>
     </div>
     <footer>
         <div class="container">
