@@ -95,7 +95,10 @@
         <c-halwa-kadai-cart-page  oncheckout={handleCheckOut}></c-halwa-kadai-cart-page>
     </div>    
     <div class={checkoutClass}>
-        <c-halwa-kadai-check-out-page></c-halwa-kadai-check-out-page>
+        <c-halwa-kadai-check-out-page onorderconfirmation={handleOrderConfirmationClick}></c-halwa-kadai-check-out-page>
+    </div>
+    <div class={orderConfimationClass}>
+        <c-halwa-kadai-order-confirmation></c-halwa-kadai-order-confirmation>
     </div>
     <footer>
         <div class="container">

@@ -83,10 +83,19 @@ export default class HalwaKadaiCheckOutPage extends LightningElement {
         })
         .then(result => {
             console.log('Order created successfully: ', result);
+            this.handleOrderConfirmationClick();
             // TODO: show toast here
         })
         .catch(error => {
             console.error('Error creating order: ', error);
         });
+    }
+    handleOrderConfirmationClick() {
+        console.log('handleOrderConfirmationClick()');
+        const orderConfirmationEvent = new CustomEvent('orderconfirmation', {
+            bubbles: true,
+            composed: true
+        });
+        this.dispatchEvent(orderConfirmationEvent);
     }
 }
