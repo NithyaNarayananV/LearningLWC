@@ -1,3 +1,13 @@
+.cart-item {
+  display: flex;          /* enable flexbox */
+  justify-content: space-between; /* spread items across the line */
+}
+
+.cart-cell {
+  flex: 1;                /* each span takes equal width */
+  text-align: center;     /* optional: center text inside each cell */
+}
+
 .page-hero {
     background: linear-gradient(135deg, #FFEBD6, #FFF9F2);
     padding: 100px 0 50px;

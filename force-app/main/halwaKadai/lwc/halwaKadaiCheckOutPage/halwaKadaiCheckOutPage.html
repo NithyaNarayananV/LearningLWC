@@ -16,8 +16,55 @@
                             <label for="fullname">Full Name</label>
                             <input type="text" id="fullname" placeholder="Enter your name" required value={name}  onblur={setName} />
 
-                            <label for="address">Address</label>
-                            <textarea id="address" placeholder="House number, street, city" required value={address} onblur={setAddress}></textarea>
+                            <label for="street">Street</label>
+                            <input 
+                                id="street" 
+                                type="text" 
+                                placeholder="House number, street" 
+                                required 
+                                value={street} 
+                                onblur={setStreet}
+                            />
+
+                            <label for="city">City</label>
+                            <input 
+                                id="city" 
+                                type="text" 
+                                placeholder="City" 
+                                required 
+                                value={city} 
+                                onblur={setCity}
+                            />
+
+                            <label for="state">State</label>
+                            <input 
+                                id="state" 
+                                type="text" 
+                                placeholder="State" 
+                                required 
+                                value={state} 
+                                onblur={setState}
+                            />
+
+                            <label for="postalCode">Postal Code</label>
+                            <input 
+                                id="postalCode" 
+                                type="text" 
+                                placeholder="Postal Code" 
+                                required 
+                                value={postalCode} 
+                                onblur={setPostalCode}
+                            />
+
+                            <label for="country">Country</label>
+                            <input 
+                                id="country" 
+                                type="text" 
+                                placeholder="Country" 
+                                required 
+                                value={country} 
+                                disabled
+                            />
 
                             <label for="phone">Mobile Number</label>
                             <input type="tel" id="phone" placeholder="+91 XXXXX XXXXX"  pattern="(\+91)?[6-9][0-9]{9}" required value={phone} onblur={setPhone}/>
@@ -48,27 +95,28 @@
                         <h2>Your Order</h2>
                         <div id="order-summary"></div>
                         <div class="summary-item">
-                            <div class="item-details">
-                                <template for:each={halwaProducts} for:item="product" for:index="index">
-                                <template if:true={product.selected}>
-                                    <div class="cart-item" key={product.id}>
-                                        <div class="cart-item-info">
-                                            <div class="cart-item-details">
-                                                <h3>{product.name}</h3>
-                                                <p>₹{product.price}/kg</p>
-                                                <p>Qty: {product.quantity} Kg</p>
-                                                <p>Order Price: ₹{product.orderPrice}</p>
-                                            </div>
-                                        </div>
-                                    </div>  
-                                </template>
-                            </template>
-                            <strong>$ </strong>
-                            <p>₹44 x 5</p>
-                            </div>
-                            <p class="item-total">{summary.totalCount}</p>
-                        </div>
+                        <div class="item-details">
+                        
+                                <template for:each={halwaProducts} for:item="product">
+    <template if:true={product.selected}>
+        <div key={product.id} class="cart-item">                                             
+            <span class="cart-cell"><strong>{product.name}</strong></span>
+            <span class="cart-cell">₹{product.price} <strong>X</strong> {product.quantity}</span>
+            <span class="cart-cell">₹{product.orderPrice}</span>
+        </div> 
+    </template>
+</template>
 
+
+                                
+
+                            </div>
+                            
+                            
+                        </div>
+ <div class="summary-line">
+                            <span>Total Items</span><span><p class="item-total">{summary.totalCount}</p></span>
+                        </div>
                         <div class="summary-line">
                             <span>Subtotal</span><span id="order-subtotal">₹{summary.totalPrice}</span>
                         </div>

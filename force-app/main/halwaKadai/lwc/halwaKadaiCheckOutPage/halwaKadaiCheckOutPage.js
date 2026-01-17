@@ -1,106 +1,92 @@
 import { LightningElement } from 'lwc';
-import { getState, setState , getSummary, subscribe as stateSubscribe} from 'c/halwaKadaiUtils';
-import createOrder from '@salesforce/apex/Halwakadai_HelperClass.createOrder';
+import { getState, getSummary, subscribe as stateSubscribe } from 'c/halwaKadaiUtils';
+import createOrderWithContact from '@salesforce/apex/Halwakadai_HelperClass.createOrderWithContact';
 
 export default class HalwaKadaiCheckOutPage extends LightningElement {
     halwaProducts;
     summary;
-    name='';
-    address='';
-    phone='';
-    email='';
-    isPlaceOrderDisabled=true;
+
+    // Contact fields
+    name = '';
+    street = '';
+    city = '';
+    state = '';
+    postalCode = '';
+    country = 'India';
+    phone = '';
+    email = '';
+
+    isPlaceOrderDisabled = true;
+
     connectedCallback() {
-        // 1. Initial Load
+        // Initial load
         this.halwaProducts = getState();
         this.summary = getSummary();
 
-        // 2. Subscribe to future changes
+        // Subscribe to cart changes
         this.unsub = stateSubscribe((data) => {
-            // This ensures both variables stay in sync with the utility
             this.halwaProducts = data.products;
             this.summary = data.summary;
             console.log('CART Sync Complete: Count is ' + this.summary.totalCount);
         });
     }
-    setName(event)
-    {
-        this.name=event.target.value.trim();
-        // If empty, show error and highlight box 
-        if (!this.name) { 
-            event.target.setCustomValidity("Name cannot be empty"); 
-            this.isPlaceOrderDisabled=true;
-            console.log('        if (!this.name) ');
-        }else{ 
-            event.target.setCustomValidity(""); // clear error 
-            this.isPlaceOrderDisabled=false;
-            console.log('  if (!this.name)   this.isPlaceOrderDisabled=false;');
-        } 
-                this.allValueSet();
 
-        event.target.reportValidity(); // triggers the red highlight
-    }
-    setAddress(event)
-    {
-        this.address=event.target.value.trim();
-        if (!this.address) { 
-            event.target.setCustomValidity("Name cannot be empty"); 
-            this.isPlaceOrderDisabled=true;
-            console.log('        if (!this.name) ');
-        }else{ 
-            event.target.setCustomValidity(""); // clear error 
-            this.isPlaceOrderDisabled=false;
-            console.log('  if (!this.address)   this.isPlaceOrderDisabled=false;');
+    // Generic validation
+    validateField(event, message, value) {
+        if (!value) {
+            event.target.setCustomValidity(message);
+            this.isPlaceOrderDisabled = true;
+        } else {
+            event.target.setCustomValidity('');
+            this.isPlaceOrderDisabled = false;
         }
         this.allValueSet();
-        event.target.reportValidity(); // triggers the red highlight
+        event.target.reportValidity();
     }
-    setPhone(event)
-    {
-        this.phone=event.target.value.trim();
-        if (!this.phone) { 
-            event.target.setCustomValidity("Name cannot be empty"); 
-            this.isPlaceOrderDisabled=true;
-        }else{ 
-            event.target.setCustomValidity(""); // clear error
-            this.isPlaceOrderDisabled=false;
-            console.log('  if (!this.phone)   this.isPlaceOrderDisabled=false;');
-        } 
-                this.allValueSet();
 
-        event.target.reportValidity(); // triggers the red highlight
-    }
-    setEmail(event)
-    {
-        this.email=event.target.value.trim();
-        if (!this.email) { 
-            event.target.setCustomValidity("Name cannot be empty"); 
-            this.isPlaceOrderDisabled=true;
-        }else{ 
-            event.target.setCustomValidity(""); // clear error 
-            this.isPlaceOrderDisabled=false;
-            console.log('  if (!this.email)   this.isPlaceOrderDisabled=false;');
-        }         this.allValueSet();
+    // Setters
+    setName(event) { this.name = event.target.value.trim(); this.validateField(event, "Name cannot be empty", this.name); }
+    setStreet(event) { this.street = event.target.value.trim(); this.validateField(event, "Street cannot be empty", this.street); }
+    setCity(event) { this.city = event.target.value.trim(); this.validateField(event, "City cannot be empty", this.city); }
+    setState(event) { this.state = event.target.value.trim(); this.validateField(event, "State cannot be empty", this.state); }
+    setPostalCode(event) { this.postalCode = event.target.value.trim(); this.validateField(event, "Postal Code cannot be empty", this.postalCode); }
+    setCountry(event) { this.country = event.target.value.trim(); this.validateField(event, "Country cannot be empty", this.country); }
+    setPhone(event) { this.phone = event.target.value.trim(); this.validateField(event, "Phone cannot be empty", this.phone); }
+    setEmail(event) { this.email = event.target.value.trim(); this.validateField(event, "Email cannot be empty", this.email); }
 
-        event.target.reportValidity(); // triggers the red highlight
+    // Enable/disable Place Order
+    allValueSet() {
+        if (
+            this.name && this.street && this.city && this.state &&
+            this.postalCode && this.country && this.phone && this.email
+        ) {
+            this.isPlaceOrderDisabled = false;
+        } else {
+            this.isPlaceOrderDisabled = true;
+        }
     }
-    allValueSet(){
-        if(this.name!='' && this.address!='' && this.phone !='' && this.email!='')
-            this.isPlaceOrderDisabled=false;
-        else            
-            this.isPlaceOrderDisabled=true; 
-    }
-    onPlaceOrderHandler(){
+
+    // Place order handler
+    onPlaceOrderHandler() {
         console.log('onPlaceOrderHandler');
 
-        createOrder({ products: this.halwaProducts }).then(result => 
-        { 
-            console.log('Order created successfully: ', result); 
-            // You can show a toast here 
-        }) .catch(error => { 
-            console.error('Error creating order: ', error); 
+        createOrderWithContact({
+            products: this.halwaProducts,
+            name: this.name,
+            phone: this.phone,
+            email: this.email,
+            street: this.street,
+            city: this.city,
+            state: this.state,
+            postalCode: this.postalCode,
+            country: this.country
+        })
+        .then(result => {
+            console.log('Order created successfully: ', result);
+            // TODO: show toast here
+        })
+        .catch(error => {
+            console.error('Error creating order: ', error);
         });
-
     }
-
 }
