@@ -178,4 +178,51 @@ public without sharing class Halwakadai_HelperClass {
         System.debug('createOrderWithContact - Before createOrder - contactId : ' + contactId);
         return createOrder(products, contactId, street, city, state, postalCode, country);
     }
+    public static void sendOrderConfirmation(String toAddress, String orderId, Decimal totalPrice) {
+        Messaging.SingleEmailMessage mail = new Messaging.SingleEmailMessage();
+        mail.setToAddresses(new String[] { toAddress });
+        mail.setSubject('Your Halwa Kadai Order Confirmation');
+        mail.setPlainTextBody(
+            'Hello,\n\n' +
+            'Thank you for your order ' + orderId + '.\n' +
+            'Total Price: ₹' + totalPrice + '\n\n' +
+            'We will notify you once it ships.\n\n' +
+            'Regards,\nHalwa Kadai Team'
+        );
+        Messaging.sendEmail(new Messaging.SingleEmailMessage[] { mail });
+    }
+
+    @AuraEnabled
+    public static Integer sendEmailOTP(String email) {
+        Messaging.SingleEmailMessage mail = new Messaging.SingleEmailMessage();
+        mail.setToAddresses(new String[] { email });
+        mail.setSubject('Your Halwa Kadai Login OTP');
+
+        Integer otp = otpGenerator();
+
+        // Build HTML body
+        String htmlBody = ''
+            + '<html><body style="font-family:Segoe UI,Arial,sans-serif;">'
+            + '<h2 style="color:#ff6600;">Halwa Kadai Login</h2>'
+            + '<p>Hello,</p>'
+            + '<p>Please use this OTP to login:</p>'
+            + '<div style="font-size:24px;font-weight:bold;color:#333;'
+            + 'padding:10px;border:1px solid #ccc;display:inline-block;">'
+            + otp
+            + '</div>'
+            + '<p>Regards,<br/>Halwa Kadai Team</p>'
+            + '</body></html>';
+
+        mail.setHtmlBody(htmlBody);
+
+        //Messaging.sendEmail(new Messaging.SingleEmailMessage[] { mail });
+        return otp;
+    }
+
+    public static Integer otpGenerator() {
+        // Generates a random number between 1000 and 9999
+        Integer min = 1000;
+        Integer max = 9999;
+        return (Integer)Math.floor(Math.random() * (max - min + 1)) + min;
+    }
 }

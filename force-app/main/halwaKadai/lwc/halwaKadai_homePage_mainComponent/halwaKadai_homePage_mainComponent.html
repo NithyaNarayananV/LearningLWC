@@ -12,7 +12,7 @@
 
                 <!-- Right Side Buttons -->
                 <div class="header-right">
-                    <!--a href="auth.html" class="btn-login">Login</a-->
+                    <a onclick={onLoginClick} class="btn-login">Login</a>
 
                     <!-- My Orders Link (Visible only after login) -->
                     <a  onclick={onCartClick} id="my-orders-link" class="btn-orders" style="display:none;">📦 My Orders</a>
@@ -101,6 +101,9 @@
         <c-halwa-kadai-order-confirmation></c-halwa-kadai-order-confirmation>
         <template lwc:if={isActive_OderConfimation}>
         </template>
+    </div>
+    <div class={loginClass}>
+        <c-halwa-kadai-login></c-halwa-kadai-login>
     </div>
     <footer>
         <div class="container">
