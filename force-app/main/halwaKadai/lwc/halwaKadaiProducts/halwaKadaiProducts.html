@@ -1,0 +1,104 @@
+<template>
+
+    <!-- Hero -->
+    <section class="page-hero">
+        <div class="container">
+            <h1>Our Halwa Varieties</h1>
+            <p>Discover our delicious range of traditional halwa</p>
+        </div>
+    </section>
+
+    <!-- Filters -->
+    <section class="products">
+        <div class="container">
+
+            <section class="product-filters">
+                <div class="container">
+                    <div class="filter-options">
+
+                        <select id="sortFilter">
+                            <option value="default">Sort by</option>
+                            <option value="lowToHigh">Price: Low to High</option>
+                            <option value="highToLow">Price: High to Low</option>
+                        </select>
+
+                        <select id="priceFilter">
+                            <option value="all">All Prices</option>
+                            <option value="low">Under ₹400</option>
+                            <option value="medium">₹400 - ₹600</option>
+                            <option value="high">Above ₹600</option>
+                        </select>
+
+                        <button class="btn btn-secondary" id="resetFilters">Reset Filters</button>
+
+                    </div>
+                </div>
+            </section>
+
+            <div class="product-grid">
+
+                <template for:each={halwaProducts} for:item="product" for:index="index">
+                        <div class="product-card" key={product.id}>
+                            <span class="product-badge"></span>
+                            <div class="product-image" >
+                                <img src={product.url} alt={product.alt} loading="lazy">
+                            </div>
+                            <h3>{product.name}</h3>
+                            <p>{product.description}</p>
+                            <span class="price">Rs.{product.price}/Kg</span>
+                               <!-- Your quantity control -->
+                            <div class="actions-row">
+                                <template  lwc:if={product.selected}>
+                                    <div class="quantity-control">
+                                        <button
+                                            class="quantity-btn decrease"
+                                            data-id={product.id}
+                                            onclick={handleDecreaseQuantity}
+                                            aria-label="Decrease quantity"
+                                        >-</button>
+                                        
+                                        <div class="input-kg-container">
+                                            <input
+                                                type="number"
+                                                class="quantity-input with-kg"
+                                                min="0"
+                                                value={product.quantity}
+                                                readonly
+                                            />
+                                            <span class="kg-label">Kg</span>
+                                        </div>
+
+                                        <button
+                                            class="quantity-btn increase"
+                                            data-id={product.id}
+                                            onclick={handleIncreaseQuantity}
+                                            aria-label="Increase quantity"
+                                        >+</button>
+                                    </div>
+                                </template> 
+                                <template lwc:else>
+                                    <button class="add-to-cart-btn" data-id={product.id} onclick={handleIncreaseQuantity}>Add to Cart</button>
+                                </template>
+                            </div>
+
+                        </div>
+                </template>
+            </div>
+        </div>
+    </section>
+
+    <!-- ✅ Featured Combo Packs -->
+    <section class="featured-combos" id="featuredCombosSection">
+        <div class="container">
+            <h2>Featured Combo Packs</h2>
+            <div class="combo-grid" id="comboGrid"></div>
+        </div>
+    </section>
+    <!-- ✅ Recently Viewed -->
+    <section class="recently-viewed">
+        <div class="container">
+            <h2>Recently Viewed</h2>
+            <div class="recent-grid" id="recentGrid"></div>
+        </div>
+    </section>
+</template>

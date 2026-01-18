@@ -1,0 +1,165 @@
+<template>
+    <lightning-card> 
+      <div style="padding: 20px;">
+        <template if:true={isSubmitted}>
+          <div> 
+            <p style="color: green; font-weight: bold;">Submitted successfully!</p>
+          </div>
+        </template>
+          <template if:false={contactId}>
+            <div style="display: flex; gap: 10px; align-items: center;">
+              <!-- Basic ingo of the user-->
+              <lightning-input
+                label="Contact Name"
+                placeholder="Enter Your Name"
+                value={contactName}
+                onchange={onChangeNameHandler}>
+              </lightning-input>
+              <div style="text-align: right; padding:20px">
+                <lightning-button 
+                  label="Create Contact"
+                  onclick={onCreateContactClick}>
+                </lightning-button>
+              </div>               
+            </div>
+          </template>
+          <template if:true={contactId}>
+            <div>
+              Hello {contactName}!
+            </div>
+            <table class="slds-table slds-table_cell-buffer slds-table_bordered">
+              <tbody>
+                <template for:each={forms} for:item="form" for:index="index">
+                  <tr key={form.index}>
+                    <td>
+                      <lightning-input
+                        label={form.MasterLabel}
+                        placeholder={form.Label}
+                        value={form.value}
+                        data-index={index}
+                        pattern={form.pattern}
+                        onchange={onChangeValueHandler}>
+                      </lightning-input>
+                    </td>
+                    <td> 
+                      <template if:true={form.Has_Attachment__c}>
+                        <template if:true={form.isUploadActive}>
+                          <lightning-file-upload
+                            label={form.Document}
+                            name={form.fileName}
+                            data-index={index}
+                            accept=".pdf,.doc,.docx,.png,.jpg"
+                            record-id={form.contactRecordId}
+                            disabled={form.disableUpload}
+                            onuploadfinished={handleUploadFinished}>
+                          </lightning-file-upload>
+                          <template if:true={form.docsUploaded}>
+                          <p style="color: green; font-weight: bold;">File uploaded successfully!</p>                              </template>
+                        </template>
+                        <template if:false={form.isUploadActive}>
+                          <p style="color: green; font-weight: bold;">File uploaded successfully!</p>
+                          <lightning-button 
+                            label="Re-Upload"
+                            data-index={index}
+                            onclick={onReUploadDoc}>
+                          </lightning-button>
+                        </template>
+                        </template>
+                    </td>
+                    <!--
+                      <td> Testing Column : Need to be Deleted 
+                        <p key={form.index}>MasterLabel : {form.MasterLabel}</p>
+                        <p key={form.index}>Has_Attachment__c : {form.Has_Attachment__c}</p>
+                        <p key={form.index}>Label : {form.Label}</p>
+                        <p key={form.index}>Document : {form.Document}</p>
+                        <p key={form.index}>Upload : {form.disableUpload}</p>
+                        <p key={form.index}>pattern : {form.pattern}</p>
+                        <p key={form.index}><strong> Value : {form.value}</strong></p>
+                      </td>
+                    -->
+                    <td>                            
+                      <template if:true={form.Has_Attachment__c}>
+                          <p key={form.documentId}>
+                            <!--a href={form.downloadUrl} target="_blank">{form.downloadUrl}</a-->
+                            <!--<iframe src={form.downloadUrlPDF} width="600" height="400" style="border:none;"></iframe>-->
+                            <img src={form.downloadUrl} style="max-width:600px; max-height:400px;">
+                          </p>
+                      </template>
+                    </td>
+                  </tr>
+                </template>
+              </tbody>
+            </table>
+            <div style="text-align: right; padding:20px">
+              <lightning-button 
+                label="Submit"
+                onclick={onSubmitHandler}>
+              </lightning-button>
+            </div>
+          </template>
+      </div>
+    </lightning-card>
+
+
+
+
+
+
+
+
+
+
+
+    <!--Mukesh Bro COde-->
+      <lightning-card>
+        <div style="padding: 20px;">
+        <!-- <div
+          class="slds-text-align_center slds-m-top_x-large slds-m-bottom_small"
+          style="font-size: 1.5rem"
+        >
+          <strong>Client Services Technical Assistance Intake Form</strong>
+        </div> -->
+ 
+      <lightning-record-edit-form
+        record-id={recordId}
+        object-api-name="Account"
+        onload={handleFormLoad}
+        onsuccess={handleSuccess}
+        onsubmit={handleSubmit} >
+        <!-- onerror={handleError} -->
+        <span class="css-injection" lwc:dom="manual"></span>
+ 
+        <div class="slds-m-top_medium">
+        <!--  <template> -->
+        <div data-id="Submitter Details">
+          <!--Help Text-->
+          <div class="slds-grid slds-grid_align-end slds-m-bottom_small">
+          <label class="colorContrast slds-no-flex slds-form-element__label slds-col slds-size_2-of-12">
+            <abbr class="slds-required" title="required">*</abbr>
+            = Required field
+          </label>
+        </div>
+ 
+        <!--Submitter Name-->
+        <div class="slds-grid">
+          <div class="slds-form-element__control slds-grow slds-col slds-size_7-of-12">
+            <lightning-input-field
+              variant="label-inline"
+              field-name="Phone"
+              data-id="CSCM_Submitter_Name__c"
+              value={test}
+              required
+            ></lightning-input-field>
+              <!--  class="inline-fix"
+              disabled={editMode} -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </lightning-record-edit-form>
+
+
+        </div>
+</lightning-card>
+  
+</template>

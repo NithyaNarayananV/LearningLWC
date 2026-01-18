@@ -1,0 +1,110 @@
+<template>
+            <header>
+            <div class="container header-flex">
+
+                <!-- Logo -->
+                <div class="logo">
+                    <h1>Halwa Heritage</h1>
+                </div>
+
+                <!-- Hamburger (visible only on mobile) -->
+                <button id="menu-toggle" class="menu-toggle">☰</button>
+
+                <!-- Right Side Buttons -->
+                <div class="header-right">
+                    <!--a href="auth.html" class="btn-login">Login</a-->
+
+                    <!-- My Orders Link (Visible only after login) -->
+                    <a  onclick={onCartClick} id="my-orders-link" class="btn-orders" style="display:none;">📦 My Orders</a>
+
+                    <!-- Cart -->
+                    <a id="cart-icon" class="cart-icon" onclick={onCartClick}>
+                        🛒 <span class="cart-count">{summary.totalCount}</span>
+                    </a>
+
+                    <!-- Profile section -->
+                    <div class="profile-wrapper" style="display:none; position:relative;">
+                        <button id="profile-btn" class="profile-btn" title="Profile">
+                            👤
+                        </button>
+
+                        <div class="profile-dropdown" id="profile-dropdown">
+                            <!-- STATIC TOP USER INFO -->
+                            <div class="profile-top-text">
+                                <h4 id="profile-name-display">User Name</h4>
+                                <p id="profile-email-display">user@gmail.com</p>
+                            </div>
+
+                            <div class="profile-divider"></div>
+
+                            <!-- DETAILS SECTION (HIDDEN BY DEFAULT) -->
+                            <div id="profile-details" style="display:none;">
+
+                                <label>Name</label>
+                                <input id="profile-name" type="text" />
+
+                                <label>Mobile</label>
+                                <input id="profile-mobile" type="text" />
+
+                                <label>Email (Read-only)</label>
+                                <input id="profile-email" type="text" readonly disabled />
+                            </div>
+
+                            <div class="profile-divider"></div>
+
+                            <!-- ACTION BUTTONS -->
+                            <div class="profile-actions">
+                                <button id="edit-btn" class="action-btn primary">✏ Edit</button>
+
+                                <button id="update-btn" class="action-btn success" style="display:none;">
+                                    ✔ Update
+                                </button>
+
+                                <button id="cancel-btn" class="action-btn secondary" style="display:none;">
+                                    ✖ Cancel
+                                </button>
+
+                                <button id="change-email-btn" class="action-btn warning">
+                                    📧 Change Email
+                                </button>
+                            </div>
+                        </div>
+                        <!-- Hidden until login -->
+                        <button id="logout-btn" type="button" class="btn-logout" style="display:none;" title="Logout">
+                            <span class="material-symbols-outlined">power_settings_new</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+    <nav class="main-menu">
+        <ul>
+            <li><a onclick={onHomeClick}>Home</a></li>
+            <li><a onclick={onAboutClick}>About</a></li>
+            <li><a onclick={onProductsClick}>Products</a></li>
+            <li><a onclick={onContactClick}>Contact</a></li>
+        </ul>
+    </nav>
+     <div class={homeClass}>
+        <c-halwa-kadai-home-page></c-halwa-kadai-home-page>
+     </div>
+    <div class={productClass}>
+        <c-halwa-kadai-products onproductcount={handleProductCount}></c-halwa-kadai-products>
+    </div>
+    <div class={cartClass}>
+        <c-halwa-kadai-cart-page  oncheckout={handleCheckOut}></c-halwa-kadai-cart-page>
+    </div>    
+    <div class={checkoutClass}>
+        <c-halwa-kadai-check-out-page onorderconfirmation={handleOrderConfirmationClick}></c-halwa-kadai-check-out-page>
+    </div>
+    <div class={orderConfirmationClass}>
+        <c-halwa-kadai-order-confirmation></c-halwa-kadai-order-confirmation>
+        <template lwc:if={isActive_OderConfimation}>
+        </template>
+    </div>
+    <footer>
+        <div class="container">
+            <p>&copy; 2026 Halwa Delights. All rights reserved.</p>
+        </div>
+    </footer>
+</template>

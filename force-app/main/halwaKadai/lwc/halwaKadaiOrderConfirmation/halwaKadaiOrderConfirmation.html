@@ -1,0 +1,167 @@
+<template>
+
+        <section class="page-hero">
+            <div class="container">
+                <h1>Order Confirmation</h1>
+                <p>Thank you for your order!</p>
+            </div>
+        </section>
+
+        <section class="confirmation-section">
+            <div class="container">
+                <div class="confirmation-steps">
+                    <div class="step completed">
+                        <span class="step-number">1</span>
+                        <span class="step-text">Cart</span>
+                    </div>
+                    <div class="step completed">
+                        <span class="step-number">2</span>
+                        <span class="step-text">Information</span>
+                    </div>
+                    <div class="step completed">
+                        <span class="step-number">3</span>
+                        <span class="step-text">Payment</span>
+                    </div>
+                    <div class="step active">
+                        <span class="step-number">4</span>
+                        <span class="step-text">Confirmation</span>
+                    </div>
+                </div>
+
+                <div class="confirmation-content">
+                    <div class="confirmation-card">
+                        <div class="confirmation-header success">
+                            <div class="confirmation-icon">✅</div>
+                            <h2>Order Confirmed!</h2>
+                            <p>Thank you for your purchase. Your order has been received.</p>
+                        </div>
+
+                        <!-- Delivery Information Card -->
+                        <div class="delivery-info-card">
+                            <div class="delivery-icon">🚚</div>
+                            <div class="delivery-details">
+                                <h3>Expected Delivery</h3>
+                                <div class="delivery-date" id="delivery-date">Calculating...</div>
+                                <div class="delivery-location" id="delivery-location"></div>
+                                <div class="delivery-note">
+                                    <small>We'll send you tracking details once your order ships</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="order-details">
+                            <div class="detail-row">
+                                <span>Order Number:</span>
+                                <strong id="order-number">ORD123456</strong>
+                            </div>
+                            <div class="detail-row">
+                                <span>Order Date:</span>
+                                <span id="order-date">Today</span>
+                            </div>
+                            <div class="detail-row">
+                                <span>Total Amount:</span>
+                                <strong id="order-total">₹{summary.totalPrice}</strong>
+                            </div>
+                            <div class="detail-row">
+                                <span>Payment Method:</span>
+                                <span id="payment-method">Cash on Delivery</span>
+                            </div>
+                            <div class="detail-row">
+                                <span>Payment Status:</span>
+                                <span id="payment-status" class="status-paid">Not Paid</span>
+                            </div>
+                        </div>
+
+                        <div class="shipping-info">
+                            <h3>Shipping Information</h3>
+                            <div class="address-card">
+                                <div id="shipping-address">
+                                    <!-- Shipping address will be loaded here -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="order-items-summary">
+                            <h3>Order Items</h3>
+                            <div id="confirmation-items" class="confirmation-items">
+                                <div class="summary-item">
+                                    <div class="item-details">                        
+                                        <template for:each={halwaProducts} for:item="product">
+                                            <template if:true={product.selected}>
+                                                <div key={product.id} class="cart-item">                                             
+                                                    <span class="cart-cell"><strong>{product.name}</strong></span>
+                                                    <span class="cart-cell">₹{product.price} <strong>X</strong> {product.quantity}</span>
+                                                    <span class="cart-cell">₹{product.orderPrice}</span>
+                                                </div> 
+                                            </template>
+                                        </template>
+                                    </div>
+                                </div>                      
+                            </div>
+                            
+                            <div class="order-summary-totals">
+                                <div class="summary-row">
+                                    <span>Subtotal:</span>
+                                    <span id="confirmation-subtotal">₹{summary.totalPrice}</span>
+                                </div>
+                                <div class="summary-row">
+                                    <span>Shipping:</span>
+                                    <span id="confirmation-shipping">₹0</span>
+                                </div>
+                                <div class="summary-row total-row">
+                                    <span>Total:</span>
+                                    <span id="confirmation-total">₹{summary.totalPrice}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Simple Order Status -->
+                        <div class="order-status-simple">
+                            <h3>Order Status</h3>
+                            <div class="status-timeline">
+                                <div class="status-step current" id="status-confirmed">
+                                    <div class="status-indicator"></div>
+                                    <div class="status-content">
+                                        <strong>Order Confirmed</strong>
+                                        <p>We've received your order and are preparing it</p>
+                                        <small id="status-confirmed-time">Just now</small>
+                                    </div>
+                                </div>
+                                <div class="status-step" id="status-shipped">
+                                    <div class="status-indicator"></div>
+                                    <div class="status-content">
+                                        <strong>Shipped</strong>
+                                        <p>Your order will be dispatched soon</p>
+                                        <small id="status-shipped-time">Expected: Within 24 hours</small>
+                                    </div>
+                                </div>
+                                <div class="status-step" id="status-delivered">
+                                    <div class="status-indicator"></div>
+                                    <div class="status-content">
+                                        <strong>Delivered</strong>
+                                        <p>Your order will arrive at your doorstep</p>
+                                        <small id="status-delivered-time">Expected: <span id="expected-delivery-date"></span></small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="confirmation-actions">
+                            <a class="btn btn-secondary">Continue Shopping</a>
+                            <a class="btn btn-primary">Back to Home</a>
+                            <button id="print-order" onclick={handlePrint} class="btn btn-outline">Print Order</button>
+                        </div>
+
+                        <div class="support-info">
+                            <p>Need help? Contact our support team at <strong>support@halwadelights.com</strong> or call <strong>+91-9876543210</strong></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        
+
+        <button class="back-to-top" id="backToTop">↑</button>
+
+</template>

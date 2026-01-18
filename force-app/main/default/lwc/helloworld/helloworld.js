@@ -6,4 +6,17 @@ export default class HelloWorld extends LightningElement {
         changeHandler(event) {
         this.greeting = event.target.value;
         }
+         youtubeUrl = '';
+  embedUrl = '';
+
+  handleInputChange(event) {
+    this.youtubeUrl = event.target.value;
+  }
+
+  handleConvertClick() {
+   
+      this.embedUrl = this.youtubeUrl; // Fallback to the original URL if extraction fails
+   
+  }
+
 }
