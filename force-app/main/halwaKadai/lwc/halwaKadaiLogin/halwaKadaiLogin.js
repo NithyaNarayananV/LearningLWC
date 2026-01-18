@@ -1,5 +1,6 @@
 import { LightningElement } from 'lwc';
-import { ShowToastEvent } from 'lightning/platformShowToastEvent';
+// 1. Import the new Toast module
+import LightningToast from 'lightning/toast';
 import sendEmailOTP from '@salesforce/apex/Halwakadai_HelperClass.sendEmailOTP';
 
 export default class HalwaKadaiLogin extends LightningElement {
@@ -10,7 +11,7 @@ export default class HalwaKadaiLogin extends LightningElement {
 
     handleEmailChange(event) {
         this.email = event.target.value;
-         console.log('Email:', this.email);
+        console.log('Email:', this.email);
     }
     
     async handleSendOTP() {
@@ -39,18 +40,30 @@ export default class HalwaKadaiLogin extends LightningElement {
             this.showToast('Error', 'Something went wrong while sending OTP', 'error');
         }
     }
-    showToast(title, message, variant) { this.dispatchEvent( new ShowToastEvent({ title, message, variant }) ); }
+
+    // 2. Updated showToast method using lightning/toast
+    showToast(label, message, variant) {
+        LightningToast.show({
+            label: label, // This replaces 'title'
+            message: message,
+            variant: variant,
+            mode: 'dismissible'
+        }, this);
+    }
 
     handleOTPChange(event) {
         this.otp = event.target.value;
-         console.log('Entered OTP:', this.otp);
+        console.log('Entered OTP:', this.otp);
     }
-    handleLogin() {
-        event.preventDefault(); // stops the form from submitting
-        if(this.otp.length==4 && this.otp == this.generatedOTP) {
+
+    handleLogin(event) {
+        event.preventDefault(); 
+        if(this.otp.length === 4 && this.otp == this.generatedOTP) {
             this.showToast('Success', 'Login successful', 'success');
+            // Add navigation logic here
         } else {
             this.showToast('Invalid OTP', 'Please Enter Correct OTP', 'error');
         }
     }
+
 }

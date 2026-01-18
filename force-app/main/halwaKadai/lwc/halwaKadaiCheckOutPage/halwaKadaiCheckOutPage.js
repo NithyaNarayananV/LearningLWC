@@ -1,6 +1,7 @@
 import { LightningElement } from 'lwc';
 import { getState, getSummary, subscribe as stateSubscribe } from 'c/halwaKadaiUtils';
 import createOrderWithContact from '@salesforce/apex/Halwakadai_HelperClass.createOrderWithContact';
+import sendOrderConfirmationEmail from '@salesforce/apex/Halwakadai_HelperClass.sendOrderConfirmationEmail';
 
 export default class HalwaKadaiCheckOutPage extends LightningElement {
     halwaProducts;
@@ -94,8 +95,11 @@ export default class HalwaKadaiCheckOutPage extends LightningElement {
         })
         .then(result => {
             console.log('Order created successfully: ', result);
+            sendOrderConfirmationEmail({orderId: result});
+
             // Dispatch event before state changes
             this.handleOrderConfirmationClick();
+
         })
         .catch(error => {
             console.error('Error creating order: ', error);

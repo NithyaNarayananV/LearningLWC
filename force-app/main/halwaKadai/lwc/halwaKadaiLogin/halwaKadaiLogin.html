@@ -20,7 +20,17 @@
             <div class="form-group">
               <label for="login-password">OTP</label>
               <div >
-                <input type="text" onchange={handleOTPChange} value={otp} placeholder="Enter your OTP" />
+                <input 
+                  type="text" 
+                  onchange={handleOTPChange} 
+                  variant="label-hidden" 
+                  class="otp-box"
+                  max-length="4" 
+                  pattern="[0-9]*"
+                  inputmode="numeric"
+                  value={otp} 
+                  placeholder="Enter your OTP"
+                />
               </div>
             </div>
 

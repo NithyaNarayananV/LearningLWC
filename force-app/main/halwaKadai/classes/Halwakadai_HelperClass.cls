@@ -225,4 +225,87 @@ public without sharing class Halwakadai_HelperClass {
         Integer max = 9999;
         return (Integer)Math.floor(Math.random() * (max - min + 1)) + min;
     }
+
+    // --- your existing methods remain unchanged ---
+    // e.g. sendEmailOTP(), other helpers
+
+    /**
+     * Sends an order confirmation email to the customer after placing an order.
+     *
+     * @param orderId The Id of the Order__c record
+     */
+    @AuraEnabled
+    public static void sendOrderConfirmationEmail(Id orderId) {
+        // Query standard Order and related OrderItems
+        System.debug('sendOrderConfirmationEmail : orderId - '+orderId);
+        Order ord = [
+            SELECT Id, ContractId, AccountId,
+                Pricebook2Id, OriginalOrderId, EffectiveDate,
+                EndDate, Status, Type,
+                BillingStreet, BillingCity, BillingState,
+                BillingPostalCode, BillingCountry, BillingLatitude,
+                BillingLongitude, BillingGeocodeAccuracy, BillingAddress,
+                ShippingStreet, ShippingCity, ShippingState,
+                ShippingPostalCode, ShippingCountry, ShippingLatitude,
+                ShippingLongitude, ShippingGeocodeAccuracy, ShippingAddress,
+                Name, PoDate, PoNumber, OrderReferenceNumber, BillToContactId,
+                ShipToContactId, ActivatedDate, ActivatedById, StatusCode,
+                OrderNumber, TotalAmount, BillToContact.Email,
+                (
+                    SELECT Id, Product2Id,  Product2.Name, Product2.ProductCode,  IsDeleted, OrderId,
+                            PricebookEntryId, OriginalOrderItemId, AvailableQuantity,
+                            Quantity, UnitPrice, ListPrice, TotalPrice, ServiceDate,
+                            EndDate, Description, CreatedDate, CreatedById, OrderItemNumber
+                    FROM OrderItems
+                )
+            FROM Order
+            WHERE Id = :orderId
+            LIMIT 1
+        ];
+
+        // Build item list string
+        String itemList = '';
+        for (OrderItem oi : ord.OrderItems) {
+            itemList += oi.Product2.Name + ' x' + oi.Quantity + ' (₹' + oi.TotalPrice + '), ';
+        }
+        if (itemList.endsWith(', ')) {
+            itemList = itemList.substring(0, itemList.length() - 2);
+        }
+
+        // Build HTML body
+        String htmlBody =
+            '<!DOCTYPE html>' +
+            '<html><head><meta charset="UTF-8"></head><body style="font-family:Arial,sans-serif;background-color:#f7f7f7;margin:0;padding:0;">' +
+            '<div style="max-width:600px;margin:20px auto;background:#ffffff;border-radius:8px;overflow:hidden;box-shadow:0 2px 6px rgba(0,0,0,0.1);">' +
+                '<div style="background-color:#e67e22;color:#fff;padding:20px;text-align:center;">' +
+                    '<h2>🍯 Halwa Kadai – Order Confirmation</h2>' +
+                '</div>' +
+                '<div style="padding:20px;color:#333;">' +
+                    '<p>Hi ' + (ord.BillToContact != null ? ord.BillToContact.Email : '') + ',</p>' +
+                    '<p>Thank you for your order! Here are your order details:</p>' +
+                    '<table style="margin-top:15px;border-collapse:collapse;width:100%;">' +
+                        '<tr><th style="border:1px solid #ddd;padding:8px;background:#f2f2f2;text-align:left;">Order Number</th><td style="border:1px solid #ddd;padding:8px;">' + ord.OrderNumber + '</td></tr>' +
+                        '<tr><th style="border:1px solid #ddd;padding:8px;background:#f2f2f2;text-align:left;">Order Date</th><td style="border:1px solid #ddd;padding:8px;">' + String.valueOf(ord.EffectiveDate) + '</td></tr>' +
+                        '<tr><th style="border:1px solid #ddd;padding:8px;background:#f2f2f2;text-align:left;">Items</th><td style="border:1px solid #ddd;padding:8px;">' + itemList + '</td></tr>' +
+                        '<tr><th style="border:1px solid #ddd;padding:8px;background:#f2f2f2;text-align:left;">Total Amount</th><td style="border:1px solid #ddd;padding:8px;">₹ ' + String.valueOf(ord.TotalAmount) + '</td></tr>' +
+                    '</table>' +
+                    '<p>We’ll notify you once your order is ready for delivery.</p>' +
+                    '<p>Sweet regards,<br/>The Halwa Kadai Team</p>' +
+                '</div>' +
+                '<div style="background-color:#f2f2f2;text-align:center;padding:15px;font-size:12px;color:#555;">' +
+                    '© 2026 Halwa Kadai. All rights reserved.<br/>This is an automated email, please do not reply directly.' +
+                '</div>' +
+            '</div>' +
+            '</body></html>';
+
+        // Create email
+        Messaging.SingleEmailMessage mail = new Messaging.SingleEmailMessage();
+        mail.setToAddresses(new String[] { ord.BillToContact.Email });
+        mail.setSubject('Your Halwa Kadai Order Confirmation');
+        mail.setHtmlBody(htmlBody);
+
+        // Send email
+        Messaging.sendEmail(new Messaging.SingleEmailMessage[] { mail });
+    }
+
 }
