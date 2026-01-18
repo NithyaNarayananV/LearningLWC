@@ -95,26 +95,19 @@
                         <h2>Your Order</h2>
                         <div id="order-summary"></div>
                         <div class="summary-item">
-                        <div class="item-details">
-                        
+                            <div class="item-details"> 
                                 <template for:each={halwaProducts} for:item="product">
-    <template if:true={product.selected}>
-        <div key={product.id} class="cart-item">                                             
-            <span class="cart-cell"><strong>{product.name}</strong></span>
-            <span class="cart-cell">₹{product.price} <strong>X</strong> {product.quantity}</span>
-            <span class="cart-cell">₹{product.orderPrice}</span>
-        </div> 
-    </template>
-</template>
-
-
-                                
-
+                                    <template if:true={product.selected}>
+                                        <div key={product.id} class="cart-item">                                             
+                                            <span class="cart-cell"><strong>{product.name}</strong></span>
+                                            <span class="cart-cell">₹{product.price} <strong>X</strong> {product.quantity}</span>
+                                            <span class="cart-cell">₹{product.orderPrice}</span>
+                                        </div> 
+                                    </template>
+                                </template>
                             </div>
-                            
-                            
                         </div>
- <div class="summary-line">
+                        <div class="summary-line">
                             <span>Total Items</span><span><p class="item-total">{summary.totalCount}</p></span>
                         </div>
                         <div class="summary-line">

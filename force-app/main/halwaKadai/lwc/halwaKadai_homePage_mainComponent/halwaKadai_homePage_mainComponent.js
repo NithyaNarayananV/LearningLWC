@@ -8,11 +8,12 @@ export default class HalwaKadai_homePage_mainComponent extends LightningElement 
   isActive_About=false;
   isActive_Product=false;
   isActive_Contact=false;
+  isActive_OderConfimation=false;
   cartClass='slds-hide';
   homeClass='slds-show';
   productClass='slds-hide';
   checkoutClass='slds-hide';
-  orderConfirmationClass=false;
+  orderConfirmationClass='slds-hide';
 
   productCount=0;
   summary = { totalCount: 0, totalPrice: 0 };
@@ -31,43 +32,33 @@ export default class HalwaKadai_homePage_mainComponent extends LightningElement 
         });
     }
 
+    disconnectedCallback() {
+        // Clean up subscription to prevent memory leaks
+        if (this.unsub) {
+            this.unsub();
+        }
+    }
+
 
   onHomeClick(){
+    this.hideAll();
     this.isActive_Home=true;
-    this.isActive_About=false;
-    this.isActive_Product=false;
-    this.isActive_Contact=false;
-    this.hideAll();
     this.homeClass='slds-show';
-
-   }
+  }
   onAboutClick(){
-    this.isActive_Home=false;
+    this.hideAll();
     this.isActive_About=true;
-    this.isActive_Product=false;
-    this.isActive_Contact=false;
-    this.hideAll();
-   }
+  } 
   onProductsClick(){
-    this.isActive_Home=false;
-    this.isActive_About=false;
-    this.isActive_Product=true;
-    this.isActive_Contact=false;
     this.hideAll();
+    this.isActive_Product=true;
     this.productClass='slds-show'; 
    }
   onContactClick(){
-    this.isActive_Home=false;
-    this.isActive_About=false;
-    this.isActive_Product=false;
-    this.isActive_Contact=true;
     this.hideAll();
+    this.isActive_Contact=true;
    } 
   onCartClick(){
-    this.isActive_Home=false;
-    this.isActive_About=false;
-    this.isActive_Product=false;
-    this.isActive_Contact=false;
     this.hideAll();
     this.cartClass='slds-show';
    } 
@@ -76,19 +67,29 @@ export default class HalwaKadai_homePage_mainComponent extends LightningElement 
     this.checkoutClass='slds-show';
   }
 
-   onOrderConfirmationClick(){
+  onOrderConfirmationClick(){
     console.log('onOrderConfirmationClick()');
-    this.hideAll();
-    console.log('after hideAll()');
-
-    this.orderConfirmationClass=true;
-   }
-   hideAll(){
+    // Defer state updates to avoid promise rejection during component lifecycle
+    Promise.resolve().then(() => {
+      this.hideAll();
+      console.log('after hideAll()');
+      this.orderConfirmationClass='slds-show';
+      this.isActive_OderConfimation=true;
+    }).catch(error => {
+      console.error('Error updating order confirmation state:', error);
+    });
+  }
+  hideAll(){
+    this.isActive_Home=false;
+    this.isActive_About=false;
+    this.isActive_Product=false;
+    this.isActive_Contact=false;
+    this.isActive_OderConfimation=false;
     this.homeClass='slds-hide'; 
     this.cartClass='slds-hide';
     this.productClass='slds-hide'; 
     this.checkoutClass='slds-hide';
-    this.orderConfirmationClass=false;
+    this.orderConfirmationClass='slds-hide';
     this.handleScrollTop();
    }
 

@@ -4,14 +4,18 @@ let summary = { totalCount: 0, totalPrice: 0 };
 const listeners = [];
 
 export function getState() {
-    return state;
+    console.log('halwaKadaiUtils : getState ');
+    return [...state];
 }
 
 export function getSummary() {
+    console.log('halwaKadaiUtils : getSummary ');
     return summary;
 }
 
 export function setState(newProducts) {
+    console.log('halwaKadaiUtils : setState ');
+
     // 1. Update the Products Array
     if (Array.isArray(newProducts)) {
         state = [...newProducts];

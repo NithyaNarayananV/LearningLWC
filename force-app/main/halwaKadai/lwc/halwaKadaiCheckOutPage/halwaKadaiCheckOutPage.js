@@ -52,7 +52,18 @@ export default class HalwaKadaiCheckOutPage extends LightningElement {
     setPostalCode(event) { this.postalCode = event.target.value.trim(); this.validateField(event, "Postal Code cannot be empty", this.postalCode); }
     setCountry(event) { this.country = event.target.value.trim(); this.validateField(event, "Country cannot be empty", this.country); }
     setPhone(event) { this.phone = event.target.value.trim(); this.validateField(event, "Phone cannot be empty", this.phone); }
-    setEmail(event) { this.email = event.target.value.trim(); this.validateField(event, "Email cannot be empty", this.email); }
+    setEmail(event) {
+    this.email = event.target.value.trim();
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(this.email)) {
+        event.target.setCustomValidity("Enter a valid email address");
+    } else {
+        event.target.setCustomValidity("");
+    }
+    event.target.reportValidity();
+}
+
+//setEmail(event) { this.email = event.target.value.trim(); this.validateField(event, "Email cannot be empty", this.email); }
 
     // Enable/disable Place Order
     allValueSet() {
@@ -83,8 +94,8 @@ export default class HalwaKadaiCheckOutPage extends LightningElement {
         })
         .then(result => {
             console.log('Order created successfully: ', result);
+            // Dispatch event before state changes
             this.handleOrderConfirmationClick();
-            // TODO: show toast here
         })
         .catch(error => {
             console.error('Error creating order: ', error);
@@ -92,10 +103,14 @@ export default class HalwaKadaiCheckOutPage extends LightningElement {
     }
     handleOrderConfirmationClick() {
         console.log('handleOrderConfirmationClick()');
-        const orderConfirmationEvent = new CustomEvent('orderconfirmation', {
-            bubbles: true,
-            composed: true
-        });
-        this.dispatchEvent(orderConfirmationEvent);
+        try {
+            const orderConfirmationEvent = new CustomEvent('orderconfirmation', {
+                bubbles: true,
+                composed: true
+            });
+            this.dispatchEvent(orderConfirmationEvent);
+        } catch (error) {
+            console.error('Error dispatching order confirmation event:', error);
+        }
     }
 }

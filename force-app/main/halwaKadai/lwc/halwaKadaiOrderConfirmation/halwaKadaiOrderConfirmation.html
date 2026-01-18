@@ -84,19 +84,20 @@
                         <div class="order-items-summary">
                             <h3>Order Items</h3>
                             <div id="confirmation-items" class="confirmation-items">
-                            <div class="summary-item">
-                            <div class="item-details">                        
-                                <template for:each={halwaProducts} for:item="product">
-                                    <template if:true={product.selected}>
-                                        <div key={product.id} class="cart-item">                                             
-                                            <span class="cart-cell"><strong>{product.name}</strong></span>
-                                            <span class="cart-cell">₹{product.price} <strong>X</strong> {product.quantity}</span>
-                                            <span class="cart-cell">₹{product.orderPrice}</span>
-                                        </div> 
-                                    </template>
-                                </template>
+                                <div class="summary-item">
+                                    <div class="item-details">                        
+                                        <template for:each={halwaProducts} for:item="product">
+                                            <template if:true={product.selected}>
+                                                <div key={product.id} class="cart-item">                                             
+                                                    <span class="cart-cell"><strong>{product.name}</strong></span>
+                                                    <span class="cart-cell">₹{product.price} <strong>X</strong> {product.quantity}</span>
+                                                    <span class="cart-cell">₹{product.orderPrice}</span>
+                                                </div> 
+                                            </template>
+                                        </template>
+                                    </div>
+                                </div>                      
                             </div>
-                        </div>                            </div>
                             
                             <div class="order-summary-totals">
                                 <div class="summary-row">
