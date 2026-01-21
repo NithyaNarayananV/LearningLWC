@@ -2,12 +2,25 @@ import { LightningElement } from 'lwc';
 // 1. Import the new Toast module
 import LightningToast from 'lightning/toast';
 import sendEmailOTP from '@salesforce/apex/Halwakadai_HelperClass.sendEmailOTP';
+import { getState, setState , getSummary, subscribe as stateSubscribe} from 'c/halwaKadaiUtils';
 
 export default class HalwaKadaiLogin extends LightningElement {
     email = '';
     otpSent = false;
     otp = '';
     generatedOTP = '';
+    summary='';
+    connectedCallback() {
+        // 1. Initial Load
+        this.summary = getSummary();
+
+        // 2. Subscribe to future changes
+        this.unsub = stateSubscribe((data) => {
+            // This ensures both variables stay in sync with the utility
+            this.summary = data.summary;
+            console.log('Sync Complete: Count is ' + this.summary.totalCount);
+        });
+    }
 
     handleEmailChange(event) {
         this.email = event.target.value;
@@ -60,6 +73,9 @@ export default class HalwaKadaiLogin extends LightningElement {
         event.preventDefault(); 
         if(this.otp.length === 4 && this.otp == this.generatedOTP) {
             this.showToast('Success', 'Login successful', 'success');
+            setState({loggedIn:true});
+
+
             // Add navigation logic here
         } else {
             this.showToast('Invalid OTP', 'Please Enter Correct OTP', 'error');

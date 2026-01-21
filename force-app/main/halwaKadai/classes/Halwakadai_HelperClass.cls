@@ -44,7 +44,6 @@ public without sharing class Halwakadai_HelperClass {
                    HomePage_Visible__c, Tag__c, Price__c,
                    (SELECT Id, UnitPrice FROM PricebookEntries WHERE IsActive = true ORDER BY CreatedDate DESC LIMIT 1)
             FROM Product2
-            WHERE RecordType.DeveloperName = 'HalwaShop'
         ];
     }
 
@@ -189,7 +188,7 @@ public without sharing class Halwakadai_HelperClass {
             'We will notify you once it ships.\n\n' +
             'Regards,\nHalwa Kadai Team'
         );
-        Messaging.sendEmail(new Messaging.SingleEmailMessage[] { mail });
+        //Messaging.sendEmail(new Messaging.SingleEmailMessage[] { mail });
     }
 
     @AuraEnabled
@@ -216,6 +215,7 @@ public without sharing class Halwakadai_HelperClass {
         mail.setHtmlBody(htmlBody);
 
         //Messaging.sendEmail(new Messaging.SingleEmailMessage[] { mail });
+        System.debug('Disabled : OTP = '+otp);
         return otp;
     }
 
@@ -250,7 +250,7 @@ public without sharing class Halwakadai_HelperClass {
                 ShippingLongitude, ShippingGeocodeAccuracy, ShippingAddress,
                 Name, PoDate, PoNumber, OrderReferenceNumber, BillToContactId,
                 ShipToContactId, ActivatedDate, ActivatedById, StatusCode,
-                OrderNumber, TotalAmount, BillToContact.Email,
+                OrderNumber, TotalAmount, BillToContact.Email,BillToContact.Name,
                 (
                     SELECT Id, Product2Id,  Product2.Name, Product2.ProductCode,  IsDeleted, OrderId,
                             PricebookEntryId, OriginalOrderItemId, AvailableQuantity,
@@ -266,7 +266,7 @@ public without sharing class Halwakadai_HelperClass {
         // Build item list string
         String itemList = '';
         for (OrderItem oi : ord.OrderItems) {
-            itemList += oi.Product2.Name + ' x' + oi.Quantity + ' (₹' + oi.TotalPrice + '), ';
+            itemList += oi.Product2.Name + ' x' + oi.Quantity + ' (₹' + oi.TotalPrice + '), <br> ';
         }
         if (itemList.endsWith(', ')) {
             itemList = itemList.substring(0, itemList.length() - 2);
@@ -281,7 +281,7 @@ public without sharing class Halwakadai_HelperClass {
                     '<h2>🍯 Halwa Kadai – Order Confirmation</h2>' +
                 '</div>' +
                 '<div style="padding:20px;color:#333;">' +
-                    '<p>Hi ' + (ord.BillToContact != null ? ord.BillToContact.Email : '') + ',</p>' +
+                    '<p>Hi ' + (ord.BillToContact != null ? ord.BillToContact.Name : '') + ',</p>' +
                     '<p>Thank you for your order! Here are your order details:</p>' +
                     '<table style="margin-top:15px;border-collapse:collapse;width:100%;">' +
                         '<tr><th style="border:1px solid #ddd;padding:8px;background:#f2f2f2;text-align:left;">Order Number</th><td style="border:1px solid #ddd;padding:8px;">' + ord.OrderNumber + '</td></tr>' +
@@ -305,7 +305,9 @@ public without sharing class Halwakadai_HelperClass {
         mail.setHtmlBody(htmlBody);
 
         // Send email
-        Messaging.sendEmail(new Messaging.SingleEmailMessage[] { mail });
+        //Messaging.sendEmail(new Messaging.SingleEmailMessage[] { mail });
+        System.debug('Disabled Order Confimation Email ');
+
     }
 
 }

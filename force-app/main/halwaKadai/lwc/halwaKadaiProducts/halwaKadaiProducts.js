@@ -8,7 +8,7 @@ import { getState, setState , getSummary, subscribe as stateSubscribe} from 'c/h
 export default class HalwaKadaiProducts extends LightningElement {
 
     halwaProducts;
-    summary = { totalCount: 0, totalPrice: 0 };
+    summary = { totalCount: 0, totalPrice: 0 , loggedIn:false};
 
     products;
     productCount=0;
@@ -55,7 +55,7 @@ export default class HalwaKadaiProducts extends LightningElement {
             }
 
     }
-        connectedCallback() {
+    connectedCallback() {
         // 1. Initial Load
         this.halwaProducts = getState();
         this.summary = getSummary();
@@ -78,7 +78,8 @@ export default class HalwaKadaiProducts extends LightningElement {
                 this.summary = {
                     ...this.summary,
                     totalCount: this.summary.totalCount + 1,
-                    totalPrice: this.summary.totalPrice + p.price
+                    totalPrice: this.summary.totalPrice + p.price,
+                    loggedIn : this.loggedIn
                 };
                 return { ...p, quantity: newQty, _dirty: true, selected:true , orderPrice: p.price * newQty };
             }
@@ -97,7 +98,8 @@ export default class HalwaKadaiProducts extends LightningElement {
                 this.summary = {
                     ...this.summary,
                     totalCount: this.summary.totalCount - 1,
-                    totalPrice: this.summary.totalPrice - p.price
+                    totalPrice: this.summary.totalPrice - p.price,
+                    loggedIn : this.loggedIn
                 };
                 return { ...p, quantity: newQty, _dirty: true, selected: newSelected, orderPrice: p.price * newQty };
             }

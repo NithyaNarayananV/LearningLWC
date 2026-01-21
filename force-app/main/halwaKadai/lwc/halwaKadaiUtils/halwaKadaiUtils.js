@@ -1,6 +1,6 @@
 // halwaKadaiUtils.js
 let state = [];
-let summary = { totalCount: 0, totalPrice: 0 };
+let summary = { totalCount: 0, totalPrice: 0 , loggedIn: false};
 const listeners = [];
 
 export function getState() {
@@ -8,13 +8,15 @@ export function getState() {
     return [...state];
 }
 
+
 export function getSummary() {
     console.log('halwaKadaiUtils : getSummary ');
     return summary;
 }
 
 export function setState(newProducts) {
-    console.log('halwaKadaiUtils : setState ');
+    console.log('halwaKadaiUtils : setState = ',newProducts);
+
 
     // 1. Update the Products Array
     if (Array.isArray(newProducts)) {
@@ -37,7 +39,8 @@ export function setState(newProducts) {
             const price = Number(item.price) || 0;
             const qty = Number(item.quantity) || 0;
             return total + (price * qty);
-        }, 0)
+        }, 0), loggedIn : state.loggedIn
+        
     };
     console.log('State and Summary updated:', state, summary);
 

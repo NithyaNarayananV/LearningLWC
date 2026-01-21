@@ -31,7 +31,10 @@ export default class HalwaKadaiCheckOutPage extends LightningElement {
             console.log('CART Sync Complete: Count is ' + this.summary.totalCount);
         });
     }
-
+    disconnectedCallback(){
+        console.log('disconnectedCallback : onPlaceOrderHandler');
+        this.onPlaceOrderHandler();
+    }
     // Generic validation
     validateField(event, message, value) {
         if (!value) {
