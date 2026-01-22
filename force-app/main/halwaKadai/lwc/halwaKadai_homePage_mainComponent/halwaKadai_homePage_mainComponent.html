@@ -12,7 +12,9 @@
 
                 <!-- Right Side Buttons -->
                 <div class="header-right">
-                    <a onclick={onLoginClick} class="btn-login">Login</a>
+                    <template if:false={summary.loggedIn}>
+                        <a onclick={onLoginClick} class="btn-login">Login</a>
+                    </template>
 
                     <!-- My Orders Link (Visible only after login) -->
                     <a  onclick={onCartClick} id="my-orders-link" class="btn-orders" style="display:none;">📦 My Orders</a>
@@ -103,7 +105,7 @@
         </template>
     </div>
     <div class={loginClass}>
-        <c-halwa-kadai-login></c-halwa-kadai-login>
+        <c-halwa-kadai-login onlogin={handleLogin}></c-halwa-kadai-login>
     </div>
     <footer>
         <div class="container">

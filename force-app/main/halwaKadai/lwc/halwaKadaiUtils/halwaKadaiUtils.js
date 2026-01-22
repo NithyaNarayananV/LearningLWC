@@ -29,22 +29,30 @@ export function setState(newProducts) {
 
     // 2. Automatically sync the Summary based on the new products
     summary = {
-        totalCount:  state.reduce((total, item) => {
-            // Ensure we handle price and quantity correctly
+        ...summary, // keep loggedIn and any other flags
+        totalCount: state.reduce((total, item) => {
             const qty = Number(item.quantity) || 0;
-            return total +  qty;
+            return total + qty;
         }, 0),
         totalPrice: state.reduce((total, item) => {
-            // Ensure we handle price and quantity correctly
             const price = Number(item.price) || 0;
             const qty = Number(item.quantity) || 0;
             return total + (price * qty);
-        }, 0), loggedIn : state.loggedIn
-        
+        }, 0)
     };
+
     console.log('State and Summary updated:', state, summary);
 
     notify();
+}
+export function setSummary(newSummary) { 
+    console.log('halwaKadaiUtils : setSummary = ', newSummary); 
+    console.log('halwaKadaiUtils : setSummary : totalCount  = ', newSummary.totalCount); 
+    console.log('halwaKadaiUtils : setSummary : totalPrice = ', newSummary.totalPrice); 
+    console.log('halwaKadaiUtils : setSummary : loggedIn = ', newSummary.loggedIn); 
+    // Merge new summary values into existing summary 
+    summary = { ...summary, ...newSummary }; 
+    notify(); 
 }
 
 export function subscribe(callback) {

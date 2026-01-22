@@ -1,7 +1,7 @@
 // file: halwaKadai_homePage_mainComponent.js
 import { LightningElement } from 'lwc';
 
-import { getState, setState , getSummary, subscribe as stateSubscribe} from 'c/halwaKadaiUtils';
+import { getState, setState ,setSummary, getSummary, subscribe as stateSubscribe} from 'c/halwaKadaiUtils';
 
 export default class HalwaKadai_homePage_mainComponent extends LightningElement {
   isActive_Home=true;
@@ -15,9 +15,9 @@ export default class HalwaKadai_homePage_mainComponent extends LightningElement 
   checkoutClass='slds-hide';
   orderConfirmationClass='slds-hide';
   loginClass='slds-hide';
-
+  halwaProducts;
   productCount=0;
-  summary = { totalCount: 0, totalPrice: 0 };
+  summary = { totalCount: 0, totalPrice: 0, loggedIn:false };
   
   connectedCallback() {
         // 1. Initial Load
@@ -29,17 +29,21 @@ export default class HalwaKadai_homePage_mainComponent extends LightningElement 
             // This ensures both variables stay in sync with the utility
             this.halwaProducts = data.products;
             this.summary = data.summary;
-            console.log('CART Sync Complete: Count is ' + this.summary.totalCount);
+
+            console.log('HalwaKadai_homePage_mainComponent : connectedCallback :stateSubscribe : summary.totalCount = ' + this.summary.totalCount);
+            console.log('HalwaKadai_homePage_mainComponent : connectedCallback :stateSubscribe : summary.totalPrice = ' + this.summary.totalPrice);
+            console.log('HalwaKadai_homePage_mainComponent : connectedCallback :stateSubscribe : summary.loggedIn = ' + this.summary.loggedIn);
+       
         });
     }
 
     disconnectedCallback() {
         // Clean up subscription to prevent memory leaks
+        console.log('DisconnectedCallBack : HalwaKadai_homePage_mainComponent ')
         if (this.unsub) {
             this.unsub();
         }
     }
-
 
   onHomeClick(){
     this.hideAll();
@@ -97,7 +101,7 @@ export default class HalwaKadai_homePage_mainComponent extends LightningElement 
     this.orderConfirmationClass='slds-hide';
     this.loginClass='slds-hide';
     this.handleScrollTop();
-   }
+  }
 
   handleProductCount(event) {
     console.log('handleProductCount(event) {');
@@ -106,6 +110,7 @@ export default class HalwaKadai_homePage_mainComponent extends LightningElement 
     this.productCount = productCount;
     console.log('Child says:',productCount);
   }
+
   handleCheckOut(event) {
     console.log('handleCheckOut(event) {');
     this.onCheckoutClick();
@@ -117,14 +122,16 @@ export default class HalwaKadai_homePage_mainComponent extends LightningElement 
     this.onOrderConfirmationClick();
     this.handleScrollTop();
   }
+  handleLogin(){
+    console.log('HalwaKadai_homePage_mainComponent : handleLogin() ');
+    this.onProductsClick();
+  }
 
   handleScrollTop() { // Scroll the entire window to the top 
     window.scrollTo({ 
         top: 0, 
         behavior: 'smooth' 
         // adds smooth animation
-    }); 
+    });
   }
-
-
 }

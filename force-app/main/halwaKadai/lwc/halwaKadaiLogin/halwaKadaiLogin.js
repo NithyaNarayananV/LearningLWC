@@ -2,7 +2,7 @@ import { LightningElement } from 'lwc';
 // 1. Import the new Toast module
 import LightningToast from 'lightning/toast';
 import sendEmailOTP from '@salesforce/apex/Halwakadai_HelperClass.sendEmailOTP';
-import { getState, setState , getSummary, subscribe as stateSubscribe} from 'c/halwaKadaiUtils';
+import { getState, setState ,setSummary, getSummary, subscribe as stateSubscribe} from 'c/halwaKadaiUtils';
 
 export default class HalwaKadaiLogin extends LightningElement {
     email = '';
@@ -44,6 +44,10 @@ export default class HalwaKadaiLogin extends LightningElement {
                 console.log('OTP sent to email:', this.email);
                 console.log('Generated OTP:', this.generatedOTP);
 
+                ////delete this line:
+                this.otp=this.generatedOTP;
+                ///delete this line
+
                 this.showToast('Success', 'OTP has been sent to your email', 'success');
             } else {
                 this.showToast('Error', 'Failed to generate OTP', 'error');
@@ -71,10 +75,21 @@ export default class HalwaKadaiLogin extends LightningElement {
 
     handleLogin(event) {
         event.preventDefault(); 
+        console.log('handleLogin');
         if(this.otp.length === 4 && this.otp == this.generatedOTP) {
             this.showToast('Success', 'Login successful', 'success');
-            setState({loggedIn:true});
-
+            const loginEvent = new CustomEvent('login', {
+                bubbles: true,
+                composed: true
+            });
+            this.summary = {
+                ...this.summary,
+                loggedIn : true
+            };
+            console.log('HalwaKadaiLogin : handleLogin : B4        setSummary(this.summary);');
+            setSummary(this.summary);
+            this.dispatchEvent(loginEvent);
+            console.log('HalwaKadaiLogin : handleLogin : AF     this.dispatchEvent(loginEvent);');
 
             // Add navigation logic here
         } else {

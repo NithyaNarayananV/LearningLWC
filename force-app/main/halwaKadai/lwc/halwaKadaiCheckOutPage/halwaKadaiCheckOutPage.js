@@ -20,6 +20,10 @@ export default class HalwaKadaiCheckOutPage extends LightningElement {
     isPlaceOrderDisabled = true;
 
     connectedCallback() {
+        console.log('disconnectedCallback : connectedCallback');
+
+        window.addEventListener('beforeunload', this.onPlaceOrderHandler.bind(this));
+
         // Initial load
         this.halwaProducts = getState();
         this.summary = getSummary();
@@ -32,8 +36,11 @@ export default class HalwaKadaiCheckOutPage extends LightningElement {
         });
     }
     disconnectedCallback(){
+        console.log('disconnectedCallback : removeEventListener');
+        if(this.summary.loggedIn)
+        window.removeEventListener('beforeunload', this.onPlaceOrderHandler.bind(this));
         console.log('disconnectedCallback : onPlaceOrderHandler');
-        this.onPlaceOrderHandler();
+        //this.onPlaceOrderHandler();
     }
     // Generic validation
     validateField(event, message, value) {
@@ -82,7 +89,7 @@ export default class HalwaKadaiCheckOutPage extends LightningElement {
     }
 
     // Place order handler
-    onPlaceOrderHandler() {
+    onPlaceOrderHandler(event) {
         console.log('onPlaceOrderHandler');
 
         createOrderWithContact({
@@ -107,6 +114,8 @@ export default class HalwaKadaiCheckOutPage extends LightningElement {
         .catch(error => {
             console.error('Error creating order: ', error);
         });
+            event.preventDefault();
+    event.returnValue = '';
     }
     handleOrderConfirmationClick() {
         console.log('handleOrderConfirmationClick()');
