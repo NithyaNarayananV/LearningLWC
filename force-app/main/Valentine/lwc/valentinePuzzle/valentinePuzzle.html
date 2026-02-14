@@ -1,0 +1,27 @@
+<template>
+    <div class="container">
+        <h1>💖 .. Will you be my Valentine? 💖</h1>
+
+        <div class="avatar">{avatarExpression}</div>
+
+        <div class="grid-holder">
+            <div class="grid">
+                <template for:each={tiles} for:item="tile">
+                    <div key={tile.id}
+                         class="tile"
+                         data-id={tile.id}
+                         onclick={handleTileClick}>
+                        {tile.value}
+                    </div>
+                </template>
+            </div>
+        </div>
+
+        <template if:true={showMessage}>
+            <p class="message">Yay! 💖 You said Yes!</p>
+        </template>
+
+        <!-- Fullscreen canvas for confetti (no external libraries) -->
+        <canvas class="confetti-canvas" lwc:dom="manual"></canvas>
+    </div>
+</template>

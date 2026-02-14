@@ -1,11 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <Package xmlns="http://soap.sforce.com/2006/04/metadata">
+
 	<types>
-		<members>Halwa_Shop</members>
-		<name>CustomApplication</name>
-	</types>
-	<types>
-		<members>Halwa_Kadai</members>
+		<members>Valentine</members>
 		<name>CustomSite</name>
 	</types>
 	<version>65.0</version>
