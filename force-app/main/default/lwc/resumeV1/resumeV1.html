@@ -1,0 +1,140 @@
+<template>
+    <div class="resume-container">
+        
+        <header class="resume-header">
+            <div class="header-titles">
+                <h1 class="name">{contact.name}</h1>
+                <h2 class="role">{contact.role}</h2>
+            </div>
+            <div class="contact-info">
+                <span>{contact.location}</span> | 
+                <span>{contact.email}</span>
+            </div>
+        </header>
+
+        <div class="resume-body">
+            
+            <aside class="left-column">
+                <div class="section">
+                    <h3 class="section-title">CERTIFICATIONS</h3>
+                    <ol>
+                        <template for:each={certifications} for:item="cert">
+                            <li key={cert.id}>{cert.name}</li>
+                        </template>
+                    </ol>
+                </div>
+
+                <div class="section">
+                    <h3 class="section-title">SKILLS</h3>
+                    <ol>
+                        <template for:each={skills} for:item="skill">
+                            <li key={skill.id}>{skill.name}</li>
+                        </template>
+                    </ol>
+                </div>
+                <div class="section">
+                    <h3 class="section-title">SOCIAL CONNECT</h3>
+                    <ul class="no-bullets">
+                        <template for:each={socials} for:item="social">
+                            <li key={social.id}>
+                                <a href={social.url} target="_blank" rel="noopener noreferrer">
+                                    {social.name}
+                                </a>
+                            </li>
+                        </template>
+                    </ul>
+                </div>
+
+                <!--div class="section">
+                    <h3 class="section-title">EDUCATION</h3>
+                    <template for:each={education} for:item="edu">
+                        <div key={edu.id} class="edu-item">
+                            <p class="edu-year">{edu.year}</p>
+                            <p class="edu-school"><strong>{edu.school}</strong></p>
+                            <p class="edu-details">{edu.details}</p>
+                        </div>
+                    </template>
+                </div-->
+            </aside>
+
+            <main class="right-column">
+                <div class="section">
+                    <h3 class="section-title right-title">OBJECTIVE</h3>
+                    <p>Self-driven <strong>Salesforce developer</strong> focused on building scalable, user-friendly applications using <strong>Apex, Flows and Lightning Web Components.</strong> Experienced in developing personal projects, with foundational exposure to Java and Python. <strong>Seeking hands-on roles in Salesforce-centric development.</strong></p>
+                </div>
+
+                <div class="section">
+                    <h3 class="section-title right-title">CAREER SUMMARY</h3>
+                    <ul>
+                        <template for:each={summaryPoints} for:item="point">
+                            <li key={point.id}>{point.text}</li>
+                        </template>
+                    </ul>
+                </div>
+
+                <div class="section">
+                    <h3 class="section-title right-title">EXPERTISE</h3>
+                    <ul>
+                        <template for:each={expertisePoints} for:item="point">
+                            <li key={point.id}>{point.text}</li>
+                        </template>
+                    </ul>
+                </div>
+
+                <div class="section">
+                    <h3 class="section-title right-title">TECHNICAL SKILLS</h3>
+                    <ul>
+                        <template for:each={techSkills} for:item="skill">
+                            <li key={skill.id}><strong>{skill.category}:</strong> {skill.details}</li>
+                        </template>
+                    </ul>
+                </div>
+
+                <div class="section">
+                    <h3 class="section-title right-title">PROFESSIONAL EXPERIENCE</h3>
+                    <template for:each={experience} for:item="exp">
+                        <div key={exp.id}>
+                            <h4><strong>{exp.company}</strong> - {exp.duration}</h4>
+                            <template for:each={exp.roles} for:item="role">
+                                <div key={role.title} class="role-block">
+                                    <p><strong>{role.title}</strong></p>
+                                    <ul>
+                                        <template for:each={role.points} for:item="point">
+                                            <li key={point}>{point}</li>
+                                        </template>
+                                    </ul>
+                                </div>
+                            </template>
+                        </div>
+                    </template>
+                </div>
+
+<div class="section">
+                    <h3 class="section-title right-title">PERSONAL SALESFORCE PROJECTS</h3>
+                    <template for:each={sfProjects} for:item="proj">
+                        <div key={proj.id} class="project-block">
+                            <p><strong>{proj.id}. {proj.title}</strong> - {proj.year}</p>
+                            <p>{proj.desc}</p>
+                            <ul>
+                                <template for:each={proj.points} for:item="point">
+                                    <li key={point}>* {point}</li>
+                                </template>
+                            </ul>
+                        </div>
+                    </template>
+                </div>
+
+                <!--div class="section">
+                    <h3 class="section-title right-title">OTHER PERSONAL PROGRAMMING PROJECTS</h3>
+                    <template for:each={otherProjects} for:item="proj">
+                        <div key={proj.id} class="project-block">
+                            <p><strong>{proj.title}</strong> - {proj.year}</p>
+                            <p>{proj.desc}</p>
+                        </div>
+                    </template>
+                </div-->
+            </main>
+
+        </div>
+    </div>
+</template>

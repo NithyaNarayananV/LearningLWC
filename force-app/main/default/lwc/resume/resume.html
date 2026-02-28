@@ -1,0 +1,75 @@
+<template>
+  <lightning-card title="Resume - C Vr Nithya Narayanan" icon-name="standard:user">
+    <div class="slds-p-around_medium">
+
+      <!-- Contact Info -->
+      <div class="contact">
+        <h2>{title}</h2>
+        <p>Email: <a href="mailto:{email}">{email}</a></p>
+        <p>
+          <a href={linkedin} target="_blank">LinkedIn</a> |
+          <a href={github} target="_blank">GitHub</a>
+        </p>
+      </div>
+
+      <!-- Objective -->
+      <section class="section">
+        <h2>Objective</h2>
+        <p>{objective}</p>
+      </section>
+
+      <!-- Career Summary -->
+      <section class="section">
+        <h2>Career Summary</h2>
+        <ul>
+          <template for:each={careerSummary} for:item="point">
+            <li key={point}>{point}</li>
+          </template>
+        </ul>
+      </section>
+
+      <!-- Technical Skills -->
+      <section class="section">
+        <h2>Technical Skills</h2>
+        <template for:each={skills} for:item="skill">
+          <div key={skill.category}>
+            <strong>{skill.category}:</strong> {skill.items}
+          </div>
+        </template>
+      </section>
+
+      <!-- Professional Experience -->
+      <section class="section">
+        <h2>Professional Experience</h2>
+        <template for:each={experience} for:item="job">
+          <div key={job.id} class="job">
+            <strong>{job.company}</strong> | {job.role} | {job.period}<br/>
+            <ul>
+              <template for:each={job.details} for:item="detail">
+                <li key={detail}>{detail}</li>
+              </template>
+            </ul>
+          </div>
+        </template>
+      </section>
+
+      <!-- Certifications -->
+      <section class="section">
+        <h2>Certifications</h2>
+        <ul>
+          <template for:each={certifications} for:item="cert">
+            <li key={cert}>{cert}</li>
+          </template>
+        </ul>
+      </section>
+
+      <!-- Education -->
+      <section class="section">
+        <h2>Education</h2>
+        <p>{education.degree} – {education.institution} ({education.year})</p>
+        <p>Percentage: {education.percentage}</p>
+      </section>
+
+    </div>
+  </lightning-card>
+</template>
