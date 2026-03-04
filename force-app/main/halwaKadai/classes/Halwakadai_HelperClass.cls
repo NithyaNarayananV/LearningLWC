@@ -43,7 +43,7 @@ public without sharing class Halwakadai_HelperClass {
             SELECT Name, ProductCode, Description, StockKeepingUnit, Image_URL__c,
                    HomePage_Visible__c, Tag__c, Price__c,
                    (SELECT Id, UnitPrice FROM PricebookEntries WHERE IsActive = true ORDER BY CreatedDate DESC LIMIT 1)
-            FROM Product2
+            FROM Product2 WHERE RecordType.DeveloperName  = 'HalwaShop'
         ];
     }
 

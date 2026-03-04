@@ -12,6 +12,8 @@
 
                 <!-- Right Side Buttons -->
                 <div class="header-right">
+                        <a onclick={onClearCacheClick} class="btn-login">Clear Cache</a>
+                        <a onclick={onClearCartClick} class="btn-login">Clear Cart</a>
                     <template if:false={summary.loggedIn}>
                         <a onclick={onLoginClick} class="btn-login">Login</a>
                     </template>
@@ -95,10 +97,12 @@
     </div>
     <div class={cartClass}>
         <c-halwa-kadai-cart-page  oncheckout={handleCheckOut}></c-halwa-kadai-cart-page>
-    </div>    
-    <div class={checkoutClass}>
-        <c-halwa-kadai-check-out-page onorderconfirmation={handleOrderConfirmationClick}></c-halwa-kadai-check-out-page>
     </div>
+    <template lwc:if={isActive_CheckOut}>  
+        <div class={checkoutClass}>
+            <c-halwa-kadai-check-out-page onorderconfirmation={handleOrderConfirmationClick}></c-halwa-kadai-check-out-page>
+        </div>
+    </template>
     <div class={orderConfirmationClass}>
         <c-halwa-kadai-order-confirmation></c-halwa-kadai-order-confirmation>
         <template lwc:if={isActive_OderConfimation}>

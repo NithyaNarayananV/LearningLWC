@@ -1,22 +1,49 @@
 // halwaKadaiUtils.js
+let productsCONSTANT = [];
 let state = [];
 let summary = { totalCount: 0, totalPrice: 0 , loggedIn: false};
+let siteUser = {name : '', email: '', Street: '', City: '', State: '', PostalCode: '', Country: '', MobilePhone: ''};
+
 const listeners = [];
+const KEYhalwaProducts = 'myApp:halwaProducts'; // namespace your key to avoid collisions
+const KEYsummary = 'myApp:summary'; // namespace your key to avoid collisions
+
+export function getProductsCONSTANT() {
+    console.log('halwaKadaiUtils : getProductsCONSTANT ');
+    return [...productsCONSTANT];
+}
 
 export function getState() {
     console.log('halwaKadaiUtils : getState ');
     return [...state];
 }
 
+export function setSiteUser(newSiteUser) {
+    siteUser = { ...siteUser, ...newSiteUser };
+    console.log('halwaKadaiUtils : setUser = ', siteUser);
+    summary = { ...summary, loggedIn: true };
+}
+
+export function getSiteUser() {
+    return siteUser;
+}
 
 export function getSummary() {
     console.log('halwaKadaiUtils : getSummary ');
     return summary;
 }
-
+export function setProductsCONSTANT(newProducts) {
+    console.log('halwaKadaiUtils : setProductsCONSTANT = ', newProducts);
+    if (Array.isArray(newProducts)) {
+        productsCONSTANT = [...newProducts];
+    } else if (newProducts && Array.isArray(newProducts.value)) {
+        productsCONSTANT = [...newProducts.value];
+    } else {
+        productsCONSTANT = newProducts;
+    }    console.log('halwaKadaiUtils : setProductsCONSTANT : productsCONSTANT = ', productsCONSTANT);
+}
 export function setState(newProducts) {
     console.log('halwaKadaiUtils : setState = ',newProducts);
-
 
     // 1. Update the Products Array
     if (Array.isArray(newProducts)) {
@@ -40,9 +67,15 @@ export function setState(newProducts) {
             return total + (price * qty);
         }, 0)
     };
-
+    try {
+        window.localStorage.setItem(KEYhalwaProducts, JSON.stringify(state));
+        console.log('halwaKadaiUtils : setState : state = ', state);
+        console.log('window.localStorage.setItem(KEYhalwaProducts, JSON.stringify(state));');
+    } catch (e) {
+        console.log('Error setting localStorage:', e);
+        console.log('ERROR : window.localStorage.setItem(KEYhalwaProducts, JSON.stringify(state));');
+    }
     console.log('State and Summary updated:', state, summary);
-
     notify();
 }
 export function setSummary(newSummary) { 
@@ -52,6 +85,14 @@ export function setSummary(newSummary) {
     console.log('halwaKadaiUtils : setSummary : loggedIn = ', newSummary.loggedIn); 
     // Merge new summary values into existing summary 
     summary = { ...summary, ...newSummary }; 
+    try {
+        window.localStorage.setItem(KEYsummary, JSON.stringify(summary));
+        console.log('halwaKadaiUtils : setSummary : summary = ', summary);
+        console.log('window.localStorage.setItem(KEYsummary, JSON.stringify(summary));');
+    } catch (e) {
+        console.log('Error setting localStorage:', e);
+        console.log('ERROR : window.localStorage.setItem(KEYsummary, JSON.stringify(summary));'); 
+    }
     notify(); 
 }
 

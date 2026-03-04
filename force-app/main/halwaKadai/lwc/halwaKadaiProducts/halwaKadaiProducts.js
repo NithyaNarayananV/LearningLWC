@@ -3,11 +3,12 @@ import getProducts from '@salesforce/apex/Halwakadai_HelperClass.getProductsDeta
 
 import { publish, MessageContext } from 'lightning/messageService';
 import PRODUCTS_LMS from '@salesforce/messageChannel/halwaKadaiLMS__c';
-import { getState, setState ,setSummary, getSummary, subscribe as stateSubscribe} from 'c/halwaKadaiUtils';
+import { getState, setState ,setSummary, getSummary, subscribe as stateSubscribe, setProductsCONSTANT} from 'c/halwaKadaiUtils';
 
 export default class HalwaKadaiProducts extends LightningElement {
 
     halwaProducts;
+    halwaProductsCONSTANT;
     summary = { totalCount: 0, totalPrice: 0,  loggedIn: false };
 
     products;
@@ -40,7 +41,16 @@ export default class HalwaKadaiProducts extends LightningElement {
                 selected: false,
                 orderPrice: 0
             }));
-
+            this.halwaProductsCONSTANT = this.halwaProducts;
+            setProductsCONSTANT(this.halwaProductsCONSTANT);
+            console.log('halwaKadaiProducts : wiredProducts : before this.halwaProducts = ', this.halwaProducts);
+            if(getState().length === 0){
+                setState(this.halwaProducts);
+            }else{
+                this.halwaProducts = getState();
+            }
+            console.log('halwaKadaiProducts : wiredProducts : after this.halwaProducts = ', this.halwaProducts);
+            
         } else if (error) {
               this.error = error;
               // Log everything we can, even in Locker

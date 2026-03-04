@@ -2,7 +2,8 @@ import { LightningElement } from 'lwc';
 // 1. Import the new Toast module
 import LightningToast from 'lightning/toast';
 import sendEmailOTP from '@salesforce/apex/Halwakadai_HelperClass.sendEmailOTP';
-import { getState, setState ,setSummary, getSummary, subscribe as stateSubscribe} from 'c/halwaKadaiUtils';
+import { getState, setState ,setSummary, getSummary, subscribe as stateSubscribe, setSiteUser} from 'c/halwaKadaiUtils';
+import Street from '@salesforce/schema/Asset.Street';
 
 export default class HalwaKadaiLogin extends LightningElement {
     email = '';
@@ -10,6 +11,8 @@ export default class HalwaKadaiLogin extends LightningElement {
     otp = '';
     generatedOTP = '';
     summary='';
+    siteUser = {name : '', email: '', Street: '', City: '', State: '', PostalCode: '', Country: '', MobilePhone: ''};
+
     connectedCallback() {
         // 1. Initial Load
         this.summary = getSummary();
@@ -24,6 +27,8 @@ export default class HalwaKadaiLogin extends LightningElement {
 
     handleEmailChange(event) {
         this.email = event.target.value;
+        this.siteUser = { ...this.siteUser, email: this.email };
+
         console.log('Email:', this.email);
     }
     
@@ -47,7 +52,8 @@ export default class HalwaKadaiLogin extends LightningElement {
                 ////delete this line:
                 this.otp=this.generatedOTP;
                 ///delete this line
-
+                setSiteUser(this.siteUser);
+                console.log('HalwaKadaiLogin : handleSendOTP : B4        setSiteUser(this.siteUser);');
                 this.showToast('Success', 'OTP has been sent to your email', 'success');
             } else {
                 this.showToast('Error', 'Failed to generate OTP', 'error');
