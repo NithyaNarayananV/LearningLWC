@@ -1,12 +1,13 @@
 // halwaKadaiUtils.js
 let productsCONSTANT = [];
 let state = [];
-let summary = { totalCount: 0, totalPrice: 0 , loggedIn: false};
-let siteUser = {name : '', email: '', Street: '', City: '', State: '', PostalCode: '', Country: '', MobilePhone: ''};
+let summary = { totalCount: 0, totalPrice: 0 , loggedIn: false, orderPlaced: false, newUser: true};
+let siteUser = {id:'newContact', name : '', email: '', Street: '', City: '', State: '', PostalCode: '', Country: '', MobilePhone: ''};
 
 const listeners = [];
 const KEYhalwaProducts = 'myApp:halwaProducts'; // namespace your key to avoid collisions
 const KEYsummary = 'myApp:summary'; // namespace your key to avoid collisions
+const KEYsiteUser = 'myApp:siteUser'; // namespace your key to avoid collisions
 
 export function getProductsCONSTANT() {
     console.log('halwaKadaiUtils : getProductsCONSTANT ');
@@ -25,6 +26,8 @@ export function setSiteUser(newSiteUser) {
 }
 
 export function getSiteUser() {
+    window.localStorage.setItem(KEYsiteUser, JSON.stringify(siteUser));
+
     console.log('halwaKadaiUtils : getSiteUser = ', siteUser);
     return siteUser;
 }

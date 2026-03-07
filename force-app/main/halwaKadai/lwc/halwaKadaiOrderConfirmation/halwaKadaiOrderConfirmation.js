@@ -1,6 +1,6 @@
 // halwaKadaiOrderConfirmation.js
 import { LightningElement } from 'lwc';
-import { getState, getSummary, subscribe as stateSubscribe } from 'c/halwaKadaiUtils';
+import { getState, getSummary, subscribe as stateSubscribe, setSummary } from 'c/halwaKadaiUtils';
 
 export default class HalwaKadaiOrderConfirmation extends LightningElement {
     halwaProducts = [];
@@ -29,6 +29,8 @@ export default class HalwaKadaiOrderConfirmation extends LightningElement {
                 this.halwaProducts = data.products;
                 this.summary = data.summary;
                 console.log('CART Sync Complete: Count is ' + this.summary.totalCount);
+                //setSummary({ totalCount: 0, totalPrice: 0, loggedIn: this.summary.loggedIn, orderPlaced: true, newUser: false });
+
             } else {
                 console.warn('Subscription received invalid data:', data);
             }
@@ -37,6 +39,8 @@ export default class HalwaKadaiOrderConfirmation extends LightningElement {
 
     disconnectedCallback() {
         // Clean up subscription to avoid memory leaks
+        console.log('HalwaKadaiOrderConfirmation : disconnectedCallback');
+
         if (this.unsub) {
             try {
                 this.unsub();

@@ -108,6 +108,12 @@ export default class HalwaKadai_homePage_mainComponent extends LightningElement 
     this.hideAll();
     this.loginClass='slds-show';
   }
+  onLogOutClick(){
+    //this.hideAll();
+    //Need to Process and remove the login.
+    setSummary({...this.summary,loggedIn:false });
+
+  }
   onClearCacheClick(){
     console.log('onClearCacheClick()');
     try {

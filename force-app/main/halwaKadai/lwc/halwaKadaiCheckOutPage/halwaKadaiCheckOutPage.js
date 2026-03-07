@@ -7,19 +7,20 @@ export default class HalwaKadaiCheckOutPage extends LightningElement {
     halwaProducts;
     summary;
     siteUser;
+    contactDetailsChanges=false;
 
     isPlaceOrderDisabled = false;
 
     connectedCallback() {
-        this.siteUser = getSiteUser();
-        console.log('HalwaKadaiCheckOutPage : connectedCallback :  siteUser = ', this.siteUser);
-        console.log('HalwaKadaiCheckOutPage : connectedCallback');
-
-        window.addEventListener('beforeunload', this.onPlaceOrderHandler.bind(this));
-
         // Initial load
+        this.siteUser = getSiteUser();
         this.halwaProducts = getState();
         this.summary = getSummary();
+        console.log('HalwaKadaiCheckOutPage : connectedCallback :  siteUser = ', this.siteUser);
+        console.log('HalwaKadaiCheckOutPage : connectedCallback :  halwaProducts = ', this.halwaProducts);
+        console.log('HalwaKadaiCheckOutPage : connectedCallback :  summary = ', this.summary);
+
+        window.addEventListener('beforeunload', this.onPlaceOrderHandler.bind(this));
 
         // Subscribe to cart changes
         this.unsub = stateSubscribe((data) => {
@@ -49,25 +50,24 @@ export default class HalwaKadaiCheckOutPage extends LightningElement {
     }
 
     // Setters
-    setName(event) { this.siteUser.name = event.target.value.trim(); this.validateField(event, "Name cannot be empty", this.siteUser.name); setSiteUser(this.siteUser); }
-    setStreet(event) { this.siteUser.Street = event.target.value.trim(); this.validateField(event, "Street cannot be empty", this.siteUser.Street); setSiteUser(this.siteUser); }
-    setCity(event) { this.siteUser.City = event.target.value.trim(); this.validateField(event, "City cannot be empty", this.siteUser.City); setSiteUser(this.siteUser); }
-    setState(event) { this.siteUser.State = event.target.value.trim(); this.validateField(event, "State cannot be empty", this.siteUser.State); setSiteUser(this.siteUser); }
-    setPostalCode(event) { this.siteUser.PostalCode = event.target.value.trim(); this.validateField(event, "Postal Code cannot be empty", this.siteUser.PostalCode); setSiteUser(this.siteUser); }
-    setCountry(event) { this.siteUser.Country = event.target.value.trim(); this.validateField(event, "Country cannot be empty", this.siteUser.Country); setSiteUser(this.siteUser); }
-    setPhone(event) { this.siteUser.MobilePhone = event.target.value.trim(); this.validateField(event, "Phone cannot be empty", this.siteUser.MobilePhone); setSiteUser(this.siteUser); }
+    setName(event) { this.siteUser.name = event.target.value.trim(); this.validateField(event, "Name cannot be empty", this.siteUser.name);   this.contactDetailsChanges=true; }
+    setStreet(event) { this.siteUser.Street = event.target.value.trim(); this.validateField(event, "Street cannot be empty", this.siteUser.Street);   this.contactDetailsChanges=true; }
+    setCity(event) { this.siteUser.City = event.target.value.trim(); this.validateField(event, "City cannot be empty", this.siteUser.City);   this.contactDetailsChanges=true; }
+    setState(event) { this.siteUser.State = event.target.value.trim(); this.validateField(event, "State cannot be empty", this.siteUser.State);   this.contactDetailsChanges=true; }
+    setPostalCode(event) { this.siteUser.PostalCode = event.target.value.trim(); this.validateField(event, "Postal Code cannot be empty", this.siteUser.PostalCode);   this.contactDetailsChanges=true; }
+    setCountry(event) { this.siteUser.Country = event.target.value.trim(); this.validateField(event, "Country cannot be empty", this.siteUser.Country);   this.contactDetailsChanges=true; }
+    setPhone(event) { this.siteUser.MobilePhone = event.target.value.trim(); this.validateField(event, "Phone cannot be empty", this.siteUser.MobilePhone);   this.contactDetailsChanges=true; }
     setEmail(event) {
-    this.siteUser.email = event.target.value.trim();
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(this.siteUser.email)) {
-        event.target.setCustomValidity("Enter a valid email address");
-    } else {
-        event.target.setCustomValidity("");
+        this.siteUser.email = event.target.value.trim();
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(this.siteUser.email)) {
+            event.target.setCustomValidity("Enter a valid email address");
+        } else {
+            event.target.setCustomValidity("");
+        }
+        event.target.reportValidity();
+        this.contactDetailsChanges=true;
     }
-    event.target.reportValidity();
-}
-
-//setEmail(event) { this.email = event.target.value.trim(); this.validateField(event, "Email cannot be empty", this.email); }
 
     // Enable/disable Place Order
     allValueSet() {
@@ -83,30 +83,49 @@ export default class HalwaKadaiCheckOutPage extends LightningElement {
 
     // Place order handler
     onPlaceOrderHandler(event) {
+        setSiteUser(this.siteUser);
         console.log('onPlaceOrderHandler');
 
-        createOrderWithContact({
-            products: this.halwaProducts,
-            name: this.name,
-            phone: this.phone,
-            email: this.email,
-            street: this.street,
-            city: this.city,
-            state: this.state,
-            postalCode: this.postalCode,
-            country: this.country
-        })
-        .then(result => {
-            console.log('Order created successfully: ', result);
-            sendOrderConfirmationEmail({orderId: result});
-            // Dispatch event before state changes
-            this.handleOrderConfirmationClick();
-        })
-        .catch(error => {
-            console.error('Error creating order: ', error);
-        });
-            event.preventDefault();
-    event.returnValue = '';
+        if(this.siteUser.id !== 'newContact'){
+            console.log('Existing contact, will update details if changed');
+            //Update contact here if needed
+            if(this.contactDetailsChanges){
+                console.log('Contact details changed, updating siteUser in utils');
+                //Update contact here
+            }
+            //create order with existing contact
+            createOrderWithContact({
+                products: this.halwaProducts,
+                name: this.siteUser.name,
+                phone: this.siteUser.MobilePhone,
+                email: this.siteUser.Email,
+                street: this.siteUser.street,
+                city: this.siteUser.city,
+                state: this.siteUser.state,
+                postalCode: this.siteUser.postalCode,
+                country: this.siteUser.country,
+                contactId: this.siteUser.id
+            })
+            .then(result => {
+                console.log('Order created successfully: ', result);
+                sendOrderConfirmationEmail({orderId: result});
+                this.summary.orderPlaced = true;
+                this.summary.orderId = result;
+                // Dispatch event before state changes
+                this.handleOrderConfirmationClick();
+            })
+            .catch(error => {
+                console.error('Error creating order: ', error);
+            });
+        }
+        if(this.summary.orderPlaced){
+            console.log('Order already placed, skipping order creation');
+            return;
+        }else{
+            console.log('Placing order for the first time');
+        }
+        event.preventDefault();
+        event.returnValue = '';
     }
     handleOrderConfirmationClick() {
         console.log('handleOrderConfirmationClick()');

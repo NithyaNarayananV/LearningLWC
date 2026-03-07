@@ -17,6 +17,9 @@
                     <template if:false={summary.loggedIn}>
                         <a onclick={onLoginClick} class="btn-login">Login</a>
                     </template>
+                    <template if:true={summary.loggedIn}>
+                        <a onclick={onLogOutClick} class="btn-login">LogOut</a>
+                    </template>
 
                     <!-- My Orders Link (Visible only after login) -->
                     <a  onclick={onCartClick} id="my-orders-link" class="btn-orders" style="display:none;">📦 My Orders</a>

@@ -60,6 +60,8 @@ public without sharing class Halwakadai_HelperClass {
         // Add address to static list
         addressList.add(new AddressWrapper(street, city, state, postalCode, country));
 
+        // Create order linked to contact and with billing/shipping address
+        System.debug('createOrderWithContact - Before createOrder - contactId : ' + contactId);
         Order newOrder = new Order(
             AccountId = '001GA00005KAsGgYAL',
             ContractId = '800GA000000b86cYAA',
@@ -132,7 +134,7 @@ public without sharing class Halwakadai_HelperClass {
         addressList.add(new AddressWrapper(street, city, state, postalCode, country));
 
         Contact con = new Contact(
-            LastName = name,
+            LastName = name==null? 'Unknown' : name,
             Phone = phone,
             Email = email,
             MailingStreet     = street,
@@ -161,6 +163,8 @@ public without sharing class Halwakadai_HelperClass {
         return [ SELECT Id, name, phone, email, MailingStreet, MailingCity, MailingState, MailingPostalCode, MailingCountry FROM Contact WHERE Email = :email LIMIT 1];
     }
 
+
+
     @AuraEnabled
     public static Id createOrderWithContact(
         List<Map<String,Object>> products,
@@ -171,12 +175,14 @@ public without sharing class Halwakadai_HelperClass {
         String city,
         String state,
         String postalCode,
-        String country
-    ) {
+        String country,
+        Id contactId
+    ){
         // Check if contact exists
-        Id contactId = searchContact(email);
+        //Id contactId = searchContact(email);
         if (contactId == null) {
-            contactId = createContact(name, phone, email, street, city, state, postalCode, country);
+            System.debug('No existing contact found with email: ' + email + '. Creating new contact.');
+            //contactId = createContact(name, phone, email, street, city, state, postalCode, country);
         }
 
         // Create order linked to contact and with billing/shipping address

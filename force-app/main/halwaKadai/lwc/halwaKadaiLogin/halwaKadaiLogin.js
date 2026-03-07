@@ -11,8 +11,8 @@ export default class HalwaKadaiLogin extends LightningElement {
     otpSent = false;
     otp = '';
     generatedOTP = '';
-    summary='';
-    siteUser = {name : '', email: '', Street: '', City: '', State: '', PostalCode: '', Country: '', MobilePhone: ''};
+    summary;
+    siteUser;// = {name : '', email: '', Street: '', City: '', State: '', PostalCode: '', Country: '', MobilePhone: ''};
     newUser = true;
     contactDeailts;
     connectedCallback() {
@@ -94,11 +94,15 @@ export default class HalwaKadaiLogin extends LightningElement {
                 .then((contact) => {
                     if (contact) {
                         this.newUser = false;
+                         this.summary = {
+                            ...this.summary,
+                            newUser : false};
                         console.log('HalwaKadaiLogin : handleLogin : contact : ', contact);
                         this.contactDeailts = contact;
                         console.log('HalwaKadaiLogin : handleLogin : contactDetails : ', this.contactDeailts);
                         this.siteUser = {
                             ...this.siteUser,
+                            id: contact.Id,
                             name: contact.Name, 
                             email: contact.Email, 
                             Street: contact.MailingStreet, 
