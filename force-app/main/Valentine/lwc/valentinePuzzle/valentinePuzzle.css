@@ -1,0 +1,64 @@
+.container {
+    text-align: center;
+    margin-top: 30px;
+    font-family: 'Comic Sans MS', cursive, sans-serif;
+}
+
+h1 {
+    color: #e91e63;
+    font-size: 2rem;
+    margin-bottom: 20px;
+}
+
+.avatar {
+    font-size: 3rem;
+    margin-bottom: 20px;
+}
+
+.grid-holder {
+    display: inline-block;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(3, 80px);
+    grid-gap: 10px;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.tile {
+    background-color: #f8bbd0;
+    border: 2px solid #e91e63;
+    border-radius: 8px;
+    font-size: 1rem;
+    padding: 15px;
+    cursor: pointer;
+    transition: transform 0.2s, background-color 0.2s;
+    text-align: center;
+}
+
+.tile:hover {
+    transform: scale(1.1);
+    background-color: #f48fb1;
+}
+
+.message {
+    margin-top: 20px;
+    font-size: 1.5rem;
+    color: #4caf50;
+    font-weight: bold;
+}
+
+/* Fullscreen canvas for confetti (hidden until used) */
+.confetti-canvas {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0;
+    transition: opacity 80ms ease-out;
+}
+.confetti-canvas.show {
+    opacity: 1;
+}

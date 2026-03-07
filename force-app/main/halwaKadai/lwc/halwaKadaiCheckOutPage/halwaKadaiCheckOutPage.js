@@ -1,27 +1,26 @@
 import { LightningElement } from 'lwc';
-import { getState, getSummary, subscribe as stateSubscribe } from 'c/halwaKadaiUtils';
+import { getState, getSummary, subscribe as stateSubscribe, getSiteUser, setSiteUser, setSummary } from 'c/halwaKadaiUtils';
 import createOrderWithContact from '@salesforce/apex/Halwakadai_HelperClass.createOrderWithContact';
+import sendOrderConfirmationEmail from '@salesforce/apex/Halwakadai_HelperClass.sendOrderConfirmationEmail';
 
 export default class HalwaKadaiCheckOutPage extends LightningElement {
     halwaProducts;
     summary;
+    siteUser;
+    contactDetailsChanges=false;
 
-    // Contact fields
-    name = '';
-    street = '';
-    city = '';
-    state = '';
-    postalCode = '';
-    country = 'India';
-    phone = '';
-    email = '';
-
-    isPlaceOrderDisabled = true;
+    isPlaceOrderDisabled = false;
 
     connectedCallback() {
         // Initial load
+        this.siteUser = getSiteUser();
         this.halwaProducts = getState();
         this.summary = getSummary();
+        console.log('HalwaKadaiCheckOutPage : connectedCallback :  siteUser = ', this.siteUser);
+        console.log('HalwaKadaiCheckOutPage : connectedCallback :  halwaProducts = ', this.halwaProducts);
+        console.log('HalwaKadaiCheckOutPage : connectedCallback :  summary = ', this.summary);
+
+        window.addEventListener('beforeunload', this.onPlaceOrderHandler.bind(this));
 
         // Subscribe to cart changes
         this.unsub = stateSubscribe((data) => {
@@ -30,7 +29,13 @@ export default class HalwaKadaiCheckOutPage extends LightningElement {
             console.log('CART Sync Complete: Count is ' + this.summary.totalCount);
         });
     }
-
+    disconnectedCallback(){
+        console.log('disconnectedCallback : removeEventListener');
+        if(this.summary.loggedIn)
+        window.removeEventListener('beforeunload', this.onPlaceOrderHandler.bind(this));
+        console.log('disconnectedCallback : onPlaceOrderHandler');
+        //this.onPlaceOrderHandler();
+    }
     // Generic validation
     validateField(event, message, value) {
         if (!value) {
@@ -45,25 +50,24 @@ export default class HalwaKadaiCheckOutPage extends LightningElement {
     }
 
     // Setters
-    setName(event) { this.name = event.target.value.trim(); this.validateField(event, "Name cannot be empty", this.name); }
-    setStreet(event) { this.street = event.target.value.trim(); this.validateField(event, "Street cannot be empty", this.street); }
-    setCity(event) { this.city = event.target.value.trim(); this.validateField(event, "City cannot be empty", this.city); }
-    setState(event) { this.state = event.target.value.trim(); this.validateField(event, "State cannot be empty", this.state); }
-    setPostalCode(event) { this.postalCode = event.target.value.trim(); this.validateField(event, "Postal Code cannot be empty", this.postalCode); }
-    setCountry(event) { this.country = event.target.value.trim(); this.validateField(event, "Country cannot be empty", this.country); }
-    setPhone(event) { this.phone = event.target.value.trim(); this.validateField(event, "Phone cannot be empty", this.phone); }
+    setName(event) { this.siteUser.name = event.target.value.trim(); this.validateField(event, "Name cannot be empty", this.siteUser.name);   this.contactDetailsChanges=true; }
+    setStreet(event) { this.siteUser.Street = event.target.value.trim(); this.validateField(event, "Street cannot be empty", this.siteUser.Street);   this.contactDetailsChanges=true; }
+    setCity(event) { this.siteUser.City = event.target.value.trim(); this.validateField(event, "City cannot be empty", this.siteUser.City);   this.contactDetailsChanges=true; }
+    setState(event) { this.siteUser.State = event.target.value.trim(); this.validateField(event, "State cannot be empty", this.siteUser.State);   this.contactDetailsChanges=true; }
+    setPostalCode(event) { this.siteUser.PostalCode = event.target.value.trim(); this.validateField(event, "Postal Code cannot be empty", this.siteUser.PostalCode);   this.contactDetailsChanges=true; }
+    setCountry(event) { this.siteUser.Country = event.target.value.trim(); this.validateField(event, "Country cannot be empty", this.siteUser.Country);   this.contactDetailsChanges=true; }
+    setPhone(event) { this.siteUser.MobilePhone = event.target.value.trim(); this.validateField(event, "Phone cannot be empty", this.siteUser.MobilePhone);   this.contactDetailsChanges=true; }
     setEmail(event) {
-    this.email = event.target.value.trim();
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(this.email)) {
-        event.target.setCustomValidity("Enter a valid email address");
-    } else {
-        event.target.setCustomValidity("");
+        this.siteUser.email = event.target.value.trim();
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(this.siteUser.email)) {
+            event.target.setCustomValidity("Enter a valid email address");
+        } else {
+            event.target.setCustomValidity("");
+        }
+        event.target.reportValidity();
+        this.contactDetailsChanges=true;
     }
-    event.target.reportValidity();
-}
-
-//setEmail(event) { this.email = event.target.value.trim(); this.validateField(event, "Email cannot be empty", this.email); }
 
     // Enable/disable Place Order
     allValueSet() {
@@ -78,28 +82,52 @@ export default class HalwaKadaiCheckOutPage extends LightningElement {
     }
 
     // Place order handler
-    onPlaceOrderHandler() {
+    onPlaceOrderHandler(event) {
+        setSiteUser(this.siteUser);
         console.log('onPlaceOrderHandler');
 
-        createOrderWithContact({
-            products: this.halwaProducts,
-            name: this.name,
-            phone: this.phone,
-            email: this.email,
-            street: this.street,
-            city: this.city,
-            state: this.state,
-            postalCode: this.postalCode,
-            country: this.country
-        })
-        .then(result => {
-            console.log('Order created successfully: ', result);
-            // Dispatch event before state changes
-            this.handleOrderConfirmationClick();
-        })
-        .catch(error => {
-            console.error('Error creating order: ', error);
-        });
+        if(this.siteUser.id !== 'newContact'){
+            console.log('Existing contact, will update details if changed');
+            //Update contact here if needed
+            if(this.contactDetailsChanges){
+                console.log('Contact details changed, updating siteUser in utils');
+                //Update contact here
+            }
+            //create order with existing contact
+            createOrderWithContact({
+                products: this.halwaProducts,
+                name: this.siteUser.name,
+                phone: this.siteUser.MobilePhone,
+                email: this.siteUser.Email,
+                street: this.siteUser.street,
+                city: this.siteUser.city,
+                state: this.siteUser.state,
+                postalCode: this.siteUser.postalCode,
+                country: this.siteUser.country,
+                contactId: this.siteUser.id
+            })
+            .then(result => {
+                console.log('Order created successfully: ', result);
+                sendOrderConfirmationEmail({orderId: result});
+                this.summary.orderPlaced = true;
+                this.summary.orderId = result;
+                // Dispatch event before state changes
+                this.handleOrderConfirmationClick();
+            })
+            .catch(error => {
+                console.error('Error creating order: ', error);
+            });
+        }
+        if(this.summary.orderPlaced){
+            console.log('Order already placed, skipping order creation');
+            return;
+        }else{
+            console.log('Placing order for the first time');
+        }
+        event.preventDefault();
+        //setSummary({ totalCount: 0, totalPrice: 0, loggedIn: this.summary.loggedIn, orderPlaced: true, newUser: false });
+
+        event.returnValue = '';
     }
     handleOrderConfirmationClick() {
         console.log('handleOrderConfirmationClick()');

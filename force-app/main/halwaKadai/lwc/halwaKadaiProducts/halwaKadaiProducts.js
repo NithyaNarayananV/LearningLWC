@@ -3,12 +3,13 @@ import getProducts from '@salesforce/apex/Halwakadai_HelperClass.getProductsDeta
 
 import { publish, MessageContext } from 'lightning/messageService';
 import PRODUCTS_LMS from '@salesforce/messageChannel/halwaKadaiLMS__c';
-import { getState, setState , getSummary, subscribe as stateSubscribe} from 'c/halwaKadaiUtils';
+import { getState, setState ,setSummary, getSummary, subscribe as stateSubscribe, setProductsCONSTANT} from 'c/halwaKadaiUtils';
 
 export default class HalwaKadaiProducts extends LightningElement {
 
     halwaProducts;
-    summary = { totalCount: 0, totalPrice: 0 };
+    halwaProductsCONSTANT;
+    summary = { totalCount: 0, totalPrice: 0,  loggedIn: false };
 
     products;
     productCount=0;
@@ -40,7 +41,16 @@ export default class HalwaKadaiProducts extends LightningElement {
                 selected: false,
                 orderPrice: 0
             }));
-
+            this.halwaProductsCONSTANT = this.halwaProducts;
+            setProductsCONSTANT(this.halwaProductsCONSTANT);
+            console.log('halwaKadaiProducts : wiredProducts : before this.halwaProducts = ', this.halwaProducts);
+            if(getState().length === 0){
+                setState(this.halwaProducts);
+            }else{
+                this.halwaProducts = getState();
+            }
+            console.log('halwaKadaiProducts : wiredProducts : after this.halwaProducts = ', this.halwaProducts);
+            
         } else if (error) {
               this.error = error;
               // Log everything we can, even in Locker
@@ -55,8 +65,10 @@ export default class HalwaKadaiProducts extends LightningElement {
             }
 
     }
-        connectedCallback() {
+    connectedCallback() {
+        console.log('HalwaKadaiProducts : connectedCallback');
         // 1. Initial Load
+
         this.halwaProducts = getState();
         this.summary = getSummary();
 
@@ -65,7 +77,9 @@ export default class HalwaKadaiProducts extends LightningElement {
             // This ensures both variables stay in sync with the utility
             this.halwaProducts = data.products;
             this.summary = data.summary;
-            console.log('Sync Complete: Count is ' + this.summary.totalCount);
+            console.log('HalwaKadaiProducts : connectedCallback :stateSubscribe : summary.totalCount = ' + this.summary.totalCount);
+            console.log('HalwaKadaiProducts : connectedCallback :stateSubscribe : summary.totalPrice = ' + this.summary.totalPrice);
+            console.log('HalwaKadaiProducts : connectedCallback :stateSubscribe : summary.loggedIn = ' + this.summary.loggedIn);
         });
     }
 
@@ -78,8 +92,11 @@ export default class HalwaKadaiProducts extends LightningElement {
                 this.summary = {
                     ...this.summary,
                     totalCount: this.summary.totalCount + 1,
-                    totalPrice: this.summary.totalPrice + p.price
+                    totalPrice: this.summary.totalPrice + p.price, 
+                    loggedIn: this.summary.loggedIn
                 };
+                console.log('handleIncreaseQuantity  : totalCount [ ',this.summary.totalCount,' ], totalPrice [ ',this.summary.totalPrice,' ], loggedIn [ ' ,this.summary.loggedIn);
+
                 return { ...p, quantity: newQty, _dirty: true, selected:true , orderPrice: p.price * newQty };
             }
             return p;
@@ -97,8 +114,11 @@ export default class HalwaKadaiProducts extends LightningElement {
                 this.summary = {
                     ...this.summary,
                     totalCount: this.summary.totalCount - 1,
-                    totalPrice: this.summary.totalPrice - p.price
+                    totalPrice: this.summary.totalPrice - p.price,
+                    loggedIn: this.summary.loggedIn
                 };
+                console.log('handleDecreaseQuantity : totalCount [ ',this.summary.totalCount,' ], totalPrice [ ',this.summary.totalPrice,' ], loggedIn [ ' ,this.summary.loggedIn);
+
                 return { ...p, quantity: newQty, _dirty: true, selected: newSelected, orderPrice: p.price * newQty };
             }
             return p;
@@ -127,7 +147,7 @@ export default class HalwaKadaiProducts extends LightningElement {
         publish(this.messageContext, PRODUCTS_LMS, message);
         console.log('[PUB] ✅ Published:', JSON.parse(JSON.stringify(message)));
         setState(this.halwaProducts);
-        setState(this.summary);
+        setSummary(this.summary);
         console.log('VALUE SET FOR STATE ');
     }
 }

@@ -1,5 +1,6 @@
 <template>
-            <header>
+    <template if:false={isActive_OderConfimation}>
+        <header>
             <div class="container header-flex">
 
                 <!-- Logo -->
@@ -12,7 +13,14 @@
 
                 <!-- Right Side Buttons -->
                 <div class="header-right">
-                    <!--a href="auth.html" class="btn-login">Login</a-->
+                        <a onclick={onClearCacheClick} class="btn-login">Clear Cache</a>
+                        <a onclick={onClearCartClick} class="btn-login">Clear Cart</a>
+                    <template if:false={summary.loggedIn}>
+                        <a onclick={onLoginClick} class="btn-login">Login</a>
+                    </template>
+                    <template if:true={summary.loggedIn}>
+                        <a onclick={onLogOutClick} class="btn-login">LogOut</a>
+                    </template>
 
                     <!-- My Orders Link (Visible only after login) -->
                     <a  onclick={onCartClick} id="my-orders-link" class="btn-orders" style="display:none;">📦 My Orders</a>
@@ -77,14 +85,14 @@
                 </div>
             </div>
         </header>
-    <nav class="main-menu">
-        <ul>
-            <li><a onclick={onHomeClick}>Home</a></li>
-            <li><a onclick={onAboutClick}>About</a></li>
-            <li><a onclick={onProductsClick}>Products</a></li>
-            <li><a onclick={onContactClick}>Contact</a></li>
-        </ul>
-    </nav>
+        <nav class="main-menu">
+            <ul>
+                <li><a onclick={onHomeClick}>Home</a></li>
+                <li><a onclick={onAboutClick}>About</a></li>
+                <li><a onclick={onProductsClick}>Products</a></li>
+                <li><a onclick={onContactClick}>Contact</a></li>
+            </ul>
+        </nav>
      <div class={homeClass}>
         <c-halwa-kadai-home-page></c-halwa-kadai-home-page>
      </div>
@@ -93,18 +101,26 @@
     </div>
     <div class={cartClass}>
         <c-halwa-kadai-cart-page  oncheckout={handleCheckOut}></c-halwa-kadai-cart-page>
-    </div>    
-    <div class={checkoutClass}>
-        <c-halwa-kadai-check-out-page onorderconfirmation={handleOrderConfirmationClick}></c-halwa-kadai-check-out-page>
     </div>
-    <div class={orderConfirmationClass}>
-        <c-halwa-kadai-order-confirmation></c-halwa-kadai-order-confirmation>
-        <template lwc:if={isActive_OderConfimation}>
-        </template>
+    <template lwc:if={isActive_CheckOut}>  
+        <div class={checkoutClass}>
+            <c-halwa-kadai-check-out-page onorderconfirmation={handleOrderConfirmationClick}></c-halwa-kadai-check-out-page>
+        </div>
+    </template>
+    
+    <div class={loginClass}>
+        <c-halwa-kadai-login onlogin={handleLogin}></c-halwa-kadai-login>
     </div>
     <footer>
         <div class="container">
             <p>&copy; 2026 Halwa Delights. All rights reserved.</p>
         </div>
     </footer>
+</template>
+<template lwc:if={isActive_OderConfimation}>
+    <div class={orderConfirmationClass}>
+        <c-halwa-kadai-order-confirmation onbacktohome={handleBackToHome} oncontinueshopping={handleContinueShopping}></c-halwa-kadai-order-confirmation>
+    </div>
+</template>
+    
 </template>

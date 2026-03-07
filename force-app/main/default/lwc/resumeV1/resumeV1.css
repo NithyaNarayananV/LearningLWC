@@ -1,0 +1,109 @@
+.resume-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    padding: 20px;
+    color: #333;
+}
+
+.resume-header {
+    border-bottom: 2px dotted #ccc;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}
+
+.header-titles {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+}
+
+.name {
+    color: #6a4a9c; /* Purple from image */
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin: 0;
+    text-transform: uppercase;
+}
+
+.role {
+    color: #888;
+    font-size: 1.5rem;
+    margin: 0;
+}
+
+.contact-info {
+    font-weight: bold;
+    margin-top: 5px;
+}
+
+.resume-body {
+    display: flex;
+    gap: 20px;
+}
+
+.left-column {
+    flex: 1;
+    background-color: #e6e3ee; /* Light purple tint for sidebar */
+    padding: 15px;
+    border: 1px solid #6a4a9c;
+}
+
+.right-column {
+    flex: 2.5;
+}
+
+.section {
+    margin-bottom: 20px;
+}
+
+.section-title {
+    color: #6a4a9c;
+    text-transform: uppercase;
+    font-size: 1.2rem;
+    margin-bottom: 10px;
+}
+
+.right-title {
+    background-color: #e6e3ee;
+    padding: 5px 10px;
+    border-top: 1px solid #ccc;
+    border-bottom: 1px solid #ccc;
+}
+
+ol, ul {
+    margin: 0;
+    padding-left: 20px;
+}
+
+li {
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+.no-bullets {
+    list-style-type: none;
+    padding-left: 0;
+}
+
+.edu-item {
+    margin-bottom: 15px;
+}
+
+.edu-year {
+    color: #666;
+    margin: 0;
+}
+
+.edu-school, .edu-details {
+    margin: 2px 0;
+}
+
+.role-block {
+    margin-top: 10px;
+}
+
+.project-block {
+    margin-bottom: 15px;
+}
