@@ -63,11 +63,14 @@ public without sharing class Halwakadai_HelperClass {
         // Create order linked to contact and with billing/shipping address
         System.debug('createOrderWithContact - Before createOrder - contactId : ' + contactId);
         Order newOrder = new Order(
-            AccountId = '001GA00005KAsGgYAL',
-            ContractId = '800GA000000b86cYAA',
+            AccountId = '001GA00005KAsGgYAL',// for LWC
+            ContractId = '800GA000000b86cYAA', // for LWC 
+            // NN AccountId = '001g500000DtRbBAAV', 
+            // NN ContractId = '800g500000HrG4rAAF',
             EffectiveDate = Date.today(),
             Status = 'Draft',
             Pricebook2Id = '01sGA00000Zwd4SYAR',
+            // NN Pricebook2Id = '01sg5000002JWkcAAG',
             BillToContactId = contactId,
 
             // Billing Address

@@ -1,5 +1,6 @@
 <template>
-            <header>
+    <template if:false={isActive_OderConfimation}>
+        <header>
             <div class="container header-flex">
 
                 <!-- Logo -->
@@ -84,14 +85,14 @@
                 </div>
             </div>
         </header>
-    <nav class="main-menu">
-        <ul>
-            <li><a onclick={onHomeClick}>Home</a></li>
-            <li><a onclick={onAboutClick}>About</a></li>
-            <li><a onclick={onProductsClick}>Products</a></li>
-            <li><a onclick={onContactClick}>Contact</a></li>
-        </ul>
-    </nav>
+        <nav class="main-menu">
+            <ul>
+                <li><a onclick={onHomeClick}>Home</a></li>
+                <li><a onclick={onAboutClick}>About</a></li>
+                <li><a onclick={onProductsClick}>Products</a></li>
+                <li><a onclick={onContactClick}>Contact</a></li>
+            </ul>
+        </nav>
      <div class={homeClass}>
         <c-halwa-kadai-home-page></c-halwa-kadai-home-page>
      </div>
@@ -106,11 +107,7 @@
             <c-halwa-kadai-check-out-page onorderconfirmation={handleOrderConfirmationClick}></c-halwa-kadai-check-out-page>
         </div>
     </template>
-    <div class={orderConfirmationClass}>
-        <c-halwa-kadai-order-confirmation></c-halwa-kadai-order-confirmation>
-        <template lwc:if={isActive_OderConfimation}>
-        </template>
-    </div>
+    
     <div class={loginClass}>
         <c-halwa-kadai-login onlogin={handleLogin}></c-halwa-kadai-login>
     </div>
@@ -119,4 +116,11 @@
             <p>&copy; 2026 Halwa Delights. All rights reserved.</p>
         </div>
     </footer>
+</template>
+<template lwc:if={isActive_OderConfimation}>
+    <div class={orderConfirmationClass}>
+        <c-halwa-kadai-order-confirmation onbacktohome={handleBackToHome} oncontinueshopping={handleContinueShopping}></c-halwa-kadai-order-confirmation>
+    </div>
+</template>
+    
 </template>

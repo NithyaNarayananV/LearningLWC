@@ -22,11 +22,23 @@ export function getState() {
 export function setSiteUser(newSiteUser) {
     siteUser = { ...siteUser, ...newSiteUser };
     console.log('halwaKadaiUtils : setUser = ', siteUser);
+    window.localStorage.setItem(KEYsiteUser, JSON.stringify(siteUser));
     summary = { ...summary, loggedIn: true };
 }
 
 export function getSiteUser() {
-    window.localStorage.setItem(KEYsiteUser, JSON.stringify(siteUser));
+        const rawSiteUser = window.localStorage.getItem(KEYsiteUser);
+        if (rawSiteUser) {
+            try {
+                siteUser = JSON.parse(rawSiteUser);
+                console.log('halwaKadaiUtils : getSiteUser : window.localStorage : rawSiteUser = ' + rawSiteUser);
+            } catch (e) {
+                window.localStorage.removeItem(KEYsiteUser);
+                console.log('Error parsing localStorage for siteUser:', e);
+                console.log('ERROR : rawSiteUser = ' + rawSiteUser);
+            }
+        }
+
 
     console.log('halwaKadaiUtils : getSiteUser = ', siteUser);
     return siteUser;

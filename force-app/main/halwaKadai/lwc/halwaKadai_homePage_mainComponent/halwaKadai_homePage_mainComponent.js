@@ -5,6 +5,7 @@ import { getState, setState ,setSummary, getSummary, subscribe as stateSubscribe
 
 const KEYhalwaProducts = 'myApp:halwaProducts'; // namespace your key to avoid collisions
 const KEYsummary = 'myApp:summary'; // namespace your key to avoid collisions
+const KEYsiteUser = 'myApp:siteUser'; // namespace your key to avoid collisions
 
 export default class HalwaKadai_homePage_mainComponent extends LightningElement {
   isActive_Home=true;
@@ -109,9 +110,15 @@ export default class HalwaKadai_homePage_mainComponent extends LightningElement 
     this.loginClass='slds-show';
   }
   onLogOutClick(){
-    //this.hideAll();
+    this.hideAll();
+    this.isActive_Home=true;
+    this.homeClass='slds-show';
     //Need to Process and remove the login.
-    setSummary({...this.summary,loggedIn:false });
+    setState(getProductsCONSTANT());
+    setSummary({ totalCount: 0, totalPrice: 0 , loggedIn: false, orderPlaced: false, newUser: true});
+    window.localStorage.removeItem(KEYhalwaProducts);
+    window.localStorage.removeItem(KEYsummary);
+    window.localStorage.removeItem(KEYsiteUser);
 
   }
   onClearCacheClick(){
@@ -122,12 +129,13 @@ export default class HalwaKadai_homePage_mainComponent extends LightningElement 
       console.log('halwaKadaiUtils : onClearCacheClick : before clearing localStorage, summary = ', this.summary);
         window.localStorage.removeItem(KEYhalwaProducts);
         window.localStorage.removeItem(KEYsummary);
-        console.log('Local storage cleared for keys:', KEYhalwaProducts, KEYsummary);
+        window.localStorage.removeItem(KEYsiteUser);
+        console.log('Local storage cleared for keys:', KEYhalwaProducts, KEYsummary, KEYsiteUser);
         console.log('halwaKadaiUtils : onClearCacheClick : after clearing localStorage, state = ', this.halwaProducts);
         console.log('halwaKadaiUtils : onClearCacheClick : after clearing localStorage, summary = ', this.summary);
     } catch (e) {
         console.log('Error clearing localStorage:', e);
-        console.log('ERROR : window.localStorage.removeItem for keys:', KEYhalwaProducts, KEYsummary);
+        console.log('ERROR : window.localStorage.removeItem for keys:', KEYhalwaProducts, KEYsummary, KEYsiteUser);
     }
     // Reset state and summary to defaults after clearing cache
     //setState([]);
@@ -135,8 +143,8 @@ export default class HalwaKadai_homePage_mainComponent extends LightningElement 
   }
   onClearCartClick(){
     console.log('onClearCartClick()');
-    setSummary({ totalCount: 0, totalPrice: 0, loggedIn:false });
     setState(getProductsCONSTANT());
+    setSummary({ ...this.summary, totalCount: 0, totalPrice: 0, orderPlaced: false });
   }
 
   onOrderConfirmationClick(){
@@ -150,6 +158,21 @@ export default class HalwaKadai_homePage_mainComponent extends LightningElement 
     }).catch(error => {
       console.error('Error updating order confirmation state:', error);
     });
+  }
+  handleBackToHome() {
+    console.log('handleBackToHome()');
+    //reset state and summary to defaults when going back to home
+    setState(getProductsCONSTANT());
+    setSummary({ totalCount: 0, totalPrice: 0 , loggedIn: true, orderPlaced: false, newUser: false});
+    this.onHomeClick();
+
+  }
+  handleContinueShopping() {
+    console.log('handleContinueShopping()');
+    //reset state and summary to defaults when going back to home
+    setState(getProductsCONSTANT());
+    setSummary({ totalCount: 0, totalPrice: 0 , loggedIn: true, orderPlaced: false, newUser: false});
+    this.onProductsClick();
   }
   hideAll(){
     this.isActive_Home=false;

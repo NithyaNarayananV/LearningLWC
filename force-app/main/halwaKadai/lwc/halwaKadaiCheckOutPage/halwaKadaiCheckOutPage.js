@@ -1,5 +1,5 @@
 import { LightningElement } from 'lwc';
-import { getState, getSummary, subscribe as stateSubscribe, getSiteUser, setSiteUser } from 'c/halwaKadaiUtils';
+import { getState, getSummary, subscribe as stateSubscribe, getSiteUser, setSiteUser, setSummary } from 'c/halwaKadaiUtils';
 import createOrderWithContact from '@salesforce/apex/Halwakadai_HelperClass.createOrderWithContact';
 import sendOrderConfirmationEmail from '@salesforce/apex/Halwakadai_HelperClass.sendOrderConfirmationEmail';
 
@@ -125,6 +125,8 @@ export default class HalwaKadaiCheckOutPage extends LightningElement {
             console.log('Placing order for the first time');
         }
         event.preventDefault();
+        //setSummary({ totalCount: 0, totalPrice: 0, loggedIn: this.summary.loggedIn, orderPlaced: true, newUser: false });
+
         event.returnValue = '';
     }
     handleOrderConfirmationClick() {
