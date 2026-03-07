@@ -14,7 +14,7 @@
                         <h2>Shipping Information</h2>
                         <form id="shipping-form" class="checkout-form">
                             <label for="fullname">Full Name</label>
-                            <input type="text" id="fullname" placeholder="Enter your name" required value={name}  onblur={setName} />
+                            <input type="text" id="fullname" placeholder="Enter your name" required value={siteUser.name}  onblur={setName} />
 
                             <label for="street">Street</label>
                             <input 
@@ -22,7 +22,7 @@
                                 type="text" 
                                 placeholder="House number, street" 
                                 required 
-                                value={street} 
+                                value={siteUser.Street} 
                                 onblur={setStreet}
                             />
 
@@ -32,7 +32,7 @@
                                 type="text" 
                                 placeholder="City" 
                                 required 
-                                value={city} 
+                                value={siteUser.City} 
                                 onblur={setCity}
                             />
 
@@ -42,7 +42,7 @@
                                 type="text" 
                                 placeholder="State" 
                                 required 
-                                value={state} 
+                                value={siteUser.State} 
                                 onblur={setState}
                             />
 
@@ -52,7 +52,7 @@
                                 type="text" 
                                 placeholder="Postal Code" 
                                 required 
-                                value={postalCode} 
+                                value={siteUser.PostalCode} 
                                 onblur={setPostalCode}
                             />
 
@@ -62,12 +62,12 @@
                                 type="text" 
                                 placeholder="Country" 
                                 required 
-                                value={country} 
+                                value={siteUser.Country} 
                                 disabled
                             />
 
                             <label for="phone">Mobile Number</label>
-                            <input type="tel" id="phone" placeholder="+91 XXXXX XXXXX"  pattern="(\+91)?[6-9][0-9]{9}" required value={phone} onblur={setPhone}/>
+                            <input type="tel" id="phone" placeholder="+91 XXXXX XXXXX"  pattern="(\+91)?[6-9][0-9]{9}" required value={siteUser.MobilePhone} onblur={setPhone}/>
 
                             <label for="email">Email</label>
                             <input type="email" id="email" placeholder="you@example.com"    pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$" required  value={siteUser.email} onblur={setEmail}/>

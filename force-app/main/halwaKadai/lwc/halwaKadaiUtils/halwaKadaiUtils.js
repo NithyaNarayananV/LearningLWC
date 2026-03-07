@@ -25,6 +25,7 @@ export function setSiteUser(newSiteUser) {
 }
 
 export function getSiteUser() {
+    console.log('halwaKadaiUtils : getSiteUser = ', siteUser);
     return siteUser;
 }
 

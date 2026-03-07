@@ -152,7 +152,13 @@ public without sharing class Halwakadai_HelperClass {
         List<Contact> conList = [
             SELECT Id FROM Contact WHERE Email = :email LIMIT 1
         ];
+        System.debug(conList);  
         return conList.isEmpty() ? null : conList[0].Id;
+    }
+    @AuraEnabled
+    public static Contact searchContactF(String email) {
+        if (String.isBlank(email)) return null;
+        return [ SELECT Id, name, phone, email, MailingStreet, MailingCity, MailingState, MailingPostalCode, MailingCountry FROM Contact WHERE Email = :email LIMIT 1];
     }
 
     @AuraEnabled

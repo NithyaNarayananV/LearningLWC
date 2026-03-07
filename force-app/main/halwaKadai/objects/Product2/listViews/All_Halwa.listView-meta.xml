@@ -7,6 +7,7 @@
     <columns>PRODUCT2.ACTIVE</columns>
     <columns>Image_URL__c</columns>
     <columns>Price__c</columns>
+    <columns>Tag__c</columns>
     <filterScope>Everything</filterScope>
     <filters>
         <field>PRODUCT2.RECORD_TYPE</field>

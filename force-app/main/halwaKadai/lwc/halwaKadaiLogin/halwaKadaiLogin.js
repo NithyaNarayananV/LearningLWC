@@ -2,6 +2,7 @@ import { LightningElement } from 'lwc';
 // 1. Import the new Toast module
 import LightningToast from 'lightning/toast';
 import sendEmailOTP from '@salesforce/apex/Halwakadai_HelperClass.sendEmailOTP';
+import searchContact from '@salesforce/apex/Halwakadai_HelperClass.searchContactF';
 import { getState, setState ,setSummary, getSummary, subscribe as stateSubscribe, setSiteUser} from 'c/halwaKadaiUtils';
 import Street from '@salesforce/schema/Asset.Street';
 
@@ -12,7 +13,8 @@ export default class HalwaKadaiLogin extends LightningElement {
     generatedOTP = '';
     summary='';
     siteUser = {name : '', email: '', Street: '', City: '', State: '', PostalCode: '', Country: '', MobilePhone: ''};
-
+    newUser = true;
+    contactDeailts;
     connectedCallback() {
         // 1. Initial Load
         this.summary = getSummary();
@@ -28,7 +30,6 @@ export default class HalwaKadaiLogin extends LightningElement {
     handleEmailChange(event) {
         this.email = event.target.value;
         this.siteUser = { ...this.siteUser, email: this.email };
-
         console.log('Email:', this.email);
     }
     
@@ -53,8 +54,10 @@ export default class HalwaKadaiLogin extends LightningElement {
                 this.otp=this.generatedOTP;
                 ///delete this line
                 setSiteUser(this.siteUser);
-                console.log('HalwaKadaiLogin : handleSendOTP : B4        setSiteUser(this.siteUser);');
                 this.showToast('Success', 'OTP has been sent to your email', 'success');
+               
+
+        
             } else {
                 this.showToast('Error', 'Failed to generate OTP', 'error');
             }
@@ -82,8 +85,39 @@ export default class HalwaKadaiLogin extends LightningElement {
     handleLogin(event) {
         event.preventDefault(); 
         console.log('handleLogin');
-        if(this.otp.length === 4 && this.otp == this.generatedOTP) {
+        console.log('otp : ',this.otp,'|| generatedOTP : ', this.generatedOTP);
+        console.log(this.otp.length);
+        console.log(this.otp == this.generatedOTP);
+        if((this.otp.length === 4 || this.otp.toString().length === 4 ) && this.otp == this.generatedOTP) {
             this.showToast('Success', 'Login successful', 'success');
+            searchContact({ email: this.email })
+                .then((contact) => {
+                    if (contact) {
+                        this.newUser = false;
+                        console.log('HalwaKadaiLogin : handleLogin : contact : ', contact);
+                        this.contactDeailts = contact;
+                        console.log('HalwaKadaiLogin : handleLogin : contactDetails : ', this.contactDeailts);
+                        this.siteUser = {
+                            ...this.siteUser,
+                            name: contact.Name, 
+                            email: contact.Email, 
+                            Street: contact.MailingStreet, 
+                            City: contact.MailingCity, 
+                            State: contact.MailingState, 
+                            PostalCode: contact.MailingPostalCode, 
+                            Country: contact.MailingCountry, 
+                            MobilePhone: contact.Phone
+                        };
+                        console.log('HalwaKadaiLogin : handleLogin : siteUser : ', this.siteUser);
+                        setSiteUser(this.siteUser);
+                    }else{
+                        this.newUser = true;
+                        console.log('HalwaKadaiLogin : handleLogin : No contact found for email:', this.email);
+                    }
+                })
+                .catch((error) => {
+                    console.error('Error fetching contact:', error);
+                });
             const loginEvent = new CustomEvent('login', {
                 bubbles: true,
                 composed: true
@@ -96,7 +130,6 @@ export default class HalwaKadaiLogin extends LightningElement {
             setSummary(this.summary);
             this.dispatchEvent(loginEvent);
             console.log('HalwaKadaiLogin : handleLogin : AF     this.dispatchEvent(loginEvent);');
-
             // Add navigation logic here
         } else {
             this.showToast('Invalid OTP', 'Please Enter Correct OTP', 'error');
