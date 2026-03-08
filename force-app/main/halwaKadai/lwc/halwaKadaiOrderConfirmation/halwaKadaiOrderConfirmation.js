@@ -2,8 +2,8 @@
 import { LightningElement } from 'lwc';
 import { getState, getSummary, subscribe as stateSubscribe, setSummary } from 'c/halwaKadaiUtils';
 
-const KEYhalwaProducts = 'myApp:halwaProducts'; // namespace your key to avoid collisions
-const KEYsummary = 'myApp:summary'; // namespace your key to avoid collisions
+const KEYhalwaProducts = 'halwaKadai:halwaProducts'; // namespace your key to avoid collisions
+const KEYsummary = 'halwaKadai:summary'; // namespace your key to avoid collisions
 
 export default class HalwaKadaiOrderConfirmation extends LightningElement {
     halwaProducts = [];

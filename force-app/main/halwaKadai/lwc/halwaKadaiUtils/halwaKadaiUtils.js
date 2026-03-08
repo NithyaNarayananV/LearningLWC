@@ -5,9 +5,9 @@ let summary = { totalCount: 0, totalPrice: 0 , loggedIn: false, orderPlaced: fal
 let siteUser = {id:'newContact', name : '', email: '', Street: '', City: '', State: '', PostalCode: '', Country: '', MobilePhone: ''};
 
 const listeners = [];
-const KEYhalwaProducts = 'myApp:halwaProducts'; // namespace your key to avoid collisions
-const KEYsummary = 'myApp:summary'; // namespace your key to avoid collisions
-const KEYsiteUser = 'myApp:siteUser'; // namespace your key to avoid collisions
+const KEYhalwaProducts = 'halwaKadai:halwaProducts'; // namespace your key to avoid collisions
+const KEYsummary = 'halwaKadai:summary'; // namespace your key to avoid collisions
+const KEYsiteUser = 'halwaKadai:siteUser'; // namespace your key to avoid collisions
 
 export function getProductsCONSTANT() {
     console.log('halwaKadaiUtils : getProductsCONSTANT ');
@@ -23,7 +23,11 @@ export function setSiteUser(newSiteUser) {
     siteUser = { ...siteUser, ...newSiteUser };
     console.log('halwaKadaiUtils : setUser = ', siteUser);
     window.localStorage.setItem(KEYsiteUser, JSON.stringify(siteUser));
-    summary = { ...summary, loggedIn: true };
+    if(siteUser.id !== 'newContact')
+        summary = { ...summary, loggedIn: true };
+    else
+        summary = { ...summary, loggedIn: false };
+    notify();
 }
 
 export function getSiteUser() {
@@ -38,8 +42,6 @@ export function getSiteUser() {
                 console.log('ERROR : rawSiteUser = ' + rawSiteUser);
             }
         }
-
-
     console.log('halwaKadaiUtils : getSiteUser = ', siteUser);
     return siteUser;
 }
@@ -125,6 +127,7 @@ function notify() {
     // We send BOTH variables inside one object
     listeners.forEach(cb => cb({
         products: state,
-        summary: summary
+        summary: summary,
+        siteUser: siteUser
     }));
 }

@@ -1,11 +1,11 @@
 // file: halwaKadai_homePage_mainComponent.js
 import { LightningElement } from 'lwc';
 
-import { getState, setState ,setSummary, getSummary, subscribe as stateSubscribe, getProductsCONSTANT} from 'c/halwaKadaiUtils';
+import { getState, setState ,setSummary, setSiteUser, getSummary, subscribe as stateSubscribe, getProductsCONSTANT} from 'c/halwaKadaiUtils';
 
-const KEYhalwaProducts = 'myApp:halwaProducts'; // namespace your key to avoid collisions
-const KEYsummary = 'myApp:summary'; // namespace your key to avoid collisions
-const KEYsiteUser = 'myApp:siteUser'; // namespace your key to avoid collisions
+const KEYhalwaProducts = 'halwaKadai:halwaProducts'; // namespace your key to avoid collisions
+const KEYsummary = 'halwaKadai:summary'; // namespace your key to avoid collisions
+const KEYsiteUser = 'halwaKadai:siteUser'; // namespace your key to avoid collisions
 
 export default class HalwaKadai_homePage_mainComponent extends LightningElement {
   isActive_Home=true;
@@ -116,10 +116,11 @@ export default class HalwaKadai_homePage_mainComponent extends LightningElement 
     //Need to Process and remove the login.
     setState(getProductsCONSTANT());
     setSummary({ totalCount: 0, totalPrice: 0 , loggedIn: false, orderPlaced: false, newUser: true});
+    setSiteUser({id:'newContact', name : '', email: '', Street: '', City: '', State: '', PostalCode: '', Country: '', MobilePhone: ''});
+
     window.localStorage.removeItem(KEYhalwaProducts);
     window.localStorage.removeItem(KEYsummary);
     window.localStorage.removeItem(KEYsiteUser);
-
   }
   onClearCacheClick(){
     console.log('onClearCacheClick()');

@@ -26,6 +26,7 @@ export default class HalwaKadaiCheckOutPage extends LightningElement {
         this.unsub = stateSubscribe((data) => {
             this.halwaProducts = data.products;
             this.summary = data.summary;
+            this.siteUser = data.siteUser;
             console.log('CART Sync Complete: Count is ' + this.summary.totalCount);
         });
     }
