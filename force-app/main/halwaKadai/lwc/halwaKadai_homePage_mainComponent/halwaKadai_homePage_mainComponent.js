@@ -116,7 +116,7 @@ export default class HalwaKadai_homePage_mainComponent extends LightningElement 
     //Need to Process and remove the login.
     setState(getProductsCONSTANT());
     setSummary({ totalCount: 0, totalPrice: 0 , loggedIn: false, orderPlaced: false, newUser: true});
-    setSiteUser({id:'newContact', name : '', email: '', Street: '', City: '', State: '', PostalCode: '', Country: '', MobilePhone: ''});
+    setSiteUser({id:'newContact', Name : '', Email: '', Street: '', City: '', State: '', PostalCode: '', Country: '', MobilePhone: ''});
 
     window.localStorage.removeItem(KEYhalwaProducts);
     window.localStorage.removeItem(KEYsummary);

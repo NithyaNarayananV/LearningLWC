@@ -29,7 +29,7 @@ export default class HalwaKadaiLogin extends LightningElement {
 
     handleEmailChange(event) {
         this.email = event.target.value;
-        this.siteUser = { ...this.siteUser, email: this.email };
+        this.siteUser = { ...this.siteUser, Email: this.email };
         console.log('Email:', this.email);
     }
     

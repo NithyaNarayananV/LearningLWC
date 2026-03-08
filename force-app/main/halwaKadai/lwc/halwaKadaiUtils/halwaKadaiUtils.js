@@ -2,7 +2,7 @@
 let productsCONSTANT = [];
 let state = [];
 let summary = { totalCount: 0, totalPrice: 0 , loggedIn: false, orderPlaced: false, newUser: true};
-let siteUser = {id:'newContact', name : '', email: '', Street: '', City: '', State: '', PostalCode: '', Country: 'India', MobilePhone: ''};
+let siteUser = {id:'newContact', Name : '', Email: '', Street: '', City: '', State: '', PostalCode: '', Country: 'India', MobilePhone: ''};
 
 const listeners = [];
 const KEYhalwaProducts = 'halwaKadai:halwaProducts'; // namespace your key to avoid collisions

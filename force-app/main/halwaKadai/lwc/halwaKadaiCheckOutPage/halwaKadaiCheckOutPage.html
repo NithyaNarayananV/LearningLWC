@@ -14,7 +14,7 @@
                         <h2>Shipping Information</h2>
                         <form id="shipping-form" class="checkout-form">
                             <label for="fullname">Full Name</label>
-                            <input type="text" id="fullname" placeholder="Enter your name" required value={siteUser.name}  onblur={setName} />
+                            <input type="text" id="fullname" placeholder="Enter your name" required value={siteUser.Name}  onblur={setName} />
 
                             <label for="street">Street</label>
                             <input 
@@ -64,14 +64,13 @@
                                 required 
                                 value={siteUser.Country} 
                                 onblur={setCountry}
-                                
                             />
 
                             <label for="phone">Mobile Number</label>
                             <input type="tel" id="phone" placeholder="+91 XXXXX XXXXX"  pattern="(\+91)?[6-9][0-9]{9}" required value={siteUser.MobilePhone} onblur={setPhone}/>
 
                             <label for="email">Email</label>
-                            <input type="email" id="email" placeholder="you@example.com"    pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$" required  value={siteUser.email} onblur={setEmail}/>
+                            <input type="email" id="email" placeholder="you@example.com"    pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$" required  value={siteUser.Email} onblur={setEmail}/>
                         </form>
                     </div>
 
