@@ -2,7 +2,7 @@
 let productsCONSTANT = [];
 let state = [];
 let summary = { totalCount: 0, totalPrice: 0 , loggedIn: false, orderPlaced: false, newUser: true};
-let siteUser = {id:'newContact', name : '', email: '', Street: '', City: '', State: '', PostalCode: '', Country: '', MobilePhone: ''};
+let siteUser = {id:'newContact', name : '', email: '', Street: '', City: '', State: '', PostalCode: '', Country: 'India', MobilePhone: ''};
 
 const listeners = [];
 const KEYhalwaProducts = 'halwaKadai:halwaProducts'; // namespace your key to avoid collisions
@@ -23,10 +23,12 @@ export function setSiteUser(newSiteUser) {
     siteUser = { ...siteUser, ...newSiteUser };
     console.log('halwaKadaiUtils : setUser = ', siteUser);
     window.localStorage.setItem(KEYsiteUser, JSON.stringify(siteUser));
+    /*
     if(siteUser.id !== 'newContact')
         summary = { ...summary, loggedIn: true };
     else
         summary = { ...summary, loggedIn: false };
+    */
     notify();
 }
 

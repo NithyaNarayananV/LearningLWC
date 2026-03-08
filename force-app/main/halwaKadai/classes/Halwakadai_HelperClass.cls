@@ -163,7 +163,10 @@ public without sharing class Halwakadai_HelperClass {
     @AuraEnabled
     public static Contact searchContactF(String email) {
         if (String.isBlank(email)) return null;
-        return [ SELECT Id, name, phone, email, MailingStreet, MailingCity, MailingState, MailingPostalCode, MailingCountry FROM Contact WHERE Email = :email LIMIT 1];
+        List<Contact> conList = [SELECT Id, name, phone, email, MailingStreet, MailingCity, MailingState, MailingPostalCode, MailingCountry FROM Contact WHERE Email = :email LIMIT 1];
+        System.debug('Halwakadai_HelperClass : searchContactF - Found contacts: ' + conList.size()   + ' for email: ' + email);
+        System.debug('Halwakadai_HelperClass : searchContactF - Found contacts: ' + conList   + ' for email: ' + email);
+        return conList.isEmpty() ? null : conList[0]; 
     }
 
 

@@ -1,6 +1,7 @@
 import { LightningElement } from 'lwc';
 import { getState, getSummary, subscribe as stateSubscribe, getSiteUser, setSiteUser, setSummary } from 'c/halwaKadaiUtils';
 import createOrderWithContact from '@salesforce/apex/Halwakadai_HelperClass.createOrderWithContact';
+import createContact from '@salesforce/apex/Halwakadai_HelperClass.createContact';
 import sendOrderConfirmationEmail from '@salesforce/apex/Halwakadai_HelperClass.sendOrderConfirmationEmail';
 
 export default class HalwaKadaiCheckOutPage extends LightningElement {
@@ -69,16 +70,21 @@ export default class HalwaKadaiCheckOutPage extends LightningElement {
         event.target.reportValidity();
         this.contactDetailsChanges=true;
     }
+    setCountry(event) { this.siteUser.Country = event.target.value.trim(); this.validateField(event, "Country cannot be empty", this.siteUser.Country);   this.contactDetailsChanges=true; }    
 
     // Enable/disable Place Order
     allValueSet() {
+        console.log('allValueSet() : siteUser = ', this.siteUser);
         if (
-            this.name && this.street && this.city && this.state &&
-            this.postalCode && this.country && this.phone && this.email
+            this.siteUser.name && this.siteUser.street && this.siteUser.city && this.siteUser.state &&
+            this.siteUser.postalCode && this.siteUser.country && this.siteUser.MobilePhone && this.siteUser.email
         ) {
+
             this.isPlaceOrderDisabled = false;
+            console.log('allValueSet() : All values are set, enabling Place Order');
         } else {
             this.isPlaceOrderDisabled = true;
+            console.log('allValueSet() : Some values are missing, disabling Place Order');
         }
     }
 
@@ -87,6 +93,28 @@ export default class HalwaKadaiCheckOutPage extends LightningElement {
         setSiteUser(this.siteUser);
         console.log('onPlaceOrderHandler');
 
+        if(this.siteUser.id == 'newContact'){
+            console.log('Placing order for the first time');
+            createContact({
+                name: this.siteUser.name,
+                phone: this.siteUser.MobilePhone,
+                email: this.siteUser.Email,
+                street: this.siteUser.street,
+                city: this.siteUser.city,
+                state: this.siteUser.state,
+                postalCode: this.siteUser.postalCode,
+                country: this.siteUser.country
+            })
+            .then(result => {
+                console.log('Contact created successfully: ', result);
+                this.siteUser.id = result; // Update siteUser with new contact ID
+                setSiteUser(this.siteUser); // Update siteUser in utils with new contact ID
+                //create order with new contact
+            })
+            .catch(error => {
+                console.error('Error creating contact: ', error);
+            });
+        }
         if(this.siteUser.id !== 'newContact'){
             console.log('Existing contact, will update details if changed');
             //Update contact here if needed
@@ -122,8 +150,6 @@ export default class HalwaKadaiCheckOutPage extends LightningElement {
         if(this.summary.orderPlaced){
             console.log('Order already placed, skipping order creation');
             return;
-        }else{
-            console.log('Placing order for the first time');
         }
         event.preventDefault();
         //setSummary({ totalCount: 0, totalPrice: 0, loggedIn: this.summary.loggedIn, orderPlaced: true, newUser: false });
