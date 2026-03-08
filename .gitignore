@@ -3,8 +3,8 @@
 # For useful gitignore templates see: https://github.com/github/gitignore
 
 #SUpporting Images : 
-force-app/main/halwaKadai/Images/*
-force-app/main/resume/resume_images/*
+#force-app/main/halwaKadai/Images/*
+#force-app/main/resume/resume_images/*
 
 
 # Salesforce cache
