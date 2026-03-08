@@ -107,3 +107,83 @@ li {
 .project-block {
     margin-bottom: 15px;
 }
+
+/*HOVER CERTIFICATE */
+/* Popup container */
+.popup {
+    position: fixed;              /* fixed to viewport */
+    top: 50%;                     /* vertical center */
+    left: 50%;                    /* horizontal center */
+    transform: translate(-50%, -50%); /* perfect centering */
+    background: #fff;
+    border: 1px solid #ddd;
+    padding: 16px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    z-index: 1000;
+    width: 600px;
+    max-height: 70vh;             /* limit height */
+    overflow-y: auto;             /* scroll if content too tall */
+}
+
+/* Certification card styling */
+.cert-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 12px;
+}
+
+.cert-card:last-child {
+    border-bottom: none;
+}
+
+.badge {
+    width: 60px;
+    height: 60px;
+    object-fit: contain;
+}
+
+
+/* Details section */
+.details {
+    flex: 1;
+}
+
+.category {
+    font-size: 12px;
+    color: #666;
+    margin: 0;
+}
+
+.name {
+    font-size: 16px;
+    margin: 4px 0;
+    color: #333;
+}
+
+.status, .maintenance, .issued {
+    font-size: 14px;
+    margin: 2px 0;
+    color: #555;
+}
+
+/* Actions button */
+.action-btn {
+    margin-top: 8px;
+    padding: 6px 12px;
+    background: #0070d2; /* Salesforce blue */
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.action-btn:hover {
+    background: #005bb5;
+}
+
+
+/*HOVER CERTIFICATE END */
