@@ -17,7 +17,7 @@ export default class ResumeV1 extends LightningElement {
             name: 'Salesforce Certified Agentforce Specialist',
             status: 'Active',
             issued: 'Apr 2025',
-            badgeUrl: 'https://raw.githubusercontent.com/NithyaNarayananV/LearningLWC/refs/heads/VS-Code/force-app/main/resume/resume_images/Salesforce%20Certified%20Agentforce%20Specialist.png'
+            badgeUrl: 'https://raw.githubusercontent.com/NithyaNarayananV/project-assets/refs/heads/main/resume/sfdc%20Cerfitications/Salesforce%20Certified%20Agentforce%20Specialist.png'
         },
         {
             isActive: false,
@@ -26,7 +26,7 @@ export default class ResumeV1 extends LightningElement {
             name: 'Salesforce Certified Data Cloud Consultant',
             status: 'InActive',
             issued: 'Jul 2024',
-            badgeUrl: 'https://raw.githubusercontent.com/NithyaNarayananV/LearningLWC/refs/heads/VS-Code/force-app/main/resume/resume_images/Salesforce%20Certified%20Data%20Cloud%20Consultant.png'
+            badgeUrl: 'https://raw.githubusercontent.com/NithyaNarayananV/project-assets/refs/heads/main/resume/sfdc%20Cerfitications/Salesforce%20Certified%20Data%20Cloud%20Consultant.png'
         },
         {
             isActive: true,
@@ -35,7 +35,7 @@ export default class ResumeV1 extends LightningElement {
             name: 'Salesforce Certified Experience Cloud Consultant',
             status: 'Active',
             issued: 'Aug 2025',
-            badgeUrl: 'https://raw.githubusercontent.com/NithyaNarayananV/LearningLWC/refs/heads/VS-Code/force-app/main/resume/resume_images/Salesforce%20Certified%20Experience%20Cloud%20Consultant.png'
+            badgeUrl: 'https://raw.githubusercontent.com/NithyaNarayananV/project-assets/refs/heads/main/resume/sfdc%20Cerfitications/Salesforce%20Certified%20Experience%20Cloud%20Consultant.png'
         },
         {
             isActive: true,
@@ -44,7 +44,7 @@ export default class ResumeV1 extends LightningElement {
             name: 'Salesforce Certified Platform Administrator',
             status: 'Active',
             issued: 'Jan 2024',
-            badgeUrl: 'https://raw.githubusercontent.com/NithyaNarayananV/LearningLWC/refs/heads/VS-Code/force-app/main/resume/resume_images/Salesforce%20Certified%20Platform%20Administrator.png'
+            badgeUrl: 'https://raw.githubusercontent.com/NithyaNarayananV/project-assets/refs/heads/main/resume/sfdc%20Cerfitications/Salesforce%20Certified%20Platform%20Administrator.png'
         },
         {
             isActive: true,
@@ -53,7 +53,7 @@ export default class ResumeV1 extends LightningElement {
             name: 'Salesforce Certified Platform Developer',
             status: 'Active',
             issued: 'May 2025',
-            badgeUrl: 'https://raw.githubusercontent.com/NithyaNarayananV/LearningLWC/refs/heads/VS-Code/force-app/main/resume/resume_images/Salesforce%20Certified%20Platform%20Developer.png'
+            badgeUrl: 'https://raw.githubusercontent.com/NithyaNarayananV/project-assets/refs/heads/main/resume/sfdc%20Cerfitications/Salesforce%20Certified%20Platform%20Developer.png'
         },
         {
             isActive: true,
@@ -62,7 +62,7 @@ export default class ResumeV1 extends LightningElement {
             name: 'Salesforce Certified JavaScript Developer',
             status: 'Active',
             issued: 'Feb 2026',
-            badgeUrl: 'https://raw.githubusercontent.com/NithyaNarayananV/LearningLWC/refs/heads/VS-Code/force-app/main/resume/resume_images/Salesforce%20Certified%20JavaScript%20Developer.png'
+            badgeUrl: 'https://raw.githubusercontent.com/NithyaNarayananV/project-assets/refs/heads/main/resume/sfdc%20Cerfitications/Salesforce%20Certified%20JavaScript%20Developer.png'
         },
         {
             isActive: true,
@@ -71,7 +71,7 @@ export default class ResumeV1 extends LightningElement {
             name: 'Process Automation Accredited Professional',
             status: 'Active',
             issued: 'Dec 2024',
-            badgeUrl: 'https://raw.githubusercontent.com/NithyaNarayananV/LearningLWC/refs/heads/VS-Code/force-app/main/resume/resume_images/Process%20Automation%20Accredited%20Professional.png'
+            badgeUrl: 'https://raw.githubusercontent.com/NithyaNarayananV/project-assets/refs/heads/main/resume/sfdc%20Cerfitications/Process%20Automation%20Accredited%20Professional.png'
         },
         {
             isActive: true,
@@ -80,7 +80,7 @@ export default class ResumeV1 extends LightningElement {
             name: 'Salesforce Certified AI Associate',
             status: 'Active',
             issued: 'Apr 2024',
-            badgeUrl: 'https://raw.githubusercontent.com/NithyaNarayananV/LearningLWC/refs/heads/VS-Code/force-app/main/resume/resume_images/Salesforce%20Certified%20AI%20Associate.png'
+            badgeUrl: 'https://raw.githubusercontent.com/NithyaNarayananV/project-assets/refs/heads/main/resume/sfdc%20Cerfitications/Salesforce%20Certified%20AI%20Associate.png'
         }
     ];
 
