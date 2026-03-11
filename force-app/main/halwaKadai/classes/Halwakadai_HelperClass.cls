@@ -62,15 +62,32 @@ public without sharing class Halwakadai_HelperClass {
 
         // Create order linked to contact and with billing/shipping address
         System.debug('createOrderWithContact - Before createOrder - contactId : ' + contactId);
+
+        /*
+        Account AccountId = [Select Id from Account where Name = 'HalwaKadai' limit 1]
+        if(AccountId == null){
+            System.debug('No existing account found with name: ' + 'HalwaKadai' + '. Creating new account.');
+            AccountId = createAccount('HalwaKadai');
+        }
+        Contract ContractId = [Select Id from Contract where Name = 'HalwaKadai' limit 1]
+*/
+
         Order newOrder = new Order(
+            ///* for LWC Org
             AccountId = '001GA00005KAsGgYAL',// for LWC
             ContractId = '800GA000000b86cYAA', // for LWC 
-            // NN AccountId = '001g500000DtRbBAAV', 
-            // NN ContractId = '800g500000HrG4rAAF',
-            EffectiveDate = Date.today(),
-            Status = 'Draft',
             Pricebook2Id = '01sGA00000Zwd4SYAR',
-            // NN Pricebook2Id = '01sg5000002JWkcAAG',
+            //*/
+             /* for NN org
+
+            AccountId = '001g500000DtRbBAAV', // NN 
+            ContractId = '800g500000HrG4rAAF', // NN 
+            Pricebook2Id = '01sg5000002JWkcAAG',// NN 
+            
+            for NN Org */ 
+            
+            Status = 'Draft',
+            EffectiveDate = Date.today(),
             BillToContactId = contactId,
 
             // Billing Address
