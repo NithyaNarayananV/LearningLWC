@@ -2,15 +2,18 @@
 import { LightningElement } from 'lwc';
 import { getState, getSummary, subscribe as stateSubscribe, setSummary } from 'c/halwaKadaiUtils';
 
-const KEYhalwaProducts = 'myApp:halwaProducts'; // namespace your key to avoid collisions
-const KEYsummary = 'myApp:summary'; // namespace your key to avoid collisions
+const KEYhalwaProducts = 'halwaKadai:halwaProducts'; // namespace your key to avoid collisions
+const KEYsummary = 'halwaKadai:summary'; // namespace your key to avoid collisions
 
 export default class HalwaKadaiOrderConfirmation extends LightningElement {
     halwaProducts = [];
     summary = { totalCount: 0, totalPrice: 0 };
     unsub;
+    currentPage = 'Order Confirmation';
 
     connectedCallback() {
+        document.title = this.currentPage+' - Halwa Kadai';
+
         console.log('HalwaKadaiOrderConfirmation : connectedCallback');
         const rawhalwaProducts = window.localStorage.getItem(KEYhalwaProducts);
         const rawsummary = window.localStorage.getItem(KEYsummary);

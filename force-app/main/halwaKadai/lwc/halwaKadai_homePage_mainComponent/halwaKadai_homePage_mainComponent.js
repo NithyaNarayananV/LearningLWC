@@ -1,11 +1,11 @@
 // file: halwaKadai_homePage_mainComponent.js
 import { LightningElement } from 'lwc';
 
-import { getState, setState ,setSummary, getSummary, subscribe as stateSubscribe, getProductsCONSTANT} from 'c/halwaKadaiUtils';
+import { getState, setState ,setSummary, setSiteUser, getSummary, subscribe as stateSubscribe, getProductsCONSTANT} from 'c/halwaKadaiUtils';
 
-const KEYhalwaProducts = 'myApp:halwaProducts'; // namespace your key to avoid collisions
-const KEYsummary = 'myApp:summary'; // namespace your key to avoid collisions
-const KEYsiteUser = 'myApp:siteUser'; // namespace your key to avoid collisions
+const KEYhalwaProducts = 'halwaKadai:halwaProducts'; // namespace your key to avoid collisions
+const KEYsummary = 'halwaKadai:summary'; // namespace your key to avoid collisions
+const KEYsiteUser = 'halwaKadai:siteUser'; // namespace your key to avoid collisions
 
 export default class HalwaKadai_homePage_mainComponent extends LightningElement {
   isActive_Home=true;
@@ -78,48 +78,62 @@ export default class HalwaKadai_homePage_mainComponent extends LightningElement 
     }
   }
 
+  updateDocumentTitle(currentPage = 'Home') {
+    document.title = currentPage+' - Halwa Kadai';
+  }
+
   onHomeClick(){
     this.hideAll();
     this.isActive_Home=true;
     this.homeClass='slds-show';
+    this.updateDocumentTitle('Home');
   }
   onAboutClick(){
     this.hideAll();
     this.isActive_About=true;
+    this.updateDocumentTitle('About');     
   } 
   onProductsClick(){
     this.hideAll();
     this.isActive_Product=true;
     this.productClass='slds-show'; 
-   }
+    this.updateDocumentTitle('Products');     
+  }
   onContactClick(){
     this.hideAll();
     this.isActive_Contact=true;
-   } 
+    this.updateDocumentTitle('Contact');
+  } 
   onCartClick(){
     this.hideAll();
     this.cartClass='slds-show';
+    this.isActive_Cart=true;
+    this.updateDocumentTitle('Cart');     
    } 
   onCheckoutClick(){
     this.hideAll();
     this.checkoutClass='slds-show';
     this.isActive_CheckOut=true;
+    this.updateDocumentTitle('Checkout');     
   }
   onLoginClick(){
     this.hideAll();
     this.loginClass='slds-show';
+    this.isActive_Login=true;
+    this.updateDocumentTitle('Login');
   }
   onLogOutClick(){
     this.hideAll();
-    this.isActive_Home=true;
-    this.homeClass='slds-show';
     //Need to Process and remove the login.
     setState(getProductsCONSTANT());
     setSummary({ totalCount: 0, totalPrice: 0 , loggedIn: false, orderPlaced: false, newUser: true});
+    setSiteUser({id:'newContact', Name : '', Email: '', Street: '', City: '', State: '', PostalCode: '', Country: '', MobilePhone: ''});
+    
     window.localStorage.removeItem(KEYhalwaProducts);
     window.localStorage.removeItem(KEYsummary);
     window.localStorage.removeItem(KEYsiteUser);
 
+    this.onHomeClick();
   }
   onClearCacheClick(){
     console.log('onClearCacheClick()');
@@ -127,15 +141,15 @@ export default class HalwaKadai_homePage_mainComponent extends LightningElement 
       console.log('Clearing localStorage...');
       console.log('halwaKadaiUtils : onClearCacheClick : before clearing localStorage, state = ', this.halwaProducts);
       console.log('halwaKadaiUtils : onClearCacheClick : before clearing localStorage, summary = ', this.summary);
-        window.localStorage.removeItem(KEYhalwaProducts);
-        window.localStorage.removeItem(KEYsummary);
-        window.localStorage.removeItem(KEYsiteUser);
-        console.log('Local storage cleared for keys:', KEYhalwaProducts, KEYsummary, KEYsiteUser);
-        console.log('halwaKadaiUtils : onClearCacheClick : after clearing localStorage, state = ', this.halwaProducts);
-        console.log('halwaKadaiUtils : onClearCacheClick : after clearing localStorage, summary = ', this.summary);
+      window.localStorage.removeItem(KEYhalwaProducts);
+      window.localStorage.removeItem(KEYsummary);
+      window.localStorage.removeItem(KEYsiteUser);
+      console.log('Local storage cleared for keys:', KEYhalwaProducts, KEYsummary, KEYsiteUser);
+      console.log('halwaKadaiUtils : onClearCacheClick : after clearing localStorage, state = ', this.halwaProducts);
+      console.log('halwaKadaiUtils : onClearCacheClick : after clearing localStorage, summary = ', this.summary);
     } catch (e) {
-        console.log('Error clearing localStorage:', e);
-        console.log('ERROR : window.localStorage.removeItem for keys:', KEYhalwaProducts, KEYsummary, KEYsiteUser);
+      console.log('Error clearing localStorage:', e);
+      console.log('ERROR : window.localStorage.removeItem for keys:', KEYhalwaProducts, KEYsummary, KEYsiteUser);
     }
     // Reset state and summary to defaults after clearing cache
     //setState([]);
@@ -148,13 +162,14 @@ export default class HalwaKadai_homePage_mainComponent extends LightningElement 
   }
 
   onOrderConfirmationClick(){
-    console.log('onOrderConfirmationClick()');
+    console.log('HalwaKadai_homePage_mainComponent : onOrderConfirmationClick');
     // Defer state updates to avoid promise rejection during component lifecycle
     Promise.resolve().then(() => {
       this.hideAll();
       console.log('after hideAll()');
       this.orderConfirmationClass='slds-show';
       this.isActive_OderConfimation=true;
+      this.updateDocumentTitle('Order Confirmation');
     }).catch(error => {
       console.error('Error updating order confirmation state:', error);
     });
@@ -204,7 +219,7 @@ export default class HalwaKadai_homePage_mainComponent extends LightningElement 
   }
 
   handleOrderConfirmationClick() {
-    console.log('handleOrderConfirmationClick() {');
+    console.log('HalwaKadai_homePage_mainComponent : handleOrderConfirmationClick');
     this.onOrderConfirmationClick();
     this.handleScrollTop();
   }

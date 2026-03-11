@@ -110,6 +110,26 @@
     opacity: 0.9;
 }
 
+
+.page-hero {
+    background: linear-gradient(135deg, #FFEBD6, #FFF9F2);
+    padding: 100px 0 50px;
+    margin-top: 70px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+  .page-hero h1 {
+    font-size: 1.7rem;
+  }
+
+.container {
+    width: 90%;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+
 /* Delivery Information Card */
 .delivery-info-card {
     display: flex;

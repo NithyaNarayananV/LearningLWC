@@ -1,21 +1,89 @@
-import { LightningElement } from 'lwc';
+import { LightningElement, track } from 'lwc';
 
 export default class ResumeV1 extends LightningElement {
     contact = {
         name: 'C VR NITHYA NARAYANAN',
         role: 'Salesforce Developer',
         location: 'Chennai',
+        phone: '+91 9445511404',
         email: ' nithyanarayanancvr@gmail.com'
     };
 
     certifications = [
-        { id: 1, name: 'Salesforce Administrator' },
-        { id: 2, name: 'Salesforce Platform Developer 1' },
-        { id: 3, name: 'Salesforce AI Associate' },
-        { id: 4, name: 'Salesforce Agentforce Specialist' },
-        { id: 5, name: 'Copado Fundamentals' },
-        { id: 6, name: 'Salesforce Accredited Process Automation' }
+        {
+            isActive: true,
+            id: 1,
+            category: 'Agentforce',
+            name: 'Salesforce Certified Agentforce Specialist',
+            status: 'Active',
+            issued: 'Apr 2025',
+            badgeUrl: 'https://raw.githubusercontent.com/NithyaNarayananV/project-assets/refs/heads/main/resume/sfdc%20Cerfitications/Salesforce%20Certified%20Agentforce%20Specialist.png'
+        },
+        {
+            isActive: false,
+            id: 2,
+            category: 'Data Cloud',
+            name: 'Salesforce Certified Data Cloud Consultant',
+            status: 'InActive',
+            issued: 'Jul 2024',
+            badgeUrl: 'https://raw.githubusercontent.com/NithyaNarayananV/project-assets/refs/heads/main/resume/sfdc%20Cerfitications/Salesforce%20Certified%20Data%20Cloud%20Consultant.png'
+        },
+        {
+            isActive: true,
+            id: 3,
+            category: 'Experience Cloud',
+            name: 'Salesforce Certified Experience Cloud Consultant',
+            status: 'Active',
+            issued: 'Aug 2025',
+            badgeUrl: 'https://raw.githubusercontent.com/NithyaNarayananV/project-assets/refs/heads/main/resume/sfdc%20Cerfitications/Salesforce%20Certified%20Experience%20Cloud%20Consultant.png'
+        },
+        {
+            isActive: true,
+            id: 4,
+            category: 'Salesforce Platform',
+            name: 'Salesforce Certified Platform Administrator',
+            status: 'Active',
+            issued: 'Jan 2024',
+            badgeUrl: 'https://raw.githubusercontent.com/NithyaNarayananV/project-assets/refs/heads/main/resume/sfdc%20Cerfitications/Salesforce%20Certified%20Platform%20Administrator.png'
+        },
+        {
+            isActive: true,
+            id: 5,
+            category: 'Salesforce Platform',
+            name: 'Salesforce Certified Platform Developer',
+            status: 'Active',
+            issued: 'May 2025',
+            badgeUrl: 'https://raw.githubusercontent.com/NithyaNarayananV/project-assets/refs/heads/main/resume/sfdc%20Cerfitications/Salesforce%20Certified%20Platform%20Developer.png'
+        },
+        {
+            isActive: true,
+            id: 6,
+            category: 'Salesforce Platform',
+            name: 'Salesforce Certified JavaScript Developer',
+            status: 'Active',
+            issued: 'Feb 2026',
+            badgeUrl: 'https://raw.githubusercontent.com/NithyaNarayananV/project-assets/refs/heads/main/resume/sfdc%20Cerfitications/Salesforce%20Certified%20JavaScript%20Developer.png'
+        },
+        {
+            isActive: true,
+            id: 7,
+            category: 'Salesforce Platform',
+            name: 'Process Automation Accredited Professional',
+            status: 'Active',
+            issued: 'Dec 2024',
+            badgeUrl: 'https://raw.githubusercontent.com/NithyaNarayananV/project-assets/refs/heads/main/resume/sfdc%20Cerfitications/Process%20Automation%20Accredited%20Professional.png'
+        },
+        {
+            isActive: true,
+            id: 8,
+            category: 'Agentforce',
+            name: 'Salesforce Certified AI Associate',
+            status: 'Active',
+            issued: 'Apr 2024',
+            badgeUrl: 'https://raw.githubusercontent.com/NithyaNarayananV/project-assets/refs/heads/main/resume/sfdc%20Cerfitications/Salesforce%20Certified%20AI%20Associate.png'
+        }
     ];
+
 
     skills = [
         { id: 1, name: 'Salesforce Apex, Triggers' },
@@ -49,9 +117,49 @@ export default class ResumeV1 extends LightningElement {
         { id: 2, year: '2016 – 2018', school: 'Shrine Vailankanni Senior Secondary School', details: '12th std (2018), Physics, Chemistry, Math, Computer Science. CBSE. 73%' },
         { id: 3, year: '2006 – 2016', school: 'Kendriya Vidyalaya CLRI', details: '10th std (2016), CBSE. 70%' }
     ];
+    
+
+    timeBreakdown;
+
+    findTime() {
+        const today = new Date();
+        const targetDate = new Date("2023-01-30");
+
+        let diffMs = today.getTime() - targetDate.getTime() ;
+
+        // Convert to units
+        const seconds = Math.floor(diffMs / 1000);
+        const minutes = Math.floor(seconds / 60);
+        const hours   = Math.floor(minutes / 60);
+        const days    = Math.floor(hours / 24);
+
+        // Approximate months and years
+        const years   = Math.floor(days / 365);
+        const months  = Math.floor((days % 365) / 30); // rough estimate
+        const remDays = days % 30;
+
+        // Remaining hours/minutes/seconds after stripping days
+        const remHours   = hours % 24;
+        const remMinutes = minutes % 60;
+        const remSeconds = seconds % 60;
+
+        return {
+            years,
+            months,
+            days: remDays,
+            hours: remHours,
+            minutes: remMinutes,
+            seconds: remSeconds
+        };
+    }
+
+    connectedCallback() {
+        this.timeBreakdown = this.findTime();
+        console.log('Breakdown:', this.timeBreakdown);
+    }
 
     summaryPoints = [
-        { id: 1, text: 'Over 3 years of hands-on experience on the Salesforce platform, covering Apex, Flows, Triggers, administration, integration, and deployment.' },
+        { id: 1, text: 'Over ${diffSeconds} of hands-on experience on the Salesforce platform, covering Apex, Flows, Triggers, administration, integration, and deployment.' },
         { id: 2, text: 'Salesforce Certified professional and Trailhead Ranger, reflecting platform expertise and a continuous learning attitude.' },
         { id: 3, text: 'Good understanding of Experience Cloud functionality.' },
         { id: 4, text: 'Proficient in Salesforce configuration  tools: Profiles, Permission Sets, Page Layouts, Record Types, and Custom Metadata.' },
@@ -60,7 +168,7 @@ export default class ResumeV1 extends LightningElement {
 
     expertisePoints = [
         { id: 1, text: 'Experienced in debugging Apex code, resolving deployment errors, and assisting with production issue troubleshooting and resolution.' },
-        { id: 2, text: 'Collaborated with Salesforce developers, QA testers, business analysts, and business users to support smooth deployments, validate new features, and assist in resolving minor bugs and enhancements.' },
+        { id: 2, text: 'Collaborated with other Salesforce developers, QA testers, business analysts, and business users to support smooth deployments, validate new features, and assist in resolving bugs and enhancements.' },
         { id: 3, text: 'Communicate effectively in team settings, actively participating in discussions and supporting client-facing interactions, including time-sensitive issue resolution and presentations.' },
         { id: 4, text: 'Collaborative mindset, open to feedback & eager to contribute to shared goals.' },
         { id: 5, text: 'Detail-oriented and proactive in identifying issues, with a growing ability to troubleshoot and write maintainable code.' },
@@ -135,4 +243,27 @@ export default class ResumeV1 extends LightningElement {
         { id: 2, title: 'Basic Calculator App - Java', year: '2021', desc: 'Built a user-friendly Android application using Java that performs core arithmetic operations such as addition, subtraction, multiplication, and division.' },
         { id: 3, title: 'Online (Email) Shopping Mart Application - Java', year: '2020', desc: 'Designed and implemented a shopping and billing application in Java. Integrated email functionality to automatically send bill receipts to customers. Completed as part of college mini project requirements.' }
     ];
+    /// Certificate HOVER PART
+    @track isPopupVisible = false;
+
+    showPopup() {
+        this.isPopupVisible = true;
+    }
+
+    hidePopup() {
+        // Delay slightly so user can move into popup
+        setTimeout(() => {
+            const popup = this.template.querySelector('.popup');
+            if (!popup || !popup.matches(':hover')) {
+                this.isPopupVisible = false;
+            }
+        }, 100);
+    }
+
+    keepPopup() {
+        // Keeps popup visible while hovering inside
+        this.isPopupVisible = true;
+    }
+
+    // CERTIFICATE HOVER END
 }

@@ -152,6 +152,41 @@ public without sharing class Halwakadai_HelperClass {
     }
 
     @AuraEnabled
+    public static void updateContact(
+        Id contactId,
+        String name,
+        String phone,
+        String email,
+        String street,
+        String city,
+        String state,
+        String postalCode,
+        String country
+    ) {
+        System.debug('updateContact - contactId: ' + contactId);
+        
+        // Query the existing contact
+        Contact con = [SELECT Id, LastName, Phone, Email, MailingStreet, MailingCity, MailingState, MailingPostalCode, MailingCountry FROM Contact WHERE Id = :contactId LIMIT 1];
+        
+        if (con != null) {
+            // Update fields
+            con.LastName = name == null ? 'Unknown' : name;
+            con.Phone = phone;
+            con.Email = email;
+            con.MailingStreet = street;
+            con.MailingCity = city;
+            con.MailingState = state;
+            con.MailingPostalCode = postalCode;
+            con.MailingCountry = country;
+            
+            update con;
+            System.debug('updateContact - Updated: ' + con);
+        } else {
+            System.debug('updateContact - Contact not found for Id: ' + contactId);
+        }
+    }
+
+    @AuraEnabled
     public static Id searchContact(String email) {
         if (String.isBlank(email)) return null;
         List<Contact> conList = [
@@ -163,7 +198,10 @@ public without sharing class Halwakadai_HelperClass {
     @AuraEnabled
     public static Contact searchContactF(String email) {
         if (String.isBlank(email)) return null;
-        return [ SELECT Id, name, phone, email, MailingStreet, MailingCity, MailingState, MailingPostalCode, MailingCountry FROM Contact WHERE Email = :email LIMIT 1];
+        List<Contact> conList = [SELECT Id, name, phone, email, MailingStreet, MailingCity, MailingState, MailingPostalCode, MailingCountry FROM Contact WHERE Email = :email LIMIT 1];
+        System.debug('Halwakadai_HelperClass : searchContactF - Found contacts: ' + conList.size()   + ' for email: ' + email);
+        System.debug('Halwakadai_HelperClass : searchContactF - Found contacts: ' + conList   + ' for email: ' + email);
+        return conList.isEmpty() ? null : conList[0]; 
     }
 
 

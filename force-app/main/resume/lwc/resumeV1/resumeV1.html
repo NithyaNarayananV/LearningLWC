@@ -16,13 +16,41 @@
             
             <aside class="left-column">
                 <div class="section">
-                    <h3 class="section-title">CERTIFICATIONS</h3>
-                    <ol>
-                        <template for:each={certifications} for:item="cert">
-                            <li key={cert.id}>{cert.name}</li>
-                        </template>
-                    </ol>
+                    <div class="hover-target-Certification" onmouseenter={showPopup} onmouseleave={hidePopup}>
+                        <h3 class="section-title">CERTIFICATIONS</h3>
+                        <ol>
+                            <template for:each={certifications} for:item="cert">
+                                <li key={cert.id}>{cert.name}</li>
+                            </template>
+                        </ol>
+                    </div>
                 </div>
+                <template if:true={isPopupVisible}> 
+    <div class="popup" 
+         onmouseenter={keepPopup} 
+         onmouseleave={hidePopup}> 
+
+        <template for:each={certifications} for:item="cert">
+    <template if:true={cert.isActive}>
+        <div key={cert.id} class="cert-card">
+            <!-- Badge -->
+            <img src={cert.badgeUrl} alt={cert.name} class="badge"/>
+
+            <!-- Certification details -->
+            <div class="details">
+                <h4 class="category">{cert.category}</h4>
+                <h3 class="name">{cert.name}</h3>
+                <p class="issued">
+                    <strong>Issued:</strong> {cert.issued}
+                </p>
+            </div>
+        </div>
+    </template>
+</template>
+
+    </div>
+</template>
+
 
                 <div class="section">
                     <h3 class="section-title">SKILLS</h3>
@@ -60,7 +88,7 @@
             <main class="right-column">
                 <div class="section">
                     <h3 class="section-title right-title">OBJECTIVE</h3>
-                    <p>Self-driven <strong>Salesforce developer</strong> focused on building scalable, user-friendly applications using <strong>Apex, Flows and Lightning Web Components.</strong> Experienced in developing personal projects, with foundational exposure to Java and Python. <strong>Seeking hands-on roles in Salesforce-centric development.</strong></p>
+                    <p><strong>Salesforce Developer</strong> with {timeBreakdown.years} years {timeBreakdown.months} months {timeBreakdown.days} {timeBreakdown.hours} {timeBreakdown.minutes} {timeBreakdown.seconds} of hands-on experience designing and deploying scalable, user-centric solutions using <strong>Apex, Lightning Web Components (LWC), and Flows.</strong> Skilled in REST API integrations, CI/CD pipelines (GitHub, AutoRabit), and agile delivery. Passionate about building high-impact applications that drive digital transformation and enhance user experience. <strong>Seeking dynamic, Salesforce-focused roles to apply technical expertise and collaborative problem-solving.</strong></p>
                 </div>
 
                 <div class="section">
