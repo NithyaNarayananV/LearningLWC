@@ -70,7 +70,7 @@ public without sharing class Halwakadai_HelperClass {
             AccountId = createAccount('HalwaKadai');
         }
         Contract ContractId = [Select Id from Contract where Name = 'HalwaKadai' limit 1]
-*/
+        */
 
         Order newOrder = new Order(
             ///* for LWC Org
@@ -378,6 +378,23 @@ public without sharing class Halwakadai_HelperClass {
         //Messaging.sendEmail(new Messaging.SingleEmailMessage[] { mail });
         System.debug('Disabled Order Confimation Email ');
 
+    }
+    
+    @AuraEnabled(cacheable=true)
+    public static User getCurrentUser() {
+        User currentUser = [
+            SELECT Id, Name, Email, Username, Profile.Name, UserRole.Name, Department, Title
+            FROM User
+            WHERE Id = :UserInfo.getUserId()
+        ];
+
+        System.debug('User Full Name: ' + currentUser.Name);
+        System.debug('User Email: ' + currentUser.Email);
+        System.debug('User Profile: ' + currentUser.Profile.Name);
+        System.debug('User Role: ' + currentUser.UserRole.Name);
+        System.debug('User Department: ' + currentUser.Department);
+        System.debug('User Title: ' + currentUser.Title);
+        return currentUser;
     }
 
 }

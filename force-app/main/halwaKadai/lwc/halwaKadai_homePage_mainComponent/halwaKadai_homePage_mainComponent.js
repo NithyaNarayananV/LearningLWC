@@ -1,7 +1,9 @@
 // file: halwaKadai_homePage_mainComponent.js
-import { LightningElement } from 'lwc';
-
+import { LightningElement, wire } from 'lwc';
+import getCurrentUser from '@salesforce/apex/Halwakadai_HelperClass.getCurrentUser';
+import initializeData from '@salesforce/apex/HalwaKadai_DataInitializer.initializeData';
 import { getState, setState ,setSummary, setSiteUser, getSummary, subscribe as stateSubscribe, getProductsCONSTANT} from 'c/halwaKadaiUtils';
+
 
 const KEYhalwaProducts = 'halwaKadai:halwaProducts'; // namespace your key to avoid collisions
 const KEYsummary = 'halwaKadai:summary'; // namespace your key to avoid collisions
@@ -23,13 +25,33 @@ export default class HalwaKadai_homePage_mainComponent extends LightningElement 
   halwaProducts;
   productCount=0;
   summary = { totalCount: 0, totalPrice: 0, loggedIn:false };
+  isAdmin = false;
   
+  
+  
+  @wire(getCurrentUser)
+  userDetails(result) {
+  if(result.data){
+    console.log('getCurrentUser result: ', result.data);
+    this.currentUserProfile = result.data.Profile.Name;
+    if(this.currentUserProfile === 'System Administrator'){
+      this.isAdmin = true;
+    }else{
+      this.isAdmin = false;
+    }
+    } else if(result.error){
+      console.error('Error in getCurrentUser: ', result.error);
+    }
+  }
+
   halwaProducts = null;
   summary = null;
   
   connectedCallback() {
     const rawhalwaProducts = window.localStorage.getItem(KEYhalwaProducts);
     const rawsummary = window.localStorage.getItem(KEYsummary);
+
+
     if (rawhalwaProducts) {
       try {
         this.halwaProducts = JSON.parse(rawhalwaProducts);
@@ -233,5 +255,16 @@ export default class HalwaKadai_homePage_mainComponent extends LightningElement 
         behavior: 'smooth' 
         // adds smooth animation
     });
+  }
+  onInitializeDataClick(){
+    console.log('HalwaKadai_homePage_mainComponent : onInitializeDataClick() ');
+    initializeData().then(() => {
+      console.log('Data initialization successful');
+      // Optionally, you can refresh the page or re-fetch data here to reflect the initialized data
+    })
+    .catch(error => {
+      console.error('Error initializing data:', error);
+    });
+    // Call Apex method to initialize data
   }
 }
