@@ -17,6 +17,11 @@
 
 public without sharing class Halwakadai_HelperClass {
 
+    // Class constants
+    private static final String CLASSNAME = 'Halwakadai_HelperClass';
+    private static final String HALWASHOP = 'HalwaShop';
+    private static final String HALWAKADAI = 'HalwaKadai';
+
     // Address wrapper to hold address details
     public class AddressWrapper {
         @AuraEnabled public String street;
@@ -42,8 +47,8 @@ public without sharing class Halwakadai_HelperClass {
         return [
             SELECT Name, ProductCode, Description, StockKeepingUnit, Image_URL__c,
                    HomePage_Visible__c, Tag__c, Price__c,
-                   (SELECT Id, UnitPrice FROM PricebookEntries WHERE IsActive = true ORDER BY CreatedDate DESC LIMIT 1)
-            FROM Product2 WHERE RecordType.DeveloperName  = 'HalwaShop'
+                   (SELECT Id, UnitPrice FROM PricebookEntries WHERE IsActive = true AND Pricebook2.Name = :HALWAKADAI ORDER BY CreatedDate DESC LIMIT 1)
+            FROM Product2 WHERE RecordType.DeveloperName  = :HALWASHOP
         ];
     }
 
@@ -71,20 +76,14 @@ public without sharing class Halwakadai_HelperClass {
         }
         Contract ContractId = [Select Id from Contract where Name = 'HalwaKadai' limit 1]
         */
+        Id accountId = [SELECT Id FROM Account WHERE Name = :HALWAKADAI LIMIT 1].Id;
+        Id contractId = [SELECT Id FROM Contract WHERE AccountId = :accountId LIMIT 1].Id;
+        Id pricebook2Id = [SELECT Id FROM Pricebook2 WHERE Name = :HALWAKADAI LIMIT 1].Id;
 
         Order newOrder = new Order(
-            ///* for LWC Org
-            AccountId = '001GA00005KAsGgYAL',// for LWC
-            ContractId = '800GA000000b86cYAA', // for LWC 
-            Pricebook2Id = '01sGA00000Zwd4SYAR',
-            //*/
-             /* for NN org
-
-            AccountId = '001g500000DtRbBAAV', // NN 
-            ContractId = '800g500000HrG4rAAF', // NN 
-            Pricebook2Id = '01sg5000002JWkcAAG',// NN 
-            
-            for NN Org */ 
+            AccountId = accountId,
+            ContractId = contractId, 
+            Pricebook2Id = pricebook2Id,
             
             Status = 'Draft',
             EffectiveDate = Date.today(),
@@ -216,8 +215,8 @@ public without sharing class Halwakadai_HelperClass {
     public static Contact searchContactF(String email) {
         if (String.isBlank(email)) return null;
         List<Contact> conList = [SELECT Id, name, phone, email, MailingStreet, MailingCity, MailingState, MailingPostalCode, MailingCountry FROM Contact WHERE Email = :email LIMIT 1];
-        System.debug('Halwakadai_HelperClass : searchContactF - Found contacts: ' + conList.size()   + ' for email: ' + email);
-        System.debug('Halwakadai_HelperClass : searchContactF - Found contacts: ' + conList   + ' for email: ' + email);
+        System.debug(CLASS_NAME + ' : searchContactF - Found contacts: ' + conList.size()   + ' for email: ' + email);
+        System.debug(CLASS_NAME + ' : searchContactF - Found contacts: ' + conList   + ' for email: ' + email);
         return conList.isEmpty() ? null : conList[0]; 
     }
 

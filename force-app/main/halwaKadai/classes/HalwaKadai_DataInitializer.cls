@@ -61,7 +61,7 @@ public with sharing class HalwaKadai_DataInitializer {
         */
 
         List<Product2> halwaProductsWithoutPBE = [
-            SELECT Name, ProductCode, Description, StockKeepingUnit, Image_URL__c,
+            SELECT Id,Name, ProductCode, Description, StockKeepingUnit, Image_URL__c,
                 HomePage_Visible__c, Tag__c, Price__c
             FROM Product2 
             WHERE RecordType.DeveloperName = :HALWASHOP
@@ -73,11 +73,36 @@ public with sharing class HalwaKadai_DataInitializer {
             ) 
             ORDER BY Name
         ];
+        Set<Id> halwaProductWoCustomPB_Ids = new Set<Id>();
+        for (Product2 p : halwaProductsWithoutPBE) {
+            halwaProductWoCustomPB_Ids.add(p.Id);
+        }
+        List<Product2> halwaProductsWithoutStandardPBE = [
+            SELECT Id, Name, ProductCode, Description, StockKeepingUnit, Image_URL__c,
+                HomePage_Visible__c, Tag__c, Price__c
+            FROM Product2 
+            WHERE RecordType.DeveloperName = :HALWASHOP 
+            AND Id IN :halwaProductWoCustomPB_Ids
+            AND Id NOT IN (
+                SELECT Product2Id 
+                FROM PricebookEntry 
+                WHERE PriceBook2.IsStandard = TRUE 
+                AND IsActive = TRUE
+            ) 
+            ORDER BY Name
+        ];
+
+        if(!halwaProductsWithoutStandardPBE.isEmpty()){
+            System.debug(CLASSNAME + ': Products without active Standard PricebookEntry:');
+            createStandardPriceBookEntriesForProducts(halwaProductsWithoutStandardPBE);
+        } else {
+            System.debug(CLASSNAME + ': All products have active Standard PricebookEntry. No Standard PricebookEntry records need to be created.');
+        }
         if(!halwaProductsWithoutPBE.isEmpty()){
-            System.debug('Products without active PricebookEntry in the specified Pricebook2:');
+            System.debug(CLASSNAME + ': Products without active PricebookEntry in the specified Pricebook2:');
             createPriceBookEntriesForProducts(halwaProductsWithoutPBE, pricebook2Id);
         } else {
-            System.debug('All products have active PricebookEntry in the specified Pricebook2. No PricebookEntry records need to be created.');
+            System.debug(CLASSNAME + ': All products have active PricebookEntry in the specified Pricebook2. No PricebookEntry records need to be created.');
         }
 
         System.debug('accountId : ' + accountId);
@@ -111,6 +136,25 @@ public with sharing class HalwaKadai_DataInitializer {
         pb.IsActive = true;
         insert pb;
         return pb.Id;
+    }
+    public static void createStandardPriceBookEntriesForProducts(List<Product2> products){
+        System.debug(CLASSNAME + ': createStandardPriceBookEntriesForProducts ');
+        Id standardPricebookId = [Select Id from Pricebook2 where IsStandard = true limit 1].Id;
+        List<PricebookEntry> standardPricebookEntries = new List<PricebookEntry>();
+        for(Product2 prod : products){
+            PricebookEntry pbe = new PricebookEntry();
+            pbe.Product2Id = prod.Id;
+            pbe.Pricebook2Id = standardPricebookId;
+            pbe.UnitPrice = prod.Price__c != null ? prod.Price__c : 0; // Set to 0 if Price__c is null
+            pbe.IsActive = true;
+            standardPricebookEntries.add(pbe);
+        }
+        if(!standardPricebookEntries.isEmpty()){
+            insert standardPricebookEntries;
+            System.debug('Created ' + standardPricebookEntries.size() + ' Standard PricebookEntry records for products without active Standard PricebookEntry.');
+        } else {
+            System.debug('No products found without active Standard PricebookEntry. No Standard PricebookEntry records created.');
+        }
     }
     public static void createPriceBookEntriesForProducts(List<Product2> products, Id pricebook2Id){
         System.debug(CLASSNAME + ': createPriceBookEntriesForProducts ');
