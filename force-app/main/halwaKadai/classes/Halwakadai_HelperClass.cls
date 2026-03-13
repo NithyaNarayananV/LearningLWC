@@ -215,8 +215,8 @@ public without sharing class Halwakadai_HelperClass {
     public static Contact searchContactF(String email) {
         if (String.isBlank(email)) return null;
         List<Contact> conList = [SELECT Id, name, phone, email, MailingStreet, MailingCity, MailingState, MailingPostalCode, MailingCountry FROM Contact WHERE Email = :email LIMIT 1];
-        System.debug(CLASS_NAME + ' : searchContactF - Found contacts: ' + conList.size()   + ' for email: ' + email);
-        System.debug(CLASS_NAME + ' : searchContactF - Found contacts: ' + conList   + ' for email: ' + email);
+        System.debug(CLASSNAME + ' : searchContactF - Found contacts: ' + conList.size()   + ' for email: ' + email);
+        System.debug(CLASSNAME + ' : searchContactF - Found contacts: ' + conList   + ' for email: ' + email);
         return conList.isEmpty() ? null : conList[0]; 
     }
 
