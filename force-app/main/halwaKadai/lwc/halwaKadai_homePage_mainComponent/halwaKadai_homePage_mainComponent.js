@@ -9,6 +9,16 @@ const KEYhalwaProducts = 'halwaKadai:halwaProducts'; // namespace your key to av
 const KEYsummary = 'halwaKadai:summary'; // namespace your key to avoid collisions
 const KEYsiteUser = 'halwaKadai:siteUser'; // namespace your key to avoid collisions
 
+const CLASSNAME = 'halwaKadai_homePage_mainComponent';
+const HOMEPAGE = 'halwaKadaiHomePage';
+const ABOUTPAGE = 'halwaKadaiAboutPage';
+const PRODUCTSPAGE = 'halwaKadaiProductsPage';
+const CARTPAGE = 'halwaKadaiCartPage';
+const CHECKOUTPAGE = 'halwaKadaiCheckoutPage';
+const ORDERCONFIRMATIONPAGE = 'halwaKadaiOrderConfirmationPage';
+const LOGINPAGE = 'halwaKadaiLogin';  
+const CONTACTPAGE = 'halwaKadaiContactPage';
+
 export default class HalwaKadai_homePage_mainComponent extends LightningElement {
   isActive_Home=true;
   isActive_About=false;
@@ -26,6 +36,41 @@ export default class HalwaKadai_homePage_mainComponent extends LightningElement 
   productCount=0;
   summary = { totalCount: 0, totalPrice: 0, loggedIn:false };
   isAdmin = false;
+
+  // Navigation helpers to reduce duplication and ensure consistent summary updates
+  setSectionVisibility(section) {
+    // reset flags
+    this.isActive_Home = this.isActive_About = this.isActive_Product = this.isActive_Contact = this.isActive_OderConfimation = this.isActive_CheckOut = false;
+    // reset classes
+    this.homeClass = this.cartClass = this.productClass = this.checkoutClass = this.orderConfirmationClass = this.loginClass = 'slds-hide';
+    switch (section) {
+      case 'Home': this.isActive_Home = true; this.homeClass = 'slds-show';break; // this.summary.nextPage = this.summary.loggedIn? PRODUCTSPAGE : LOGINPAGE; 
+      case 'About': this.isActive_About = true; break; // this.summary.nextPage = this.summary.loggedIn? PRODUCTSPAGE : LOGINPAGE; 
+      case 'Products': this.isActive_Product = true; this.productClass = 'slds-show'; break;
+      case 'Contact': this.isActive_Contact = true; break;
+      case 'Cart': this.isActive_Cart = true; this.cartClass = 'slds-show'; break;
+      case 'Checkout': this.isActive_CheckOut = true; this.checkoutClass = 'slds-show'; break;
+      case 'OrderConfirmation': this.isActive_OderConfimation = true; this.orderConfirmationClass = 'slds-show'; break;
+      case 'Login': this.isActive_Login = true; this.loginClass = 'slds-show'; break;
+      default: break;
+    }
+    this.handleScrollTop();
+  }
+
+  navigateTo(pageConst, uiSectionLabel, nextConst) {
+    this.setSectionVisibility(uiSectionLabel);
+    this.updateDocumentTitle(uiSectionLabel);
+    const prev = (this.summary && this.summary.currentPage) ? this.summary.currentPage : HOMEPAGE;
+    const newSummary = {
+      ...this.summary,
+      previousPage: prev,
+      currentPage: pageConst,
+      nextPage: nextConst || pageConst
+    };
+    setSummary(newSummary);
+    this.summary = newSummary;
+    console.log(`${CLASSNAME} : navigateTo(${uiSectionLabel}) : summary = `, this.summary);
+  }
   
   
   
@@ -105,44 +150,41 @@ export default class HalwaKadai_homePage_mainComponent extends LightningElement 
   }
 
   onHomeClick(){
-    this.hideAll();
-    this.isActive_Home=true;
-    this.homeClass='slds-show';
-    this.updateDocumentTitle('Home');
+    this.navigateTo(HOMEPAGE, 'Home', this.summary && this.summary.loggedIn ? PRODUCTSPAGE : LOGINPAGE);
   }
   onAboutClick(){
-    this.hideAll();
-    this.isActive_About=true;
-    this.updateDocumentTitle('About');     
+    console.log('HalwaKadai_homePage_mainComponent : onAboutClick');
+    this.navigateTo(ABOUTPAGE, 'About', this.summary && this.summary.loggedIn ? PRODUCTSPAGE : LOGINPAGE);
   } 
   onProductsClick(){
-    this.hideAll();
-    this.isActive_Product=true;
-    this.productClass='slds-show'; 
-    this.updateDocumentTitle('Products');     
+    this.navigateTo(PRODUCTSPAGE, 'Products', this.summary && this.summary.loggedIn ? CARTPAGE : LOGINPAGE);
   }
   onContactClick(){
-    this.hideAll();
-    this.isActive_Contact=true;
-    this.updateDocumentTitle('Contact');
+    this.navigateTo(CONTACTPAGE, 'Contact', this.summary && this.summary.loggedIn ? PRODUCTSPAGE : LOGINPAGE);
   } 
   onCartClick(){
-    this.hideAll();
-    this.cartClass='slds-show';
-    this.isActive_Cart=true;
-    this.updateDocumentTitle('Cart');     
+    const next = (this.summary && this.summary.loggedIn) ? CHECKOUTPAGE : LOGINPAGE;
+    this.navigateTo(CARTPAGE, 'Cart', next);
    } 
   onCheckoutClick(){
-    this.hideAll();
-    this.checkoutClass='slds-show';
-    this.isActive_CheckOut=true;
-    this.updateDocumentTitle('Checkout');     
+    // If not logged in, force Login first, then Checkout
+    if (this.summary && this.summary.loggedIn === false) {
+      setSummary({
+        ...this.summary,
+        previousPage: CARTPAGE,
+        currentPage: LOGINPAGE,
+        nextPage: CHECKOUTPAGE
+      });
+      this.onLoginClick();
+      return;
+    }
+    // Logged-in users go directly to Checkout
+    this.navigateTo(CHECKOUTPAGE, 'Checkout', ORDERCONFIRMATIONPAGE);
   }
   onLoginClick(){
-    this.hideAll();
-    this.loginClass='slds-show';
-    this.isActive_Login=true;
-    this.updateDocumentTitle('Login');
+    // Preserve intent to go to Checkout if coming from Cart, else default to Products
+    const nextAfterLogin = (this.summary && this.summary.previousPage === CARTPAGE) ? CHECKOUTPAGE : PRODUCTSPAGE;
+    this.navigateTo(LOGINPAGE, 'Login', nextAfterLogin);
   }
   onLogOutClick(){
     this.hideAll();
@@ -154,6 +196,9 @@ export default class HalwaKadai_homePage_mainComponent extends LightningElement 
     window.localStorage.removeItem(KEYhalwaProducts);
     window.localStorage.removeItem(KEYsummary);
     window.localStorage.removeItem(KEYsiteUser);
+    this.summary = { ...this.summary, 
+      previousPage: this.summary.currentPage,
+      currentPage: HOMEPAGE };
 
     this.onHomeClick();
   }
@@ -200,30 +245,19 @@ export default class HalwaKadai_homePage_mainComponent extends LightningElement 
     console.log('handleBackToHome()');
     //reset state and summary to defaults when going back to home
     setState(getProductsCONSTANT());
-    setSummary({ totalCount: 0, totalPrice: 0 , loggedIn: true, orderPlaced: false, newUser: false});
+    setSummary({ totalCount: 0, totalPrice: 0 , loggedIn: true, orderPlaced: false, newUser: false , previousPage: 'halwaKadaiOrderConfirmation', currentPage: 'halwaKadaiHomePage', nextPage: 'halwaKadaiProductsPage' });
     this.onHomeClick();
-
   }
   handleContinueShopping() {
     console.log('handleContinueShopping()');
     //reset state and summary to defaults when going back to home
     setState(getProductsCONSTANT());
-    setSummary({ totalCount: 0, totalPrice: 0 , loggedIn: true, orderPlaced: false, newUser: false});
+    setSummary({ totalCount: 0, totalPrice: 0 , loggedIn: true, orderPlaced: false, newUser: false, previousPage: 'halwaKadaiOrderConfirmation', currentPage: 'halwaKadaiProductsPage', nextPage: 'halwaKadaiCartPage' });
     this.onProductsClick();
   }
   hideAll(){
-    this.isActive_Home=false;
-    this.isActive_About=false;
-    this.isActive_Product=false;
-    this.isActive_Contact=false;
-    this.isActive_OderConfimation=false;
-    this.homeClass='slds-hide'; 
-    this.cartClass='slds-hide';
-    this.productClass='slds-hide'; 
-    this.checkoutClass='slds-hide';
-    this.orderConfirmationClass='slds-hide';
-    this.loginClass='slds-hide';
-    this.handleScrollTop();
+    // Retained for backward compatibility; now handled by setSectionVisibility
+    this.setSectionVisibility(); // no-op reset
   }
 
   handleProductCount(event) {
@@ -235,7 +269,30 @@ export default class HalwaKadai_homePage_mainComponent extends LightningElement 
   }
 
   handleCheckOut(event) {
-    console.log('handleCheckOut(event) {');
+    console.log(`${CLASSNAME} :  handleCheckOut`);
+    this.summary = getSummary();
+    console.log('HalwaKadai_homePage_mainComponent : handleCheckOut : summary = ', this.summary);
+
+    // If not logged in, route Cart -> Login -> Checkout
+    if (this.summary && this.summary.loggedIn === false) {
+      setSummary({
+        ...this.summary,
+        previousPage: CARTPAGE,
+        currentPage: LOGINPAGE,
+        nextPage: CHECKOUTPAGE
+      });
+      this.onLoginClick();
+      this.handleScrollTop();
+      return;
+    }
+
+    // Logged in: go straight to Checkout
+    setSummary({
+      ...this.summary,
+      previousPage: CARTPAGE,
+      currentPage: CHECKOUTPAGE,
+      nextPage: ORDERCONFIRMATIONPAGE
+    });
     this.onCheckoutClick();
     this.handleScrollTop();
   }
@@ -247,7 +304,20 @@ export default class HalwaKadai_homePage_mainComponent extends LightningElement 
   }
   handleLogin(){
     console.log('HalwaKadai_homePage_mainComponent : handleLogin() ');
-    this.onProductsClick();
+    this.summary = getSummary();
+    console.log('HalwaKadai_homePage_mainComponent : handleLogin() : summary = ', this.summary);
+    if(this.summary.nextPage === CHECKOUTPAGE){ 
+      setSummary({ ...this.summary, 
+        previousPage: this.summary.currentPage,
+        currentPage: CHECKOUTPAGE, 
+        nextPage: ORDERCONFIRMATIONPAGE });
+      this.onCheckoutClick();
+    } else {
+      setSummary({ ...this.summary,
+        currentPage: PRODUCTSPAGE, 
+        nextPage: CARTPAGE });
+      this.onProductsClick();
+    }
   }
   handleScrollTop() { // Scroll the entire window to the top 
     window.scrollTo({ 

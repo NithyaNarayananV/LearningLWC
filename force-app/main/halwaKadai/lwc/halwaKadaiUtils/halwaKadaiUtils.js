@@ -1,7 +1,7 @@
 // halwaKadaiUtils.js
 let productsCONSTANT = [];
 let state = [];
-let summary = { totalCount: 0, totalPrice: 0 , loggedIn: false, orderPlaced: false, newUser: true};
+let summary = { totalCount: 0, totalPrice: 0 , loggedIn: false, orderPlaced: false, newUser: true, currentPage: 'halwaKadaiHomePage', previousPage: 'halwaKadaiHomePage', nextPage: 'halwaKadaiHomePage' };
 let siteUser = {id:'newContact', Name : '', Email: '', Street: '', City: '', State: '', PostalCode: '', Country: 'India', MobilePhone: ''};
 
 const listeners = [];
