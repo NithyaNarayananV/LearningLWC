@@ -140,7 +140,10 @@ header {
     position: fixed;
     width: 100%;
     top: 0;
+    height: 70px; /* Explicit height to prevent gaps */
     z-index: 1000;
+    display: flex;
+    align-items: center;
 }
 
 header .container {
@@ -164,6 +167,7 @@ header .container {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    width: 100%;
 }
 
 .header-right {
@@ -178,14 +182,14 @@ header .container {
 
 /* New navigation bar below header */
 .main-menu {
-  margin-top: 4px;
     background: linear-gradient(to right, #FFF9F2, #FFEBD6);
     position: fixed;
     width: 100%;
-    top: 58px; /* directly below the main header */
+    top: 70px; /* Exactly matches the header height - NO GAP */
     z-index: 900;
     padding: 10px 0;
     box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    border-top: 1px solid rgba(230, 126, 34, 0.1); /* Subtle separator */
 }
 
 .main-menu ul {
@@ -204,6 +208,8 @@ header .container {
     padding: 8px 14px;
     border-radius: 20px;
     transition: 0.3s;
+    cursor: pointer;
+    font-size: 1rem;
 }
 
 .main-menu a:hover,
@@ -561,8 +567,8 @@ footer {
 
 /* Hero Image Slider */.hero-slider .slide {
     position: absolute;
-    width: 100%;
-    height: 100%;
+  width: 100%;
+  height: 100%;
     opacity: 0;
     transition: opacity 1s ease-in-out;
 }
@@ -670,7 +676,7 @@ footer {
 .popular-item img {
     width: 100%;
     height: 200px;
-    object-fit: cover;
+  object-fit: cover;
 }
 
 .popular-item h3 {
@@ -736,13 +742,13 @@ footer {
 .profile-top-text {
     text-align: center;
     margin-bottom: 10px;
-}
+    }
 
 .profile-top-text h4 {
     margin: 0;
     font-size: 1rem;
     color: #333;
-}
+    }
 
 .profile-top-text p {
     margin: 0;
@@ -782,12 +788,12 @@ footer {
 
 .action-btn.secondary {
     background: #6c757d;
-}
+    }
 
 .action-btn.warning {
     background: #f4a261;
     grid-column: span 2;
-}
+    }
 
 .action-btn:hover {
     opacity: 0.85;
