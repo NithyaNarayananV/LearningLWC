@@ -262,33 +262,87 @@ public without sharing class Halwakadai_HelperClass {
 
     @AuraEnabled
     public static Integer sendEmailOTP(String email) {
-        Messaging.SingleEmailMessage mail = new Messaging.SingleEmailMessage();
-        mail.setToAddresses(new String[] { email });
-        mail.setSubject('Your Halwa Kadai Login OTP');
+        System.debug(CLASSNAME + ': sentEmailOTP');
+        Boolean sendEmailOTP = false;
+        List<String> emailCCList = new List<String>();
 
         Integer otp = otpGenerator();
+        try {
+            System.debug(CLASSNAME + ': sentEmailOTP : optGenerated : '+otp);
+            
+            // 2. Get the Template ID - Added null check
+            EmailTemplate etOTP = [SELECT Id, Subject, HtmlValue FROM EmailTemplate WHERE DeveloperName LIKE :('HalwaKadai_Sent_OTP%') LIMIT 1];
+            
+            Account halwaKadaiAccount = [Select Id, Description from Account where Name = :HALWAKADAI LIMIT 1];
+            System.debug(CLASSNAME + ': sentEmailOTP : halwaKadaiAccount : '+halwaKadaiAccount);
+            System.debug(CLASSNAME + ': sentEmailOTP : halwaKadaiAccount.Description : '+halwaKadaiAccount.Description);
 
-        // Build HTML body
-        String htmlBody = ''
-            + '<html><body style="font-family:Segoe UI,Arial,sans-serif;">'
-            + '<h2 style="color:#ff6600;">Halwa Kadai Login</h2>'
-            + '<p>Hello,</p>'
-            + '<p>Please use this OTP to login:</p>'
-            + '<div style="font-size:24px;font-weight:bold;color:#333;'
-            + 'padding:10px;border:1px solid #ccc;display:inline-block;">'
-            + otp
-            + '</div>'
-            + '<p>Regards,<br/>Halwa Kadai Team</p>'
-            + '</body></html>';
+            if(halwaKadaiAccount != null){
+                // Parse the Account.Description JSON
+                Map<String, Object> parsedMap = (Map<String, Object>) JSON.deserializeUntyped((String)halwaKadaiAccount.Description);
+                // Extract EmailOTP flag
+                sendEmailOTP = parsedMap.containsKey('EmailOTP') 
+                    ? (Boolean) parsedMap.get('EmailOTP') 
+                    : false;
 
-        mail.setHtmlBody(htmlBody);
+                // Extract EmailCC list
+                emailCCList = new List<String>();
+                if (parsedMap.containsKey('EmailCC')) {
+                    // EmailCC is already a nested JSON object, so cast directly
+                    Map<String, Object> parsedMapEmailCC = (Map<String, Object>) parsedMap.get('EmailCC');
 
-        //Messaging.sendEmail(new Messaging.SingleEmailMessage[] { mail });
-        System.debug('Disabled : OTP = '+otp);
+                    for (String key : parsedMapEmailCC.keySet()) {
+                        emailCCList.add((String) parsedMapEmailCC.get(key));
+                    }
+                }
+                System.debug(CLASSNAME + ': sentEmailOTP : EmailOTP from Account Description : '+sendEmailOTP);
+            }
+            if (etOTP == null || etOTP.Id == null) {
+                System.debug('No Email Template found with DeveloperName LIKE HalwaKadai_Sent_OTP%');
+            }
+
+            // 3. Process the HTML Body
+            String htmlBody = etOTP.HtmlValue;
+            
+            // Check if the template contains the expected placeholder
+            if (htmlBody.contains('[[OTP_CODE]]')) {
+                String finalBody = htmlBody.replace('[[OTP_CODE]]', String.valueOf(otp));
+                
+                // 4. Prepare the message
+                Messaging.SingleEmailMessage mail = new Messaging.SingleEmailMessage();
+                mail.setToAddresses(new String[] { email });
+
+                mail.setCcAddresses(emailCCList);
+                System.debug(CLASSNAME + ': sentEmailOTP : CC Email from Account Description : '+emailCCList);
+                System.debug(CLASSNAME + ': sentEmailOTP : CC Email from Account Description : '+(emailCCList != null ? emailCCList[0] : 'No CC Email'));
+                mail.setSubject(etOTP.Subject); 
+                mail.setHtmlBody(finalBody);
+                
+                if((Boolean)sendEmailOTP)
+                { 
+                    System.debug(CLASSNAME + ': sentEmailOTP : Email will be sent to  : ' + email);
+                    System.debug(CLASSNAME + ': sentEmailOTP : Email body  : ' + mail.getHtmlBody());
+
+                    Messaging.SendEmailResult[] results = Messaging.sendEmail(new List<Messaging.SingleEmailMessage>{mail});
+                    
+                    if (results[0].isSuccess()) {
+                        System.debug(CLASSNAME + ': sentEmailOTP : Email Sent Successfully with OTP : ' + otp);
+                    } else {
+                        System.debug(CLASSNAME + ': sentEmailOTP : Email failed: ' + results[0].getErrors()[0].getMessage());
+                    }
+                }
+                System.debug(CLASSNAME + ': sentEmailOTP : OTP Sent Successfully: ' + otp);
+            } else {
+                System.debug(CLASSNAME + ': sentEmailOTP : Email template does not contain [[OTP_CODE]] placeholder');
+            }
+        } catch (Exception e) {
+            System.debug(CLASSNAME + ': sentEmailOTP : Error in sendEmailOTP: ' + e.getMessage());
+        }
         return otp;
     }
 
     public static Integer otpGenerator() {
+        System.debug(CLASSNAME + ': otpGenerator');
         // Generates a random number between 1000 and 9999
         Integer min = 1000;
         Integer max = 9999;
