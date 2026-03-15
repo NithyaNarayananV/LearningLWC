@@ -12,6 +12,9 @@
                 <button id="menu-toggle" class="menu-toggle">☰</button>
 
                 <!-- Right Side Buttons -->
+                <template if:true={isAdmin}>
+                    <a onclick={onInitializeDataClick} class="btn-login">Initialize Data</a>
+                </template>
                 <div class="header-right">
                         <a onclick={onClearCacheClick} class="btn-login">Clear Cache</a>
                         <a onclick={onClearCartClick} class="btn-login">Clear Cart</a>

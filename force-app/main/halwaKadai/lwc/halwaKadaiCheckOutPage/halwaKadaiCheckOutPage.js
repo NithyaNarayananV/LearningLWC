@@ -32,6 +32,19 @@ export default class HalwaKadaiCheckOutPage extends LightningElement {
         console.log('HalwaKadaiCheckOutPage : connectedCallback :  halwaProducts = ', this.halwaProducts);
         console.log('HalwaKadaiCheckOutPage : connectedCallback :  summary = ', this.summary);
 
+        // Guard against unauthorized access
+        if (this.summary && !this.summary.loggedIn) {
+            console.warn('HalwaKadaiCheckOutPage : User not logged in, redirecting to Login');
+            setSummary({
+                ...this.summary,
+                previousPage: 'halwaKadaiCheckoutPage',
+                currentPage: 'halwaKadaiLogin',
+                nextPage: 'halwaKadaiCheckoutPage'
+            });
+            // Optionally dispatch an event to parent to navigate
+            return;
+        }
+
         // ⚠️ Strongly recommended to REMOVE this; it won’t render the overlay anyway.
         // If you only want to WARN the user about leaving, attach a simple handler instead.
         // this.boundBeforeUnload = this.beforeUnloadHandler.bind(this);

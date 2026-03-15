@@ -1,53 +1,30 @@
 import { LightningElement, wire } from 'lwc';
 import { subscribe, unsubscribe, publish, MessageContext } from 'lightning/messageService';
 import PRODUCTS_LMS from '@salesforce/messageChannel/halwaKadaiLMS__c';
-import { getState, setState , getSummary, subscribe as stateSubscribe} from 'c/halwaKadaiUtils';
+import { getState, setState, getSummary, subscribe as stateSubscribe, setSummary } from 'c/halwaKadaiUtils';
 
 export default class HalwaKadaiCartPage extends LightningElement {
+    // Single wire declaration (remove duplicate later in file)
     @wire(MessageContext) messageContext;
+
     subscription;
-    
-    halwaProducts = [];
-    summary = { totalCount: 0, totalPrice: 0 };
     unsub;
 
+    // Local reactive state
+    halwaProducts = [];
+    summary = { totalCount: 0, totalPrice: 0};
+
     connectedCallback() {
-        // 1. Initial Load
+        // Initial load from shared utils
         this.halwaProducts = getState();
         this.summary = getSummary();
 
-        // 2. Subscribe to future changes
+        // React to shared state changes
         this.unsub = stateSubscribe((data) => {
-            // This ensures both variables stay in sync with the utility
             this.halwaProducts = data.products;
             this.summary = data.summary;
             console.log('CART Sync Complete: Count is ' + this.summary.totalCount);
         });
-    }
-
-///////////////////
-
-    receivedMessage = 'No message received';
-    renderedCallback() {
-        if (this.subscription) {return;}
-        if (!this.messageContext) {
-            console.log('[SUB] MessageContext not ready yet; will try next render');
-            return;
-        }
-        try {
-            this.subscription = subscribe(
-                this.messageContext,
-                PRODUCTS_LMS,
-                (message) => {                    
-                    console.log('[SUB] 📨 Callback entered');  // <— prove handler 
-                    this.safeHandleMessage(message) 
-                },
-            );
-           
-            console.log('[SUB] ✅ Subscribed to PRODUCTS_LMS:', this.subscription);
-        } catch (e) {
-            console.error('[SUB] ❌ Subscribe threw:', e);
-        }
     }
 
     disconnectedCallback() {
@@ -56,9 +33,30 @@ export default class HalwaKadaiCartPage extends LightningElement {
             this.subscription = null;
             console.log('[SUB] 🔚 Unsubscribed from PRODUCTS_LMS');
         }
+        if (this.unsub) {
+            this.unsub();
+            this.unsub = null;
+        }
     }
 
-    // Wrapper to ensure you see a log even if handleMessage throws early
+    // LMS subscription on first render when MessageContext is ready
+    renderedCallback() {
+        if (this.subscription || !this.messageContext) {
+            return;
+        }
+        try {
+            this.subscription = subscribe(
+                this.messageContext,
+                PRODUCTS_LMS,
+                (message) => this.safeHandleMessage(message)
+            );
+            console.log('[SUB] ✅ Subscribed to PRODUCTS_LMS');
+        } catch (e) {
+            console.error('[SUB] ❌ Subscribe threw:', e);
+        }
+    }
+
+    // Defensive wrapper for handler
     safeHandleMessage(message) {
         try {
             console.log('[SUB] 📨 Received message (raw):', JSON.stringify(message));
@@ -69,97 +67,108 @@ export default class HalwaKadaiCartPage extends LightningElement {
     }
 
     handleMessage(message) {
-        console.log('[SUB] handleMessage entry');
-
         const products = message?.products;
         if (!Array.isArray(products)) {
             console.warn('[SUB] "products" payload is not an array:', products);
-            this.receivedMessage = 'Payload is not an array';
             return;
         }
-        // Replace the array reference for LWC reactivity
+        // Replace array reference for LWC reactivity
         this.halwaProducts = [...products];
-
-        // Example: set a simple status string
-        this.receivedMessage = `Received ${this.halwaProducts.length} products`;
-
         console.log('[SUB] Updated halwaProducts count:', this.halwaProducts.length);
+    }
+
+    // Consolidated quantity update to remove duplication
+    updateQuantity(id, delta) {
+        let deltaCount = 0;
+        let deltaPrice = 0;
+
+        this.halwaProducts = this.halwaProducts.map(p => {
+            if (p.id !== id) return p;
+
+            const current = Number(p.quantity || 0);
+            const newQty = Math.max(0, current + delta);
+            const appliedDelta = newQty - current; // may be 0 if floor at 0
+            if (appliedDelta !== 0) {
+                deltaCount += appliedDelta;
+                deltaPrice += appliedDelta * (Number(p.price) || 0);
+            }
+            const newSelected = newQty > 0;
+            return { ...p, quantity: newQty, _dirty: true, selected: newSelected, orderPrice: (Number(p.price) || 0) * newQty };
+        });
+
+        // Update summary based on net delta
+        if (deltaCount !== 0 || deltaPrice !== 0) {
+            const newSummary = {
+                ...this.summary,
+                totalCount: Math.max(0, (Number(this.summary.totalCount) || 0) + deltaCount),
+                totalPrice: Math.max(0, (Number(this.summary.totalPrice) || 0) + deltaPrice)
+            };
+            this.summary = newSummary;
+            setSummary(newSummary);
+        }
+
+        // Notify and persist
+        this.notifyParent();
     }
 
     handleIncreaseQuantity(event) {
         const id = event.currentTarget.dataset.id;
-        this.halwaProducts = this.halwaProducts.map(p => {
-            console.log('handleIncreaseQuantity');
-            if (p.id === id) {
-                const newQty = Number(p.quantity || 0) + 1;
-                this.summary = {
-                    ...this.summary,
-                    totalCount: this.summary.totalCount + 1,
-                    totalPrice: this.summary.totalPrice + p.price
-                };
-                return { ...p, quantity: newQty, _dirty: true, selected: true, orderPrice: p.price * newQty };
-            }
-            return p;
-        });
-        // persist to shared state and propagate
-        //setState(this.halwaProducts);
-        this.notifyParent();
+        this.updateQuantity(id, +1);
     }
+
     handleDecreaseQuantity(event) {
         const id = event.currentTarget.dataset.id;
-        this.halwaProducts = this.halwaProducts.map(p => {
-            console.log('handleDecreaseQuantity');
-            if (p.id === id) {
-                const current = Number(p.quantity || 1);
-                const newQty = Math.max(0, current - 1);
-                const newSelected = newQty > 0;
-                this.summary = {
-                    ...this.summary,
-                    totalCount: this.summary.totalCount - 1,
-                    totalPrice: this.summary.totalPrice - p.price
-                };          
-                return { ...p, quantity: newQty, _dirty: true, selected: newSelected, orderPrice: p.price * newQty };
-            }
-            return p;
-        });
-        //setState(this.halwaProducts);
-        this.notifyParent();
+        this.updateQuantity(id, -1);
     }
 
     notifyParent() {
-        // Send any payload you want in `detail`
-        console.log(' notifyParent() {');
-        this.dispatchEvent(
-        new CustomEvent('productcount', {
-            
-            detail: {  productCount: this.productCount },
-            bubbles: true,    // allow bubbling through DOM
-            composed: true    // allow crossing Shadow DOM boundary to ancestors
-        })
-        );
+        // Bubble a simple count change if needed by parent
+        const productCount = (this.summary && typeof this.summary.totalCount === 'number') ? this.summary.totalCount : 0;
+        this.dispatchEvent(new CustomEvent('productcount', {
+            detail: { productCount },
+            bubbles: true,
+            composed: true
+        }));
         this.publishProducts();
     }
 
-    @wire(MessageContext) messageContext;
-
     publishProducts() {
-        console.log('publishProducts()');
-        const message = { products: this.halwaProducts }; // Option A (array directly)
-        publish(this.messageContext, PRODUCTS_LMS, message);
-        console.log('[PUB] ✅ Published:', JSON.parse(JSON.stringify(message)));
-        // persist shared array
+        const message = { products: this.halwaProducts };
+        if (this.messageContext) {
+            publish(this.messageContext, PRODUCTS_LMS, message);
+            console.log('[PUB] ✅ Published products over LMS');
+        }
+        // persist shared array (also recomputes derived totals in utils)
         setState(this.halwaProducts);
-        console.log('VALUE SET FOR STATE ');
-
     }
+
     handleCheckoutClick() {
-        console.log('handleCheckoutClick()');
-        const checkoutEvent = new CustomEvent('checkout', {
-            bubbles: true,
-            composed: true
+        if ((this.summary?.totalCount || 0) === 0) {
+            console.warn('Checkout attempted with empty cart');
+            return;
+        }
+
+        // If not logged in: set nav path Cart -> Login -> Checkout and route to login
+        if (this.summary?.loggedIn === false) {
+            console.warn('Checkout attempted by non-logged-in user');
+            setSummary({
+                ...this.summary,
+                previousPage: 'halwaKadaiCartPage',
+                currentPage: 'halwaKadaiLogin',
+                nextPage: 'halwaKadaiCheckoutPage'
+            });
+            // Tell parent to navigate (parent will read summary and route accordingly)
+            this.dispatchEvent(new CustomEvent('checkout', { bubbles: true, composed: true }));
+            return;
+        }
+
+        // If logged in: go directly to checkout
+        setSummary({
+            ...this.summary,
+            previousPage: 'halwaKadaiCartPage',
+            currentPage: 'halwaKadaiCheckoutPage',
+            nextPage: 'halwaKadaiOrderConfirmationPage'
         });
-        this.dispatchEvent(checkoutEvent);
+        this.dispatchEvent(new CustomEvent('checkout', { bubbles: true, composed: true }));
     }
-
-
 }

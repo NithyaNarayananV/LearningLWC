@@ -126,15 +126,18 @@ export default class HalwaKadaiLogin extends LightningElement {
                 bubbles: true,
                 composed: true
             });
+            // Ensure we're logged in and preserve intended next page
             this.summary = {
                 ...this.summary,
                 loggedIn : true
             };
             console.log('HalwaKadaiLogin : handleLogin : B4        setSummary(this.summary);');
+            this.
             setSummary(this.summary);
             this.dispatchEvent(loginEvent);
             console.log('HalwaKadaiLogin : handleLogin : AF     this.dispatchEvent(loginEvent);');
-            // Add navigation logic here
+            // Add navigation logic here - dispatch event to parent to navigate
+            // Parent will read summary.nextPage and route accordingly
         } else {
             this.showToast('Invalid OTP', 'Please Enter Correct OTP', 'error');
         }

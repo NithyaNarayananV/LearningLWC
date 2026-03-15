@@ -17,6 +17,11 @@
 
 public without sharing class Halwakadai_HelperClass {
 
+    // Class constants
+    private static final String CLASSNAME = 'Halwakadai_HelperClass';
+    private static final String HALWASHOP = 'HalwaShop';
+    private static final String HALWAKADAI = 'HalwaKadai';
+
     // Address wrapper to hold address details
     public class AddressWrapper {
         @AuraEnabled public String street;
@@ -42,8 +47,8 @@ public without sharing class Halwakadai_HelperClass {
         return [
             SELECT Name, ProductCode, Description, StockKeepingUnit, Image_URL__c,
                    HomePage_Visible__c, Tag__c, Price__c,
-                   (SELECT Id, UnitPrice FROM PricebookEntries WHERE IsActive = true ORDER BY CreatedDate DESC LIMIT 1)
-            FROM Product2 WHERE RecordType.DeveloperName  = 'HalwaShop'
+                   (SELECT Id, UnitPrice FROM PricebookEntries WHERE IsActive = true AND Pricebook2.Name = :HALWAKADAI ORDER BY CreatedDate DESC LIMIT 1)
+            FROM Product2 WHERE RecordType.DeveloperName  = :HALWASHOP
         ];
     }
 
@@ -62,15 +67,26 @@ public without sharing class Halwakadai_HelperClass {
 
         // Create order linked to contact and with billing/shipping address
         System.debug('createOrderWithContact - Before createOrder - contactId : ' + contactId);
+
+        /*
+        Account AccountId = [Select Id from Account where Name = 'HalwaKadai' limit 1]
+        if(AccountId == null){
+            System.debug('No existing account found with name: ' + 'HalwaKadai' + '. Creating new account.');
+            AccountId = createAccount('HalwaKadai');
+        }
+        Contract ContractId = [Select Id from Contract where Name = 'HalwaKadai' limit 1]
+        */
+        Id accountId = [SELECT Id FROM Account WHERE Name = :HALWAKADAI LIMIT 1].Id;
+        Id contractId = [SELECT Id FROM Contract WHERE AccountId = :accountId LIMIT 1].Id;
+        Id pricebook2Id = [SELECT Id FROM Pricebook2 WHERE Name = :HALWAKADAI LIMIT 1].Id;
+
         Order newOrder = new Order(
-            AccountId = '001GA00005KAsGgYAL',// for LWC
-            ContractId = '800GA000000b86cYAA', // for LWC 
-            // NN AccountId = '001g500000DtRbBAAV', 
-            // NN ContractId = '800g500000HrG4rAAF',
-            EffectiveDate = Date.today(),
+            AccountId = accountId,
+            ContractId = contractId, 
+            Pricebook2Id = pricebook2Id,
+            
             Status = 'Draft',
-            Pricebook2Id = '01sGA00000Zwd4SYAR',
-            // NN Pricebook2Id = '01sg5000002JWkcAAG',
+            EffectiveDate = Date.today(),
             BillToContactId = contactId,
 
             // Billing Address
@@ -199,8 +215,8 @@ public without sharing class Halwakadai_HelperClass {
     public static Contact searchContactF(String email) {
         if (String.isBlank(email)) return null;
         List<Contact> conList = [SELECT Id, name, phone, email, MailingStreet, MailingCity, MailingState, MailingPostalCode, MailingCountry FROM Contact WHERE Email = :email LIMIT 1];
-        System.debug('Halwakadai_HelperClass : searchContactF - Found contacts: ' + conList.size()   + ' for email: ' + email);
-        System.debug('Halwakadai_HelperClass : searchContactF - Found contacts: ' + conList   + ' for email: ' + email);
+        System.debug(CLASSNAME + ' : searchContactF - Found contacts: ' + conList.size()   + ' for email: ' + email);
+        System.debug(CLASSNAME + ' : searchContactF - Found contacts: ' + conList   + ' for email: ' + email);
         return conList.isEmpty() ? null : conList[0]; 
     }
 
@@ -246,33 +262,87 @@ public without sharing class Halwakadai_HelperClass {
 
     @AuraEnabled
     public static Integer sendEmailOTP(String email) {
-        Messaging.SingleEmailMessage mail = new Messaging.SingleEmailMessage();
-        mail.setToAddresses(new String[] { email });
-        mail.setSubject('Your Halwa Kadai Login OTP');
+        System.debug(CLASSNAME + ': sentEmailOTP');
+        Boolean sendEmailOTP = false;
+        List<String> emailCCList = new List<String>();
 
         Integer otp = otpGenerator();
+        try {
+            System.debug(CLASSNAME + ': sentEmailOTP : optGenerated : '+otp);
+            
+            // 2. Get the Template ID - Added null check
+            EmailTemplate etOTP = [SELECT Id, Subject, HtmlValue FROM EmailTemplate WHERE DeveloperName LIKE :('HalwaKadai_Sent_OTP%') LIMIT 1];
+            
+            Account halwaKadaiAccount = [Select Id, Description from Account where Name = :HALWAKADAI LIMIT 1];
+            System.debug(CLASSNAME + ': sentEmailOTP : halwaKadaiAccount : '+halwaKadaiAccount);
+            System.debug(CLASSNAME + ': sentEmailOTP : halwaKadaiAccount.Description : '+halwaKadaiAccount.Description);
 
-        // Build HTML body
-        String htmlBody = ''
-            + '<html><body style="font-family:Segoe UI,Arial,sans-serif;">'
-            + '<h2 style="color:#ff6600;">Halwa Kadai Login</h2>'
-            + '<p>Hello,</p>'
-            + '<p>Please use this OTP to login:</p>'
-            + '<div style="font-size:24px;font-weight:bold;color:#333;'
-            + 'padding:10px;border:1px solid #ccc;display:inline-block;">'
-            + otp
-            + '</div>'
-            + '<p>Regards,<br/>Halwa Kadai Team</p>'
-            + '</body></html>';
+            if(halwaKadaiAccount != null){
+                // Parse the Account.Description JSON
+                Map<String, Object> parsedMap = (Map<String, Object>) JSON.deserializeUntyped((String)halwaKadaiAccount.Description);
+                // Extract EmailOTP flag
+                sendEmailOTP = parsedMap.containsKey('EmailOTP') 
+                    ? (Boolean) parsedMap.get('EmailOTP') 
+                    : false;
 
-        mail.setHtmlBody(htmlBody);
+                // Extract EmailCC list
+                emailCCList = new List<String>();
+                if (parsedMap.containsKey('EmailCC')) {
+                    // EmailCC is already a nested JSON object, so cast directly
+                    Map<String, Object> parsedMapEmailCC = (Map<String, Object>) parsedMap.get('EmailCC');
 
-        //Messaging.sendEmail(new Messaging.SingleEmailMessage[] { mail });
-        System.debug('Disabled : OTP = '+otp);
+                    for (String key : parsedMapEmailCC.keySet()) {
+                        emailCCList.add((String) parsedMapEmailCC.get(key));
+                    }
+                }
+                System.debug(CLASSNAME + ': sentEmailOTP : EmailOTP from Account Description : '+sendEmailOTP);
+            }
+            if (etOTP == null || etOTP.Id == null) {
+                System.debug('No Email Template found with DeveloperName LIKE HalwaKadai_Sent_OTP%');
+            }
+
+            // 3. Process the HTML Body
+            String htmlBody = etOTP.HtmlValue;
+            
+            // Check if the template contains the expected placeholder
+            if (htmlBody.contains('[[OTP_CODE]]')) {
+                String finalBody = htmlBody.replace('[[OTP_CODE]]', String.valueOf(otp));
+                
+                // 4. Prepare the message
+                Messaging.SingleEmailMessage mail = new Messaging.SingleEmailMessage();
+                mail.setToAddresses(new String[] { email });
+
+                mail.setCcAddresses(emailCCList);
+                System.debug(CLASSNAME + ': sentEmailOTP : CC Email from Account Description : '+emailCCList);
+                System.debug(CLASSNAME + ': sentEmailOTP : CC Email from Account Description : '+(emailCCList != null ? emailCCList[0] : 'No CC Email'));
+                mail.setSubject(etOTP.Subject); 
+                mail.setHtmlBody(finalBody);
+                
+                if((Boolean)sendEmailOTP)
+                { 
+                    System.debug(CLASSNAME + ': sentEmailOTP : Email will be sent to  : ' + email);
+                    System.debug(CLASSNAME + ': sentEmailOTP : Email body  : ' + mail.getHtmlBody());
+
+                    Messaging.SendEmailResult[] results = Messaging.sendEmail(new List<Messaging.SingleEmailMessage>{mail});
+                    
+                    if (results[0].isSuccess()) {
+                        System.debug(CLASSNAME + ': sentEmailOTP : Email Sent Successfully with OTP : ' + otp);
+                    } else {
+                        System.debug(CLASSNAME + ': sentEmailOTP : Email failed: ' + results[0].getErrors()[0].getMessage());
+                    }
+                }
+                System.debug(CLASSNAME + ': sentEmailOTP : OTP Sent Successfully: ' + otp);
+            } else {
+                System.debug(CLASSNAME + ': sentEmailOTP : Email template does not contain [[OTP_CODE]] placeholder');
+            }
+        } catch (Exception e) {
+            System.debug(CLASSNAME + ': sentEmailOTP : Error in sendEmailOTP: ' + e.getMessage());
+        }
         return otp;
     }
 
     public static Integer otpGenerator() {
+        System.debug(CLASSNAME + ': otpGenerator');
         // Generates a random number between 1000 and 9999
         Integer min = 1000;
         Integer max = 9999;
@@ -361,6 +431,23 @@ public without sharing class Halwakadai_HelperClass {
         //Messaging.sendEmail(new Messaging.SingleEmailMessage[] { mail });
         System.debug('Disabled Order Confimation Email ');
 
+    }
+    
+    @AuraEnabled(cacheable=true)
+    public static User getCurrentUser() {
+        User currentUser = [
+            SELECT Id, Name, Email, Username, Profile.Name, UserRole.Name, Department, Title
+            FROM User
+            WHERE Id = :UserInfo.getUserId()
+        ];
+
+        System.debug('User Full Name: ' + currentUser.Name);
+        System.debug('User Email: ' + currentUser.Email);
+        System.debug('User Profile: ' + currentUser.Profile.Name);
+        System.debug('User Role: ' + currentUser.UserRole.Name);
+        System.debug('User Department: ' + currentUser.Department);
+        System.debug('User Title: ' + currentUser.Title);
+        return currentUser;
     }
 
 }
