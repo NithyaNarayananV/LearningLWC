@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #FFF9F2;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            background-color: #ffffff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            border: 1px solid #FFEBD6;
+        }
+        .header {
+            background: linear-gradient(135deg, #E67E22, #C45C1A);
+            padding: 30px;
+            text-align: center;
+        }
+        .header h1 {
+            color: #ffffff;
+            margin: 0;
+            font-size: 24px;
+            letter-spacing: 1px;
+        }
+        .content {
+            padding: 40px 30px;
+            text-align: center;
+            color: #5D4037;
+        }
+        .content p {
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 25px;
+        }
+        .otp-box {
+            display: inline-block;
+            background-color: #FFF9F2;
+            border: 2px dashed #E67E22;
+            border-radius: 8px;
+            padding: 15px 30px;
+            font-size: 32px;
+            font-weight: bold;
+            color: #C45C1A;
+            letter-spacing: 5px;
+            margin: 10px 0;
+        }
+        .footer {
+            background-color: #F8F9FA;
+            padding: 20px;
+            text-align: center;
+            font-size: 12px;
+            color: #888;
+        }
+        .brand-color {
+            color: #E67E22;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Halwa Kadai</h1>
+        </div>
+
+        <div class="content">
+            <p>Hello,</p>
+            <p>Welcome back! Use the verification code below to securely sign into your <span class="brand-color">Halwa Kadai</span> account.</p>
+            
+            <div class="otp-box">
+                [[OTP_CODE]]
+            </div>
+
+            <p style="margin-top: 25px; font-size: 14px; color: #888;">
+                This code is valid for the next 10 minutes.<br />
+                If you didn't request this, please ignore this email.
+            </p>
+            
+            <p style="margin-top: 30px;">
+                Regards,<br />
+                <strong>The Halwa Kadai Team</strong>
+            </p>
+        </div>
+
+        <div class="footer">
+            © 2026 Halwa Kadai. Deliciously Traditional.
+        </div>
+    </div>
+</body>
+</html>

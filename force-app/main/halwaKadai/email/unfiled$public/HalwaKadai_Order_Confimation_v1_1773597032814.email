@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #FFF9F2;
+            margin: 0;
+            padding: 0;
+            color: #5D4037;
+        }
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            background-color: #ffffff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            border: 1px solid #FFEBD6;
+        }
+        .header {
+            background: linear-gradient(135deg, #E67E22, #C45C1A);
+            padding: 30px;
+            text-align: center;
+        }
+        .header h1 {
+            color: #ffffff;
+            margin: 0;
+            font-size: 26px;
+            letter-spacing: 1px;
+        }
+        .header p {
+            color: #FFEBD6;
+            margin: 5px 0 0 0;
+            font-size: 14px;
+        }
+        .content {
+            padding: 40px 30px;
+        }
+        .content h2 {
+            color: #C45C1A;
+            font-size: 22px;
+            margin-top: 0;
+        }
+        .order-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 25px 0;
+        }
+        .order-table th {
+            text-align: left;
+            padding: 12px;
+            border-bottom: 1px solid #FFEBD6;
+            color: #8D6E63;
+            font-weight: 600;
+            width: 40%;
+        }
+        .order-table td {
+            padding: 12px;
+            border-bottom: 1px solid #FFEBD6;
+        }
+        .total-row {
+            background-color: #FFF9F2;
+        }
+        .total-row th, .total-row td {
+            color: #C45C1A !important;
+            font-size: 18px;
+            font-weight: bold;
+            border-bottom: none;
+        }
+        .status-box {
+            background-color: #FFF3E0;
+            border-left: 4px solid #E67E22;
+            padding: 15px;
+            margin: 30px 0;
+            font-size: 14px;
+            border-radius: 0 4px 4px 0;
+        }
+        .footer {
+            background-color: #F8F9FA;
+            padding: 20px;
+            text-align: center;
+            font-size: 12px;
+            color: #888;
+            border-top: 1px solid #eeeeee;
+        }
+        .highlight {
+            color: #E67E22;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Halwa Kadai</h1>
+            <p>Order Confirmed! 🍯</p>
+        </div>
+
+        <div class="content">
+            <h2>Thank you for your order!</h2>
+            <p>Hi <strong>[[Customer_Name]]</strong>,</p>
+            <p>Your sweets are being prepared with traditional care. Here are your order details:</p>
+
+            <table class="order-table">
+                <tr>
+                    <th>Order Number</th>
+                    <td>#[[Order_Number]]</td>
+                </tr>
+                <tr>
+                    <th>Order Date</th>
+                    <td>[[Order_Date]]</td>
+                </tr>
+                <tr>
+                    <th>Items</th>
+                    <td>[[Item_List]]</td>
+                </tr>
+                <tr class="total-row">
+                    <th>Total Amount</th>
+                    <td>₹[[Total_Amount]]</td>
+                </tr>
+            </table>
+
+            <div class="status-box">
+                <strong>What's next?</strong><br />
+                We'll notify you as soon as your order is ready for delivery or pickup. You can track your order status in your profile.
+            </div>
+
+            <p>Sweet regards,<br />
+            <span class="highlight">The Halwa Kadai Team</span></p>
+        </div>
+
+        <div class="footer">
+            © 2026 Halwa Kadai. Deliciously Traditional.<br />
+            This is an automated receipt for your purchase. Please do not reply.
+        </div>
+    </div>
+</body>
+</html>
