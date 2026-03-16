@@ -84,8 +84,8 @@ export default class HalwaKadaiLogin extends LightningElement {
 
     handleLogin(event) {
         event.preventDefault(); 
-        console.log('handleLogin');
-        console.log('otp : ',this.otp,'|| generatedOTP : ', this.generatedOTP);
+        console.log('HalwaKadaiLogin : handleLogin');
+        console.log('HalwaKadaiLogin : handleLogin : otp : ',this.otp,'|| generatedOTP : ', this.generatedOTP);
         console.log(this.otp.length);
         console.log(this.otp == this.generatedOTP);
         if((this.otp.length === 4 || this.otp.toString().length === 4 ) && this.otp == this.generatedOTP) {
@@ -99,12 +99,11 @@ export default class HalwaKadaiLogin extends LightningElement {
                             newUser : false};
                         console.log('HalwaKadaiLogin : handleLogin : contact : ', contact);
                         this.contactDeailts = contact;
-                        console.log('HalwaKadaiLogin : handleLogin : contactDetails : ', this.contactDeailts);
                         this.siteUser = {
                             ...this.siteUser,
-                            id: contact.Id,
-                            name: contact.Name, 
-                            email: contact.Email, 
+                            Id: contact.Id,
+                            Name: contact.Name, 
+                            Email: contact.Email, 
                             Street: contact.MailingStreet, 
                             City: contact.MailingCity, 
                             State: contact.MailingState, 
@@ -126,13 +125,14 @@ export default class HalwaKadaiLogin extends LightningElement {
                 bubbles: true,
                 composed: true
             });
+            console.log('HalwaKadaiLogin : handleLogin : B4 Summary Update : this.summary.loggedIn = ', this.summary.loggedIn);
             // Ensure we're logged in and preserve intended next page
             this.summary = {
                 ...this.summary,
                 loggedIn : true
             };
+            console.log('HalwaKadaiLogin : handleLogin : AF Summary Update  this.summary.loggedIn = ', this.summary.loggedIn);
             console.log('HalwaKadaiLogin : handleLogin : B4        setSummary(this.summary);');
-            this.
             setSummary(this.summary);
             this.dispatchEvent(loginEvent);
             console.log('HalwaKadaiLogin : handleLogin : AF     this.dispatchEvent(loginEvent);');
