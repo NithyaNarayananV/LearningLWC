@@ -21,9 +21,9 @@ public without sharing class Halwakadai_HelperClass {
     private static final String CLASSNAME = 'Halwakadai_HelperClass';
     private static final String HALWASHOP = 'HalwaShop';
     private static final String HALWAKADAI = 'HalwaKadai';
-    private static final Account ACCOUNT = [SELECT Id, Description FROM Account WHERE Name = :HALWAKADAI LIMIT 1];
-    private static final Contract CONTRACT = [SELECT Id FROM Contract WHERE AccountId = :ACCOUNT.Id LIMIT 1];
-    private static final Pricebook2 PRICEBOOK2 = [SELECT Id FROM Pricebook2 WHERE Name = :HALWAKADAI LIMIT 1];
+    private static Account halwaKadaiAccount;// = [SELECT Id, Description FROM Account WHERE Name = :HALWAKADAI LIMIT 1];
+    private static Contract halwaKadaiContract;// = [SELECT Id FROM Contract WHERE AccountId = :halwaKadaiAccount.Id LIMIT 1];
+    private static Pricebook2 halwaKadaiPricebook;// = [SELECT Id FROM Pricebook2 WHERE Name = :HALWAKADAI LIMIT 1];
 
 
     // Address wrapper to hold address details
@@ -41,6 +41,11 @@ public without sharing class Halwakadai_HelperClass {
             this.postalCode = postalCode;
             this.country = country;
         }
+    }
+    private static void initializeData(){
+        halwaKadaiAccount = [SELECT Id, Description FROM Account WHERE Name = :HALWAKADAI LIMIT 1];
+        halwaKadaiContract = [SELECT Id FROM Contract WHERE AccountId = :halwaKadaiAccount.Id LIMIT 1];
+        halwaKadaiPricebook = [SELECT Id FROM Pricebook2 WHERE Name = :HALWAKADAI LIMIT 1];
     }
 
     // Static list to hold addresses throughout the class
@@ -71,11 +76,12 @@ public without sharing class Halwakadai_HelperClass {
 
         // Create order linked to contact and with billing/shipping address
         System.debug('createOrderWithContact - Before createOrder - contactId : ' + contactId);
-
+        initializeData();
         Order newOrder = new Order(
-            AccountId = ACCOUNT.Id,
-            ContractId = CONTRACT.Id, 
-            Pricebook2Id = PRICEBOOK2.Id,
+
+            AccountId = halwaKadaiAccount.Id,
+            ContractId = halwaKadaiContract.Id, 
+            Pricebook2Id = halwaKadaiPricebook.Id,
             
             Status = 'Draft',
             EffectiveDate = Date.today(),
@@ -265,12 +271,12 @@ public without sharing class Halwakadai_HelperClass {
             // 2. Get the Template ID - Added null check
             EmailTemplate etOTP = [SELECT Id, Subject, HtmlValue FROM EmailTemplate WHERE DeveloperName LIKE :('HalwaKadai_Sent_OTP%') LIMIT 1];
             
-            System.debug(CLASSNAME + ': sentEmailOTP : halwaKadaiAccount : '+ACCOUNT);
-            System.debug(CLASSNAME + ': sentEmailOTP : halwaKadaiAccount.Description : '+ACCOUNT.Description);
+            System.debug(CLASSNAME + ': sentEmailOTP : halwaKadaiAccount : '+halwaKadaiAccount);
+            System.debug(CLASSNAME + ': sentEmailOTP : halwaKadaiAccount.Description : '+(halwaKadaiAccount != null ? halwaKadaiAccount.Description : null));
 
-            if(ACCOUNT != null){
+            if(halwaKadaiAccount != null){
                 // Parse the Account.Description JSON
-                Map<String, Object> parsedMap = (Map<String, Object>) JSON.deserializeUntyped((String)ACCOUNT.Description);
+                Map<String, Object> parsedMap = (Map<String, Object>) JSON.deserializeUntyped((String)halwaKadaiAccount.Description);
                 // Extract EmailOTP flag
                 sendEmailOTP = parsedMap.containsKey('EmailOTP') 
                     ? (Boolean) parsedMap.get('EmailOTP') 
