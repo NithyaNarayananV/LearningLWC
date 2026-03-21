@@ -21,9 +21,9 @@ public without sharing class Halwakadai_HelperClass {
     private static final String CLASSNAME = 'Halwakadai_HelperClass';
     private static final String HALWASHOP = 'HalwaShop';
     private static final String HALWAKADAI = 'HalwaKadai';
-    private static Account halwaKadaiAccount;// = [SELECT Id, Description FROM Account WHERE Name = :HALWAKADAI LIMIT 1];
-    private static Contract halwaKadaiContract;// = [SELECT Id FROM Contract WHERE AccountId = :halwaKadaiAccount.Id LIMIT 1];
-    private static Pricebook2 halwaKadaiPricebook;// = [SELECT Id FROM Pricebook2 WHERE Name = :HALWAKADAI LIMIT 1];
+    private static Account halwaKadaiAccount;
+    private static Contract halwaKadaiContract;
+    private static Pricebook2 halwaKadaiPricebook;
 
 
     // Address wrapper to hold address details
@@ -42,6 +42,7 @@ public without sharing class Halwakadai_HelperClass {
             this.country = country;
         }
     }
+    
     private static void initializeData(){
         halwaKadaiAccount = [SELECT Id, Description FROM Account WHERE Name = :HALWAKADAI LIMIT 1];
         halwaKadaiContract = [SELECT Id FROM Contract WHERE AccountId = :halwaKadaiAccount.Id LIMIT 1];
@@ -209,6 +210,7 @@ public without sharing class Halwakadai_HelperClass {
         System.debug(conList);  
         return conList.isEmpty() ? null : conList[0].Id;
     }
+    
     @AuraEnabled
     public static Contact searchContactF(String email) {
         if (String.isBlank(email)) return null;
@@ -217,8 +219,6 @@ public without sharing class Halwakadai_HelperClass {
         System.debug(CLASSNAME + ' : searchContactF - Found contacts: ' + conList   + ' for email: ' + email);
         return conList.isEmpty() ? null : conList[0]; 
     }
-
-
 
     @AuraEnabled
     public static Id createOrderWithContact(
@@ -234,16 +234,153 @@ public without sharing class Halwakadai_HelperClass {
         Id contactId
     ){
         // Check if contact exists
-        //Id contactId = searchContact(email);
         if (contactId == null) {
             System.debug('No existing contact found with email: ' + email + '. Creating new contact.');
-            //contactId = createContact(name, phone, email, street, city, state, postalCode, country);
         }
 
         // Create order linked to contact and with billing/shipping address
         System.debug('createOrderWithContact - Before createOrder - contactId : ' + contactId);
         return createOrder(products, contactId, street, city, state, postalCode, country);
     }
+
+    @AuraEnabled
+    public static Id upsertDraftOrder(
+        List<Map<String,Object>> products,
+        Id orderId,
+        Id contactId,
+        String name,
+        String phone,
+        String email,
+        String street,
+        String city,
+        String state,
+        String postalCode,
+        String country
+    ) {
+        if (contactId == null) {
+            // No logged-in user, do not create or update draft order
+            return null;
+        }
+
+        initializeData();
+
+        Order ord;
+        if (orderId == null) {
+            // First attempt: try to reuse existing contact draft order
+            List<Order> existing = [
+                SELECT Id, Status, BillToContactId
+                FROM Order
+                WHERE BillToContactId = :contactId AND Status = 'Draft'
+                ORDER BY CreatedDate DESC
+                LIMIT 1
+            ];
+            if (!existing.isEmpty()) {
+                ord = existing[0];
+            }
+        } else {
+            ord = [SELECT Id, Status, BillToContactId FROM Order WHERE Id = :orderId LIMIT 1];
+        }
+
+        if (ord == null || ord.Status == 'Activated') {
+            // If not found or already activated, start a fresh draft
+            ord = new Order(
+                AccountId = halwaKadaiAccount.Id,
+                ContractId = halwaKadaiContract.Id,
+                Pricebook2Id = halwaKadaiPricebook.Id,
+                Status = 'Draft',
+                EffectiveDate = Date.today(),
+                BillToContactId = contactId
+            );
+            insert ord;
+        } else {
+            // Existing draft found - update existing items instead of deleting
+            ord.Status = 'Draft';
+            ord.BillToContactId = contactId;
+            update ord;
+            
+            // Get existing order items
+            Map<String, OrderItem> existingItemsByProductCode = new Map<String, OrderItem>();
+            for (OrderItem item : [SELECT Id, Product2.ProductCode, Quantity, UnitPrice FROM OrderItem WHERE OrderId = :ord.Id]) {
+                existingItemsByProductCode.put(item.Product2.ProductCode, item);
+            }
+            
+            List<OrderItem> itemsToUpdate = new List<OrderItem>();
+            List<OrderItem> itemsToInsert = new List<OrderItem>();
+            List<OrderItem> itemsToDelete = new List<OrderItem>();
+            
+            for (Map<String,Object> prod : products) {
+                Integer quantity = 0;
+                Object qtyObj = prod.get('quantity');
+                if (qtyObj != null) {
+                    if (qtyObj instanceof Decimal) quantity = ((Decimal) qtyObj).intValue();
+                    else if (qtyObj instanceof Double) quantity = ((Double) qtyObj).intValue();
+                    else if (qtyObj instanceof Integer) quantity = (Integer) qtyObj;
+                }
+
+                Id pricebookId = (Id) prod.get('pricebookId');
+                Decimal unitPrice = (Decimal) prod.get('price');
+                String productCode = (String) prod.get('id'); // Assuming id is ProductCode
+
+                if (quantity > 0 && pricebookId != null && unitPrice != null && productCode != null) {
+                    if (existingItemsByProductCode.containsKey(productCode)) {
+                        // Update existing
+                        OrderItem existingItem = existingItemsByProductCode.get(productCode);
+                        existingItem.Quantity = quantity;
+                        existingItem.UnitPrice = unitPrice;
+                        itemsToUpdate.add(existingItem);
+                        existingItemsByProductCode.remove(productCode);
+                    } else {
+                        // Insert new
+                        itemsToInsert.add(new OrderItem(
+                            OrderId = ord.Id,
+                            PricebookEntryId = pricebookId,
+                            Quantity = quantity,
+                            UnitPrice = unitPrice
+                        ));
+                    }
+                }
+            }
+            
+            // Delete remaining items that are no longer in cart
+            itemsToDelete.addAll(existingItemsByProductCode.values());
+            
+            // Perform DML operations
+            if (!itemsToUpdate.isEmpty()) update itemsToUpdate;
+            if (!itemsToInsert.isEmpty()) insert itemsToInsert;
+            if (!itemsToDelete.isEmpty()) delete itemsToDelete;
+            
+        } // <---- THIS BRACE WAS MISSING!
+
+        return ord.Id;
+    }
+
+    @AuraEnabled
+    public static void activateOrder(Id orderId) {
+        if (orderId == null) {
+            throw new AuraHandledException('orderId must not be null');
+        }
+        Order ord = [SELECT Id, Status FROM Order WHERE Id = :orderId LIMIT 1];
+        if (ord == null) {
+            throw new AuraHandledException('Order not found for Id: ' + orderId);
+        }
+        ord.Status = 'Activated';
+        update ord;
+    }
+
+    @AuraEnabled
+    public static Order getDraftOrderForContact(Id contactId) {
+        if (contactId == null) return null;
+        List<Order> orders = [
+            SELECT Id, Status, BillToContactId,
+                (SELECT Id, Product2Id, Product2.Name, Product2.ProductCode, PricebookEntryId, Quantity, UnitPrice, TotalPrice
+                 FROM OrderItems)
+            FROM Order 
+            WHERE BillToContactId = :contactId AND Status = 'Draft' 
+            ORDER BY CreatedDate DESC LIMIT 1
+        ];
+        return orders.isEmpty() ? null : orders[0];
+    }
+
     public static void sendOrderConfirmation(String toAddress, String orderId, Decimal totalPrice) {
         Messaging.SingleEmailMessage mail = new Messaging.SingleEmailMessage();
         mail.setToAddresses(new String[] { toAddress });
@@ -311,7 +448,7 @@ public without sharing class Halwakadai_HelperClass {
 
                 mail.setCcAddresses(emailCCList);
                 System.debug(CLASSNAME + ': sentEmailOTP : CC Email from Account Description : '+emailCCList);
-                System.debug(CLASSNAME + ': sentEmailOTP : CC Email from Account Description : '+(emailCCList != null ? emailCCList[0] : 'No CC Email'));
+                System.debug(CLASSNAME + ': sentEmailOTP : CC Email from Account Description : '+(emailCCList != null && !emailCCList.isEmpty() ? emailCCList[0] : 'No CC Email'));
                 mail.setSubject(etOTP.Subject); 
                 mail.setHtmlBody(finalBody);
                 
@@ -346,14 +483,6 @@ public without sharing class Halwakadai_HelperClass {
         return (Integer)Math.floor(Math.random() * (max - min + 1)) + min;
     }
 
-    // --- your existing methods remain unchanged ---
-    // e.g. sendEmailOTP(), other helpers
-
-    /**
-     * Sends an order confirmation email to the customer after placing an order.
-     *
-     * @param orderId The Id of the Order__c record
-     */
     @AuraEnabled
     public static void sendOrderConfirmationEmail(Id orderId) {
         // Query standard Order and related OrderItems
