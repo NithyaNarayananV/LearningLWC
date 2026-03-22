@@ -1,5 +1,5 @@
 <template>
-    <template if:false={isActive_OrderConfirmation}>
+    <template if:false={isActive_OderConfimation}>
         <header>
             <div class="container header-flex">
 
@@ -120,7 +120,7 @@
         </div>
     </footer>
 </template>
-<template lwc:if={isActive_OrderConfirmation}>
+<template lwc:if={isActive_OderConfimation}>
     <div class={orderConfirmationClass}>
         <c-halwa-kadai-order-confirmation onbacktohome={handleBackToHome} oncontinueshopping={handleContinueShopping}></c-halwa-kadai-order-confirmation>
     </div>

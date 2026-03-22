@@ -8,8 +8,7 @@ import {
     setSummary
 } from 'c/halwaKadaiUtils';
 
-import upsertDraftOrder from '@salesforce/apex/Halwakadai_HelperClass.upsertDraftOrder';
-import activateOrder from '@salesforce/apex/Halwakadai_HelperClass.activateOrder';
+import createOrderWithContact from '@salesforce/apex/Halwakadai_HelperClass.createOrderWithContact';
 import createContact from '@salesforce/apex/Halwakadai_HelperClass.createContact';
 import sendOrderConfirmationEmail from '@salesforce/apex/Halwakadai_HelperClass.sendOrderConfirmationEmail';
 
@@ -61,7 +60,7 @@ export default class HalwaKadaiCheckOutPage extends LightningElement {
     }
 
     disconnectedCallback() {
-        console.log('HalwaKadaiCheckOutPage : disconnectedCallback');
+        console.log('disconnectedCallback');
         // if (this.boundBeforeUnload) {
         //     window.removeEventListener('beforeunload', this.boundBeforeUnload);
         //     this.boundBeforeUnload = null;
@@ -197,32 +196,12 @@ export default class HalwaKadaiCheckOutPage extends LightningElement {
                 // If you plan to update contact, await that here before order creation.
             }
 
-            // Sync Draft Order (create if missing, update if exists)
-            const existingOrderId = this.summary?.orderId || null;
-            const orderId = await upsertDraftOrder({
-                products: this.halwaProducts,
-                orderId: existingOrderId,
-                contactId: this.siteUser.id && this.siteUser.id !== 'newContact' ? this.siteUser.id : null,
-                name: this.siteUser.Name,
-                phone: this.siteUser.MobilePhone,
-                email: this.siteUser.Email,
-                street: this.siteUser.Street,
-                city: this.siteUser.City,
-                state: this.siteUser.State,
-                postalCode: this.siteUser.PostalCode,
-                country: this.siteUser.Country
-            });
-
-            await activateOrder({ orderId });
+            // Create Order (await so overlay stays)
+            const orderId = await this.createOrder();
 
             // Mark state & send email (await)
             this.summary.orderPlaced = true;
             this.summary.orderId = orderId;
-            setSummary({
-                ...this.summary,
-                orderPlaced: true,
-                orderId: orderId
-            });
 
             await sendOrderConfirmationEmail({ orderId });
             console.log('Confirmation email sent for order:', orderId);
@@ -232,6 +211,28 @@ export default class HalwaKadaiCheckOutPage extends LightningElement {
         } finally {
             this.isLoading = false; // <-- overlay hides
         }
+    }
+
+    // Return the order Id
+    async createOrder() {
+        console.log('HalwaKadaiCheckOutPage : createOrder()');
+        if(this.siteUser.id !== 'newContact')
+        console.log('createOrder() with contactId:', this.siteUser.id);
+        const orderId = await createOrderWithContact({
+            products: this.halwaProducts,
+            name: this.siteUser.Name,
+            phone: this.siteUser.MobilePhone,
+            email: this.siteUser.Email,
+            street: this.siteUser.Street,
+            city: this.siteUser.City,
+            state: this.siteUser.State,
+            postalCode: this.siteUser.PostalCode,
+            country: this.siteUser.Country,
+            contactId: this.siteUser.id
+        });
+
+        console.log('HalwaKadaiCheckOutPage : createOrder : Order created successfully: ', orderId);
+        return orderId;
     }
 
     handleOrderConfirmationClick() {

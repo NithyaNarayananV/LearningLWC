@@ -3,27 +3,23 @@ import getProducts from '@salesforce/apex/Halwakadai_HelperClass.getProductsDeta
 
 import { publish, MessageContext } from 'lightning/messageService';
 import PRODUCTS_LMS from '@salesforce/messageChannel/halwaKadaiLMS__c';
-import { getState, setState, getSummary, getSiteUser, subscribe as stateSubscribe, setProductsCONSTANT, setSummary, syncDraftOrder, loadDraftOrder } from 'c/halwaKadaiUtils';
+import { getState, setState ,setSummary, getSummary, subscribe as stateSubscribe, setProductsCONSTANT} from 'c/halwaKadaiUtils';
 
 export default class HalwaKadaiProducts extends LightningElement {
 
-    @track halwaProducts = [];
-    @track summary = { totalCount: 0, totalPrice: 0, loggedIn: false };
+    halwaProducts;
     halwaProductsCONSTANT;
+    summary = { totalCount: 0, totalPrice: 0,  loggedIn: false };
 
     products;
-    productCount = 0;
-    unsub;
-
-    @wire(MessageContext) messageContext;
-
+    productCount=0;
     @wire(getProducts)
-    wiredProducts({ error, data }) {
-        if (data) {
+    wiredProducts({ error, data}) {
+        if (data){
             console.log('wiredProducts');
             this.products = data.map((prod, index) => ({
                 id: prod.ProductCode,
-                url: prod.Image_URL__c, 
+                url: prod.Image_URL__c, // custom field from Product2
                 alt: `Halwa Kadai - Slide ${index + 1}`,
                 name: prod.Name,
                 description: prod.Description,
@@ -36,115 +32,122 @@ export default class HalwaKadaiProducts extends LightningElement {
             // Create the editable working copy with extra fields
             this.halwaProducts = this.products.map(p => ({
                 ...p,
+                // client-only fields
                 quantity: 0,
                 notes: '',
                 isFeatured: false,
+                // helper fields for UI state
                 _dirty: false,
                 selected: false,
                 orderPrice: 0
             }));
-            
             this.halwaProductsCONSTANT = this.halwaProducts;
             setProductsCONSTANT(this.halwaProductsCONSTANT);
-            
-            // Load draft order if logged in and products are now available
-            loadDraftOrder();
-            
-            // Only hydrate from state if we already have items in the cart
-            const currentState = getState();
-            if (currentState && currentState.length > 0) {
-                this.halwaProducts = currentState;
-            } else {
+            console.log('halwaKadaiProducts : wiredProducts : before this.halwaProducts = ', this.halwaProducts);
+            if(getState().length === 0){
                 setState(this.halwaProducts);
+            }else{
+                this.halwaProducts = getState();
             }
+            console.log('halwaKadaiProducts : wiredProducts : after this.halwaProducts = ', this.halwaProducts);
             
         } else if (error) {
-            console.error('Error fetching products → raw:', error);
-            console.error('Error.body:', error?.body);
-            console.error('Error.body.message:', error?.body?.message);
-        }
-    }
+              this.error = error;
+              // Log everything we can, even in Locker
+              // eslint-disable-next-line no-console
+              console.error('Error fetching products → raw:', error);
+              // eslint-disable-next-line no-console
+              console.error('Error.body:', error?.body);
+              // eslint-disable-next-line no-console
+              console.error('Error.body.message:', error?.body?.message);
+              // eslint-disable-next-line no-console
+              console.error('Error.status:', error?.status, 'Error.statusText:', error?.statusText);
+            }
 
+    }
     connectedCallback() {
         console.log('HalwaKadaiProducts : connectedCallback');
-        
         // 1. Initial Load
+
         this.halwaProducts = getState();
         this.summary = getSummary();
 
-        // 2. Subscribe to future changes (Listen to the Single Source of Truth)
+        // 2. Subscribe to future changes
         this.unsub = stateSubscribe((data) => {
-            this.halwaProducts = Array.isArray(data.products) ? [...data.products] : data.products;
-            this.summary = { ...data.summary };
+            // This ensures both variables stay in sync with the utility
+            this.halwaProducts = data.products;
+            this.summary = data.summary;
+            console.log('HalwaKadaiProducts : connectedCallback :stateSubscribe : summary.totalCount = ' + this.summary.totalCount);
+            console.log('HalwaKadaiProducts : connectedCallback :stateSubscribe : summary.totalPrice = ' + this.summary.totalPrice);
+            console.log('HalwaKadaiProducts : connectedCallback :stateSubscribe : summary.loggedIn = ' + this.summary.loggedIn);
         });
-    }
-
-    disconnectedCallback() {
-        if (this.unsub) {
-            this.unsub();
-            this.unsub = null;
-        }
     }
 
     handleIncreaseQuantity(event) {
         const id = event.currentTarget.dataset.id;
-        
         this.halwaProducts = this.halwaProducts.map(p => {
-            // FIX: Safe string comparison
-            if (String(p.id) === String(id)) {
+            console.log('handleIncreaseQuantity');
+            if (p.id === id) {
                 const newQty = Number(p.quantity || 0) + 1;
-                return { ...p, quantity: newQty, _dirty: true, selected: true, orderPrice: p.price * newQty };
+                this.summary = {
+                    ...this.summary,
+                    totalCount: this.summary.totalCount + 1,
+                    totalPrice: this.summary.totalPrice + p.price, 
+                    loggedIn: this.summary.loggedIn
+                };
+                console.log('handleIncreaseQuantity  : totalCount [ ',this.summary.totalCount,' ], totalPrice [ ',this.summary.totalPrice,' ], loggedIn [ ' ,this.summary.loggedIn);
+
+                return { ...p, quantity: newQty, _dirty: true, selected:true , orderPrice: p.price * newQty };
             }
             return p;
         });
-        
-        this.notifyParent();
+        this.notifyParent() ;
     }
-
     handleDecreaseQuantity(event) {
         const id = event.currentTarget.dataset.id;
-        
         this.halwaProducts = this.halwaProducts.map(p => {
-            // FIX: Safe string comparison
-            if (String(p.id) === String(id)) {
+            console.log('handleDecreaseQuantity');
+            if (p.id === id) {
                 const current = Number(p.quantity || 1);
-                const newQty = Math.max(0, current - 1); 
+                const newQty = Math.max(0, current - 1); // never below 0
                 const newSelected = newQty > 0;
+                this.summary = {
+                    ...this.summary,
+                    totalCount: this.summary.totalCount - 1,
+                    totalPrice: this.summary.totalPrice - p.price,
+                    loggedIn: this.summary.loggedIn
+                };
+                console.log('handleDecreaseQuantity : totalCount [ ',this.summary.totalCount,' ], totalPrice [ ',this.summary.totalPrice,' ], loggedIn [ ' ,this.summary.loggedIn);
+
                 return { ...p, quantity: newQty, _dirty: true, selected: newSelected, orderPrice: p.price * newQty };
             }
             return p;
         });
-        
         this.notifyParent();
     }
 
     notifyParent() {
-        console.log('notifyParent()');
+        // Send any payload you want in `detail`
+        console.log(' notifyParent() {');
         this.dispatchEvent(
             new CustomEvent('productcount', {            
                 detail : { productCount : this.productCount },
-                bubbles : true, 
-                composed : true 
+                bubbles : true, // allow bubbling through DOM
+                composed : true // allow crossing Shadow DOM boundary to ancestors
             })
         );
         this.publishProducts();
     }
 
-    async publishProducts() {
-        console.log('publishProducts()');
-        
-        // 1. Send Array to the Utils (This triggers the math recalculation!)
-        setState(this.halwaProducts);
-        
-        // 2. Publish to LMS with a source tag to prevent Echo Bugs
-        const message = { products: this.halwaProducts, source: 'ProductsPage' }; 
-        if (this.messageContext) {
-            publish(this.messageContext, PRODUCTS_LMS, message);
-            console.log('[PUB] ✅ Published:', JSON.parse(JSON.stringify(message)));
-        }
+    @wire(MessageContext) messageContext;
 
-        await syncDraftOrder();
-        
-        // FIX: Removed setSummary(this.summary) to stop the double-dip bug
+    publishProducts() {
+        console.log('publishProducts()');
+        const message = { products: this.halwaProducts }; // Option A (array directly)
+        publish(this.messageContext, PRODUCTS_LMS, message);
+        console.log('[PUB] ✅ Published:', JSON.parse(JSON.stringify(message)));
+        setState(this.halwaProducts);
+        setSummary(this.summary);
+        console.log('VALUE SET FOR STATE ');
     }
 }

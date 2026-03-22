@@ -17,12 +17,13 @@ public with sharing class HalwaKadai_DataInitializer {
         HALWASHOP
     }
     public static final String HALWAKADAI = 'HalwaKadai';
+    public static final String CLASSNAME = 'HalwaKadai_HelperClass';
 
     @AuraEnabled
     public static void initializeData() {
         // 1) Account and Contract
         Id accountId = ensureAccount(HALWAKADAI);
-        ensureContract(accountId);
+        Id contractId = ensureContract(accountId);
 
         // 2) Standard Price Book
         Id standardPbId = ensureStandardPricebookActive();
@@ -45,7 +46,12 @@ public with sharing class HalwaKadai_DataInitializer {
             createPricebookEntries(noCustomPbe, customPbId);
         }
 
-        System.debug('Data initialization completed successfully');
+        System.debug(String.valueOf(new Map<String, Id>{
+            'AccountId' => accountId,
+            'ContractId' => contractId,
+            'StandardPricebookId' => standardPbId,
+            'CustomPricebookId' => customPbId
+        }));
     }
 
     // Ensurers
