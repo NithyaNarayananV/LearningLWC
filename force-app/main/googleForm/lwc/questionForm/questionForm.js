@@ -1,4 +1,5 @@
 import { LightningElement, track,wire } from 'lwc';
+import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import getFormDetails from '@salesforce/apex/googleFormHelper.getFormDetails';
 
 import renameFile from '@salesforce/apex/googleFormHelper.renameFile';
@@ -10,6 +11,10 @@ import LASTNAME_FIELD from '@salesforce/schema/Contact.LastName';
 const FIELDS = [ LASTNAME_FIELD];
 
 export default class QuestionForm extends LightningElement {
+    // recordId is referenced in the template's lightning-record-edit-form.
+    // Define it if you intend to edit an existing Account; otherwise the form will create a new Account.
+    // Leave undefined by default (create mode). Set it when needed.
+    recordId;
     @track length; // You can set this dynamically
     @track forms =[];
     inactivityTimeout;
@@ -74,6 +79,20 @@ export default class QuestionForm extends LightningElement {
             this.forms[i].index = i + 1;
             console.log('After Initialization:', this.forms[i]);
             this.display(i);
+        }
+    }
+    handleFormLoad(event) {
+        try {
+            // Safe, no-op; add defaulting logic here if needed
+            // console.log('Form loaded', event?.detail);
+        } catch (e) {
+            this.dispatchEvent(
+                new ShowToastEvent({
+                    title: 'Load Error',
+                    message: e?.message || 'Unexpected error during form load',
+                    variant: 'error'
+                })
+            );
         }
     }
     onChangeValueHandler(event){
@@ -230,6 +249,74 @@ export default class QuestionForm extends LightningElement {
     }
 
 
+
+    // Handlers required by lightning-record-edit-form in template
+    handleSubmit(event) {
+        try {
+            // If you need to modify fields before submit, uncomment:
+            // event.preventDefault();
+            // const fields = event.detail.fields;
+            // this.template.querySelector('lightning-record-edit-form').submit(fields);
+        } catch (e) {
+            this.dispatchEvent(
+                new ShowToastEvent({
+                    title: 'Submit Error',
+                    message: e?.message || 'Unexpected error in submit',
+                    variant: 'error'
+                })
+            );
+        }
+    }
+
+    handleSuccess(event) {
+        try {
+            const recId = event?.detail?.id;
+            this.dispatchEvent(
+                new ShowToastEvent({
+                    title: 'Record saved',
+                    message: recId ? `Account saved. Id: ${recId}` : 'Record saved',
+                    variant: 'success'
+                })
+            );
+        } catch (e) {
+            this.dispatchEvent(
+                new ShowToastEvent({
+                    title: 'Success Handler Error',
+                    message: e?.message || 'Unexpected error after save',
+                    variant: 'warning'
+                })
+            );
+        }
+    }
+
+    handleError(event) {
+        try {
+            const errs = event?.detail;
+            let msg = 'An error occurred';
+            if (errs?.output?.errors?.length) {
+                msg = errs.output.errors.map(e => e.message).join('; ');
+            } else if (errs?.detail) {
+                msg = errs.detail;
+            } else if (errs?.message) {
+                msg = errs.message;
+            }
+            this.dispatchEvent(
+                new ShowToastEvent({
+                    title: 'Form Error',
+                    message: msg,
+                    variant: 'error'
+                })
+            );
+        } catch (e) {
+            this.dispatchEvent(
+                new ShowToastEvent({
+                    title: 'Error Handler Failure',
+                    message: e?.message || 'Unexpected error in error handler',
+                    variant: 'error'
+                })
+            );
+        }
+    }
 
     test;
 }

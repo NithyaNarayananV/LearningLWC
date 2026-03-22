@@ -21,6 +21,10 @@ public without sharing class Halwakadai_HelperClass {
     private static final String CLASSNAME = 'Halwakadai_HelperClass';
     private static final String HALWASHOP = 'HalwaShop';
     private static final String HALWAKADAI = 'HalwaKadai';
+    private static Account halwaKadaiAccount;
+    private static Contract halwaKadaiContract;
+    private static Pricebook2 halwaKadaiPricebook;
+
 
     // Address wrapper to hold address details
     public class AddressWrapper {
@@ -37,6 +41,12 @@ public without sharing class Halwakadai_HelperClass {
             this.postalCode = postalCode;
             this.country = country;
         }
+    }
+    
+    private static void initializeData(){
+        halwaKadaiAccount = [SELECT Id, Description FROM Account WHERE Name = :HALWAKADAI LIMIT 1];
+        halwaKadaiContract = [SELECT Id FROM Contract WHERE AccountId = :halwaKadaiAccount.Id LIMIT 1];
+        halwaKadaiPricebook = [SELECT Id FROM Pricebook2 WHERE Name = :HALWAKADAI LIMIT 1];
     }
 
     // Static list to hold addresses throughout the class
@@ -67,23 +77,12 @@ public without sharing class Halwakadai_HelperClass {
 
         // Create order linked to contact and with billing/shipping address
         System.debug('createOrderWithContact - Before createOrder - contactId : ' + contactId);
-
-        /*
-        Account AccountId = [Select Id from Account where Name = 'HalwaKadai' limit 1]
-        if(AccountId == null){
-            System.debug('No existing account found with name: ' + 'HalwaKadai' + '. Creating new account.');
-            AccountId = createAccount('HalwaKadai');
-        }
-        Contract ContractId = [Select Id from Contract where Name = 'HalwaKadai' limit 1]
-        */
-        Id accountId = [SELECT Id FROM Account WHERE Name = :HALWAKADAI LIMIT 1].Id;
-        Id contractId = [SELECT Id FROM Contract WHERE AccountId = :accountId LIMIT 1].Id;
-        Id pricebook2Id = [SELECT Id FROM Pricebook2 WHERE Name = :HALWAKADAI LIMIT 1].Id;
-
+        initializeData();
         Order newOrder = new Order(
-            AccountId = accountId,
-            ContractId = contractId, 
-            Pricebook2Id = pricebook2Id,
+
+            AccountId = halwaKadaiAccount.Id,
+            ContractId = halwaKadaiContract.Id, 
+            Pricebook2Id = halwaKadaiPricebook.Id,
             
             Status = 'Draft',
             EffectiveDate = Date.today(),
@@ -211,6 +210,7 @@ public without sharing class Halwakadai_HelperClass {
         System.debug(conList);  
         return conList.isEmpty() ? null : conList[0].Id;
     }
+    
     @AuraEnabled
     public static Contact searchContactF(String email) {
         if (String.isBlank(email)) return null;
@@ -219,8 +219,6 @@ public without sharing class Halwakadai_HelperClass {
         System.debug(CLASSNAME + ' : searchContactF - Found contacts: ' + conList   + ' for email: ' + email);
         return conList.isEmpty() ? null : conList[0]; 
     }
-
-
 
     @AuraEnabled
     public static Id createOrderWithContact(
@@ -236,16 +234,153 @@ public without sharing class Halwakadai_HelperClass {
         Id contactId
     ){
         // Check if contact exists
-        //Id contactId = searchContact(email);
         if (contactId == null) {
             System.debug('No existing contact found with email: ' + email + '. Creating new contact.');
-            //contactId = createContact(name, phone, email, street, city, state, postalCode, country);
         }
 
         // Create order linked to contact and with billing/shipping address
         System.debug('createOrderWithContact - Before createOrder - contactId : ' + contactId);
         return createOrder(products, contactId, street, city, state, postalCode, country);
     }
+
+    @AuraEnabled
+    public static Id upsertDraftOrder(
+        List<Map<String,Object>> products,
+        Id orderId,
+        Id contactId,
+        String name,
+        String phone,
+        String email,
+        String street,
+        String city,
+        String state,
+        String postalCode,
+        String country
+    ) {
+        if (contactId == null) {
+            // No logged-in user, do not create or update draft order
+            return null;
+        }
+
+        initializeData();
+
+        Order ord;
+        if (orderId == null) {
+            // First attempt: try to reuse existing contact draft order
+            List<Order> existing = [
+                SELECT Id, Status, BillToContactId
+                FROM Order
+                WHERE BillToContactId = :contactId AND Status = 'Draft'
+                ORDER BY CreatedDate DESC
+                LIMIT 1
+            ];
+            if (!existing.isEmpty()) {
+                ord = existing[0];
+            }
+        } else {
+            ord = [SELECT Id, Status, BillToContactId FROM Order WHERE Id = :orderId LIMIT 1];
+        }
+
+        if (ord == null || ord.Status == 'Activated') {
+            // If not found or already activated, start a fresh draft
+            ord = new Order(
+                AccountId = halwaKadaiAccount.Id,
+                ContractId = halwaKadaiContract.Id,
+                Pricebook2Id = halwaKadaiPricebook.Id,
+                Status = 'Draft',
+                EffectiveDate = Date.today(),
+                BillToContactId = contactId
+            );
+            insert ord;
+        } else {
+            // Existing draft found - update existing items instead of deleting
+            ord.Status = 'Draft';
+            ord.BillToContactId = contactId;
+            update ord;
+            
+            // Get existing order items
+            Map<String, OrderItem> existingItemsByProductCode = new Map<String, OrderItem>();
+            for (OrderItem item : [SELECT Id, Product2.ProductCode, Quantity, UnitPrice FROM OrderItem WHERE OrderId = :ord.Id]) {
+                existingItemsByProductCode.put(item.Product2.ProductCode, item);
+            }
+            
+            List<OrderItem> itemsToUpdate = new List<OrderItem>();
+            List<OrderItem> itemsToInsert = new List<OrderItem>();
+            List<OrderItem> itemsToDelete = new List<OrderItem>();
+            
+            for (Map<String,Object> prod : products) {
+                Integer quantity = 0;
+                Object qtyObj = prod.get('quantity');
+                if (qtyObj != null) {
+                    if (qtyObj instanceof Decimal) quantity = ((Decimal) qtyObj).intValue();
+                    else if (qtyObj instanceof Double) quantity = ((Double) qtyObj).intValue();
+                    else if (qtyObj instanceof Integer) quantity = (Integer) qtyObj;
+                }
+
+                Id pricebookId = (Id) prod.get('pricebookId');
+                Decimal unitPrice = (Decimal) prod.get('price');
+                String productCode = (String) prod.get('id'); // Assuming id is ProductCode
+
+                if (quantity > 0 && pricebookId != null && unitPrice != null && productCode != null) {
+                    if (existingItemsByProductCode.containsKey(productCode)) {
+                        // Update existing
+                        OrderItem existingItem = existingItemsByProductCode.get(productCode);
+                        existingItem.Quantity = quantity;
+                        existingItem.UnitPrice = unitPrice;
+                        itemsToUpdate.add(existingItem);
+                        existingItemsByProductCode.remove(productCode);
+                    } else {
+                        // Insert new
+                        itemsToInsert.add(new OrderItem(
+                            OrderId = ord.Id,
+                            PricebookEntryId = pricebookId,
+                            Quantity = quantity,
+                            UnitPrice = unitPrice
+                        ));
+                    }
+                }
+            }
+            
+            // Delete remaining items that are no longer in cart
+            itemsToDelete.addAll(existingItemsByProductCode.values());
+            
+            // Perform DML operations
+            if (!itemsToUpdate.isEmpty()) update itemsToUpdate;
+            if (!itemsToInsert.isEmpty()) insert itemsToInsert;
+            if (!itemsToDelete.isEmpty()) delete itemsToDelete;
+            
+        } // <---- THIS BRACE WAS MISSING!
+
+        return ord.Id;
+    }
+
+    @AuraEnabled
+    public static void activateOrder(Id orderId) {
+        if (orderId == null) {
+            throw new AuraHandledException('orderId must not be null');
+        }
+        Order ord = [SELECT Id, Status FROM Order WHERE Id = :orderId LIMIT 1];
+        if (ord == null) {
+            throw new AuraHandledException('Order not found for Id: ' + orderId);
+        }
+        ord.Status = 'Activated';
+        update ord;
+    }
+
+    @AuraEnabled
+    public static Order getDraftOrderForContact(Id contactId) {
+        if (contactId == null) return null;
+        List<Order> orders = [
+            SELECT Id, Status, BillToContactId,
+                (SELECT Id, Product2Id, Product2.Name, Product2.ProductCode, PricebookEntryId, Quantity, UnitPrice, TotalPrice
+                 FROM OrderItems)
+            FROM Order 
+            WHERE BillToContactId = :contactId AND Status = 'Draft' 
+            ORDER BY CreatedDate DESC LIMIT 1
+        ];
+        return orders.isEmpty() ? null : orders[0];
+    }
+
     public static void sendOrderConfirmation(String toAddress, String orderId, Decimal totalPrice) {
         Messaging.SingleEmailMessage mail = new Messaging.SingleEmailMessage();
         mail.setToAddresses(new String[] { toAddress });
@@ -273,9 +408,8 @@ public without sharing class Halwakadai_HelperClass {
             // 2. Get the Template ID - Added null check
             EmailTemplate etOTP = [SELECT Id, Subject, HtmlValue FROM EmailTemplate WHERE DeveloperName LIKE :('HalwaKadai_Sent_OTP%') LIMIT 1];
             
-            Account halwaKadaiAccount = [Select Id, Description from Account where Name = :HALWAKADAI LIMIT 1];
             System.debug(CLASSNAME + ': sentEmailOTP : halwaKadaiAccount : '+halwaKadaiAccount);
-            System.debug(CLASSNAME + ': sentEmailOTP : halwaKadaiAccount.Description : '+halwaKadaiAccount.Description);
+            System.debug(CLASSNAME + ': sentEmailOTP : halwaKadaiAccount.Description : '+(halwaKadaiAccount != null ? halwaKadaiAccount.Description : null));
 
             if(halwaKadaiAccount != null){
                 // Parse the Account.Description JSON
@@ -314,7 +448,7 @@ public without sharing class Halwakadai_HelperClass {
 
                 mail.setCcAddresses(emailCCList);
                 System.debug(CLASSNAME + ': sentEmailOTP : CC Email from Account Description : '+emailCCList);
-                System.debug(CLASSNAME + ': sentEmailOTP : CC Email from Account Description : '+(emailCCList != null ? emailCCList[0] : 'No CC Email'));
+                System.debug(CLASSNAME + ': sentEmailOTP : CC Email from Account Description : '+(emailCCList != null && !emailCCList.isEmpty() ? emailCCList[0] : 'No CC Email'));
                 mail.setSubject(etOTP.Subject); 
                 mail.setHtmlBody(finalBody);
                 
@@ -349,19 +483,21 @@ public without sharing class Halwakadai_HelperClass {
         return (Integer)Math.floor(Math.random() * (max - min + 1)) + min;
     }
 
-    // --- your existing methods remain unchanged ---
-    // e.g. sendEmailOTP(), other helpers
-
-    /**
-     * Sends an order confirmation email to the customer after placing an order.
-     *
-     * @param orderId The Id of the Order__c record
-     */
     @AuraEnabled
     public static void sendOrderConfirmationEmail(Id orderId) {
         // Query standard Order and related OrderItems
         System.debug('sendOrderConfirmationEmail : orderId - '+orderId);
-        Order ord = [
+         try {
+            // 1. Fetch the Email Template
+            EmailTemplate et = [
+                SELECT Id, Subject, HtmlValue 
+                FROM EmailTemplate 
+                WHERE DeveloperName LIKE 'HalwaKadai_Order_Confimation%' 
+                LIMIT 1
+            ];
+
+            // 2. Optimized SOQL: Query only necessary fields
+            Order ord = [
             SELECT Id, ContractId, AccountId,
                 Pricebook2Id, OriginalOrderId, EffectiveDate,
                 EndDate, Status, Type,
@@ -381,56 +517,43 @@ public without sharing class Halwakadai_HelperClass {
                             EndDate, Description, CreatedDate, CreatedById, OrderItemNumber
                     FROM OrderItems
                 )
-            FROM Order
-            WHERE Id = :orderId
-            LIMIT 1
-        ];
+                FROM Order
+                WHERE Id = :orderId
+                LIMIT 1
+            ];
 
-        // Build item list string
-        String itemList = '';
-        for (OrderItem oi : ord.OrderItems) {
-            itemList += oi.Product2.Name + ' x' + oi.Quantity + ' (₹' + oi.TotalPrice + '), <br> ';
+            if (ord.BillToContact == null || String.isBlank(ord.BillToContact.Email)) {
+                System.debug('Error: Order has no BillToContact or Email address.');
+                return;
+            }
+
+            // 3. Build the Item List string for the placeholder
+            List<String> itemParts = new List<String>();
+            for (OrderItem oi : ord.OrderItems) {
+                itemParts.add(oi.Product2.Name + ' x' + oi.Quantity + ' (₹' + oi.TotalPrice + ')');
+            }
+            String itemListHtml = String.join(itemParts, ', <br/>');
+
+            // 4. Perform Manual Merge (Replacing Placeholders in Template)
+            String htmlBody = et.HtmlValue;
+            htmlBody = htmlBody.replace('[[Customer_Name]]', ord.BillToContact.Name);
+            htmlBody = htmlBody.replace('[[Order_Number]]', ord.OrderNumber);
+            htmlBody = htmlBody.replace('[[Order_Date]]', ord.EffectiveDate.format());
+            htmlBody = htmlBody.replace('[[Item_List]]', itemListHtml);
+            htmlBody = htmlBody.replace('[[Total_Amount]]', String.valueOf(ord.TotalAmount));
+
+            // 5. Create and Send Email
+            Messaging.SingleEmailMessage mail = new Messaging.SingleEmailMessage();
+            mail.setToAddresses(new List<String>{ ord.BillToContact.Email });
+            mail.setSubject(et.Subject);
+            mail.setHtmlBody(htmlBody);
+            
+            // Messaging.sendEmail(new Messaging.SingleEmailMessage[] { mail });
+            System.debug('Success: Order Confirmation Prepared for ' + ord.BillToContact.Email);
+
+        } catch (Exception e) {
+            System.debug('Error in sendOrderConfirmationEmail: ' + e.getMessage());
         }
-        if (itemList.endsWith(', ')) {
-            itemList = itemList.substring(0, itemList.length() - 2);
-        }
-
-        // Build HTML body
-        String htmlBody =
-            '<!DOCTYPE html>' +
-            '<html><head><meta charset="UTF-8"></head><body style="font-family:Arial,sans-serif;background-color:#f7f7f7;margin:0;padding:0;">' +
-            '<div style="max-width:600px;margin:20px auto;background:#ffffff;border-radius:8px;overflow:hidden;box-shadow:0 2px 6px rgba(0,0,0,0.1);">' +
-                '<div style="background-color:#e67e22;color:#fff;padding:20px;text-align:center;">' +
-                    '<h2>🍯 Halwa Kadai – Order Confirmation</h2>' +
-                '</div>' +
-                '<div style="padding:20px;color:#333;">' +
-                    '<p>Hi ' + (ord.BillToContact != null ? ord.BillToContact.Name : '') + ',</p>' +
-                    '<p>Thank you for your order! Here are your order details:</p>' +
-                    '<table style="margin-top:15px;border-collapse:collapse;width:100%;">' +
-                        '<tr><th style="border:1px solid #ddd;padding:8px;background:#f2f2f2;text-align:left;">Order Number</th><td style="border:1px solid #ddd;padding:8px;">' + ord.OrderNumber + '</td></tr>' +
-                        '<tr><th style="border:1px solid #ddd;padding:8px;background:#f2f2f2;text-align:left;">Order Date</th><td style="border:1px solid #ddd;padding:8px;">' + String.valueOf(ord.EffectiveDate) + '</td></tr>' +
-                        '<tr><th style="border:1px solid #ddd;padding:8px;background:#f2f2f2;text-align:left;">Items</th><td style="border:1px solid #ddd;padding:8px;">' + itemList + '</td></tr>' +
-                        '<tr><th style="border:1px solid #ddd;padding:8px;background:#f2f2f2;text-align:left;">Total Amount</th><td style="border:1px solid #ddd;padding:8px;">₹ ' + String.valueOf(ord.TotalAmount) + '</td></tr>' +
-                    '</table>' +
-                    '<p>We’ll notify you once your order is ready for delivery.</p>' +
-                    '<p>Sweet regards,<br/>The Halwa Kadai Team</p>' +
-                '</div>' +
-                '<div style="background-color:#f2f2f2;text-align:center;padding:15px;font-size:12px;color:#555;">' +
-                    '© 2026 Halwa Kadai. All rights reserved.<br/>This is an automated email, please do not reply directly.' +
-                '</div>' +
-            '</div>' +
-            '</body></html>';
-
-        // Create email
-        Messaging.SingleEmailMessage mail = new Messaging.SingleEmailMessage();
-        mail.setToAddresses(new String[] { ord.BillToContact.Email });
-        mail.setSubject('Your Halwa Kadai Order Confirmation');
-        mail.setHtmlBody(htmlBody);
-
-        // Send email
-        //Messaging.sendEmail(new Messaging.SingleEmailMessage[] { mail });
-        System.debug('Disabled Order Confimation Email ');
-
     }
     
     @AuraEnabled(cacheable=true)
